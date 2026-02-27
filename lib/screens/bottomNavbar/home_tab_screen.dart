@@ -1,282 +1,512 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:guyana_center_frontend/controller/bottomNavbar/home_tab_controller.dart';
 import 'package:guyana_center_frontend/widgets/web_footer.dart';
 
 class HomeTabScreen extends StatelessWidget {
   const HomeTabScreen({super.key});
 
+  bool _isWebDesktop(BuildContext context) =>
+      kIsWeb && MediaQuery.of(context).size.width >= 1000;
+
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(HomeTabController());
     final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final bool isWebDesktop = kIsWeb && screenWidth >= 600;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-          children: [
-            // App-only header (shown on native app AND web mobile)
-            if (!isWebDesktop) ...[
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.menu_rounded, color: cs.onSurface),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      "GUYANACENTRAL",
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.4,
-                        color: cs.onSurface,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 32,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: cs.primary,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: Text(
-                        "Login",
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-            ],
+        child: _isWebDesktop(context)
+            ? _WebLayout(controller: controller)
+            : _MobileLayout(controller: controller),
+      ),
+    );
+  }
+}
 
-            RichText(
-              text: TextSpan(
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontSize: 28,
-                  height: 1.15,
+class _MobileLayout extends StatelessWidget {
+  final HomeTabController controller;
+  const _MobileLayout({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+      children: [
+        Row(
+          children: [
+            IconButton(
+              onPressed: () {},
+              icon: Icon(Icons.menu_rounded, color: cs.onSurface),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                "GUYANACENTRAL",
+                style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w800,
+                  letterSpacing: 0.4,
                   color: cs.onSurface,
                 ),
-                children: [
-                  const TextSpan(text: "Find "),
-                  TextSpan(
-                    text: "Anything.\n",
-                    style: TextStyle(color: cs.primary),
+              ),
+            ),
+            SizedBox(
+              height: 32,
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: cs.primary,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  const TextSpan(text: "Sell "),
-                  const TextSpan(
-                    text: "Everything.\n",
-                    style: TextStyle(color: Color(0xFFFF8A00)),
+                ),
+                child: Text(
+                  "Login",
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
                   ),
-                  const TextSpan(text: "Pay Nothing."),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+
+        const _HeroSection(web: false),
+
+        const SizedBox(height: 18),
+
+        _SectionHeader(
+          title: "Browse Categories",
+          actionText: "See All",
+          onTap: () {},
+        ),
+        const SizedBox(height: 10),
+
+        Obx(() {
+          final list = controller.categories;
+          final show = list.length >= 4 ? list.take(4).toList() : list.toList();
+          return Row(
+            children: List.generate(show.length, (i) {
+              final item = show[i];
+              return Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: i == show.length - 1 ? 0 : 10,
+                  ),
+                  child: _CategoryCard(
+                    icon: item.icon,
+                    title: item.title,
+                    active: item.active,
+                  ),
+                ),
+              );
+            }),
+          );
+        }),
+
+        const SizedBox(height: 18),
+
+        _SectionHeader(
+          title: "Featured Listings",
+          actionText: "View All",
+          onTap: () {},
+        ),
+        const SizedBox(height: 10),
+
+        Obx(
+          () => Column(
+            children: controller.featuredListings
+                .map(
+                  (item) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _ListingCard(item: item, onFav: () {}),
+                  ),
+                )
+                .toList(),
+          ),
+        ),
+
+        const SizedBox(height: 18),
+
+        _SectionHeader(
+          title: "Popular Properties",
+          actionText: "View All",
+          onTap: () {},
+        ),
+        const SizedBox(height: 10),
+
+        const Row(
+          children: [
+            Expanded(
+              child: _PropertyCard(
+                title: "Modern Villa with Pool",
+                price: "\$50,000",
+                image: AssetImage("assets/images/house1.jpg"),
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: _PropertyCard(
+                title: "Luxury Estate",
+                price: "\$1,200,000",
+                image: AssetImage("assets/images/house2.jpg"),
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 14),
+
+        const Row(
+          children: [
+            Expanded(
+              child: _StatChip(value: "50K+", label: "Listings"),
+            ),
+            SizedBox(width: 10),
+            Expanded(
+              child: _StatChip(value: "100K+", label: "Users"),
+            ),
+            SizedBox(width: 10),
+            Expanded(
+              child: _StatChip(value: "12", label: "Cities"),
+            ),
+            SizedBox(width: 10),
+            Expanded(
+              child: _StatChip(value: "FREE", label: "Post Ads"),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+}
+
+class _WebLayout extends StatelessWidget {
+  final HomeTabController controller;
+  const _WebLayout({required this.controller});
+
+  int _catCols(double w) {
+    if (w >= 1300) return 6;
+    if (w >= 1100) return 5;
+    return 4;
+  }
+
+  int _listingCols(double w) {
+    if (w >= 1400) return 4;
+    if (w >= 1100) return 3;
+    return 2;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final w = MediaQuery.of(context).size.width;
+
+    return Column(
+      children: [
+        Expanded(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: CustomScrollView(
+                slivers: [
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(16, 18, 16, 10),
+                      child: _HeroSection(web: true),
+                    ),
+                  ),
+
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+                      child: _SectionHeader(
+                        title: "Browse Categories",
+                        actionText: "See All",
+                        onTap: () {},
+                      ),
+                    ),
+                  ),
+
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: Obx(
+                      () => SliverGrid(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final item = controller.categories[index];
+                          return _CategoryCard(
+                            icon: item.icon,
+                            title: item.title,
+                            active: item.active,
+                          );
+                        }, childCount: controller.categories.length),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: _catCols(w),
+                          crossAxisSpacing: 14,
+                          mainAxisSpacing: 14,
+                          childAspectRatio: 1.55,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 22, 16, 10),
+                      child: _SectionHeader(
+                        title: "Featured Listings",
+                        actionText: "View All",
+                        onTap: () {},
+                      ),
+                    ),
+                  ),
+
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: Obx(
+                      () => SliverGrid(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final item = controller.featuredListings[index];
+                          return _ListingCard(item: item, onFav: () {});
+                        }, childCount: controller.featuredListings.length),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: _listingCols(w),
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 0.95,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 22, 16, 10),
+                      child: _SectionHeader(
+                        title: "Real Estate",
+                        actionText: "View All",
+                        onTap: () {},
+                      ),
+                    ),
+                  ),
+
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: SliverGrid(
+                      delegate: SliverChildListDelegate(const [
+                        _PropertyCard(
+                          title: "Modern Villa with Pool",
+                          price: "\$50,000",
+                          image: AssetImage("assets/images/house1.jpg"),
+                        ),
+                        _PropertyCard(
+                          title: "Luxury Estate",
+                          price: "\$1,200,000",
+                          image: AssetImage("assets/images/house2.jpg"),
+                        ),
+                        _PropertyCard(
+                          title: "City Apartment",
+                          price: "\$250,000",
+                          image: AssetImage("assets/images/house1.jpg"),
+                        ),
+                      ]),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: w >= 1100 ? 3 : 2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 1.15,
+                      ),
+                    ),
+                  ),
+
+                  const SliverToBoxAdapter(child: SizedBox(height: 18)),
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _StatChip(value: "50K+", label: "Listings"),
+                          ),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: _StatChip(value: "100K+", label: "Users"),
+                          ),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: _StatChip(value: "12", label: "Cities"),
+                          ),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: _StatChip(value: "FREE", label: "Post Ads"),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 26)),
+
+                  const SliverToBoxAdapter(child: WebFooter()),
+                  const SliverToBoxAdapter(child: SizedBox(height: 24)),
                 ],
               ),
             ),
+          ),
+        ),
+      ],
+    );
+  }
+}
 
-            const SizedBox(height: 8),
+class _HeroSection extends StatelessWidget {
+  final bool web;
+  const _HeroSection({required this.web});
 
-            Text(
-              "Buy and sell locally with ease. Take the simplest\n"
-              "way to find and deal near you.",
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: const Color(0xFF6B7280),
-                height: 1.35,
-                fontSize: 12.5,
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    final headline = theme.textTheme.headlineSmall?.copyWith(
+      fontSize: web ? 44 : 28,
+      height: 1.12,
+      fontWeight: FontWeight.w900,
+      color: cs.onSurface,
+    );
+
+    final subtitle = theme.textTheme.bodyMedium?.copyWith(
+      color: const Color(0xFF6B7280),
+      height: 1.35,
+      fontSize: web ? 14 : 12.5,
+      fontWeight: FontWeight.w500,
+    );
+
+    final content = Column(
+      crossAxisAlignment: web
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.start,
+      children: [
+        RichText(
+          textAlign: web ? TextAlign.center : TextAlign.start,
+          text: TextSpan(
+            style: headline,
+            children: [
+              const TextSpan(text: "Find "),
+              TextSpan(
+                text: "Anything.\n",
+                style: TextStyle(color: cs.primary),
               ),
-            ),
-
-            const SizedBox(height: 14),
-
-            TextField(
-              decoration: InputDecoration(
-                hintText: "Search for anything...",
-                prefixIcon: const Icon(Icons.search_rounded),
-                suffixIcon: Padding(
-                  padding: const EdgeInsets.all(6.0),
-                  child: SizedBox(
-                    width: 44,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: cs.primary,
-                        elevation: 0,
-                        padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Icon(Icons.search_rounded, size: 18),
-                    ),
-                  ),
-                ),
+              const TextSpan(text: "Sell "),
+              const TextSpan(
+                text: "Everything.\n",
+                style: TextStyle(color: Color(0xFFFF8A00)),
               ),
-            ),
-
-            const SizedBox(height: 18),
-
-            _SectionHeader(
-              title: "Browse Categories",
-              actionText: "See All",
-              onTap: () {},
-            ),
-            const SizedBox(height: 10),
-
-            Row(
-              children: const [
-                Expanded(
-                  child: _CategoryCard(
-                    icon: Icons.grid_view_rounded,
-                    title: "All",
-                    active: true,
-                  ),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: _CategoryCard(
-                    icon: Icons.videocam_rounded,
-                    title: "Videos",
-                  ),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: _CategoryCard(
-                    icon: Icons.home_work_rounded,
-                    title: "Property",
-                  ),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: _CategoryCard(
-                    icon: Icons.directions_car_filled_rounded,
-                    title: "Cars",
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 18),
-
-            _SectionHeader(
-              title: "Featured Listings",
-              actionText: "View All",
-              onTap: () {},
-            ),
-            const SizedBox(height: 10),
-
-            _ListingCard(
-              badgeText: "Featured",
-              badgeColor: cs.primary,
-              title: "Toyota Land Cruiser 2022",
-              location: "Georgetown",
-              price: "\$45,000",
-              image: const AssetImage("assets/images/car1.jpg"),
-              onFav: () {},
-            ),
-            const SizedBox(height: 12),
-            _ListingCard(
-              badgeText: "Urgent",
-              badgeColor: const Color(0xFFFF5A5A),
-              title: "Mercedes-Benz C-Class",
-              location: "East Bank",
-              price: "\$38,500",
-              image: const AssetImage("assets/images/car2.jpg"),
-              onFav: () {},
-            ),
-            const SizedBox(height: 12),
-            _ListingCard(
-              badgeText: "New",
-              badgeColor: const Color(0xFFFFB020),
-              title: "BMW Steering Wheel Badge",
-              location: "Georgetown",
-              price: "\$120",
-              image: const AssetImage("assets/images/parts.jpg"),
-              onFav: () {},
-            ),
-            const SizedBox(height: 12),
-            _ListingCard(
-              badgeText: "New",
-              badgeColor: const Color(0xFFFFB020),
-              title: "Honda Civic Sport 2023",
-              location: "Georgetown",
-              price: "\$28,200",
-              image: const AssetImage("assets/images/car3.jpg"),
-              onFav: () {},
-            ),
-
-            const SizedBox(height: 18),
-
-            _SectionHeader(
-              title: "Popular Properties",
-              actionText: "View All",
-              onTap: () {},
-            ),
-            const SizedBox(height: 10),
-
-            Row(
-              children: const [
-                Expanded(
-                  child: _PropertyCard(
-                    title: "Modern Villa with Pool",
-                    price: "\$50,000",
-                    image: AssetImage("assets/images/house1.jpg"),
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: _PropertyCard(
-                    title: "Luxury Estate",
-                    price: "\$1,200,000",
-                    image: AssetImage("assets/images/house2.jpg"),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 14),
-
-            Row(
-              children: const [
-                Expanded(
-                  child: _StatChip(value: "50K+", label: "Listings"),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: _StatChip(value: "100K+", label: "Users"),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: _StatChip(value: "12", label: "Cities"),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: _StatChip(value: "FREE", label: "Post Ads"),
-                ),
-              ],
-            ),
-
-            // Web desktop-only footer
-            if (isWebDesktop) ...[
-              const SizedBox(height: 40),
-              const WebFooter(),
+              const TextSpan(text: "Pay Nothing."),
             ],
-          ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          "Buy and sell locally with ease. Take the simplest\nway to find and deal near you.",
+          textAlign: web ? TextAlign.center : TextAlign.start,
+          style: subtitle,
+        ),
+        const SizedBox(height: 18),
+
+        SizedBox(
+          width: web ? 560 : double.infinity,
+          child: TextField(
+            decoration: InputDecoration(
+              hintText: "Search for anything...",
+              prefixIcon: const Icon(Icons.search_rounded),
+              suffixIcon: Padding(
+                padding: const EdgeInsets.all(6),
+                child: SizedBox(
+                  width: 44,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: cs.primary,
+                      elevation: 0,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Icon(Icons.search_rounded, size: 18),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        if (web) ...[
+          const SizedBox(height: 12),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 10,
+            runSpacing: 10,
+            children: const [
+              _ChipTab(text: "Home", active: true),
+              _ChipTab(text: "Trending"),
+              _ChipTab(text: "Cars"),
+              _ChipTab(text: "Property"),
+              _ChipTab(text: "Jobs"),
+            ],
+          ),
+        ],
+      ],
+    );
+
+    return web
+        ? Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: content,
+          )
+        : content;
+  }
+}
+
+class _ChipTab extends StatelessWidget {
+  final String text;
+  final bool active;
+  const _ChipTab({required this.text, this.active = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: active ? cs.primary.withOpacity(0.10) : cs.surface,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: active
+              ? cs.primary.withOpacity(0.25)
+              : const Color(0xFFE5E7EB),
+        ),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: active ? cs.primary : const Color(0xFF6B7280),
+          fontWeight: FontWeight.w700,
+          fontSize: 12,
         ),
       ),
     );
@@ -356,20 +586,23 @@ class _CategoryCard extends StatelessWidget {
     final textColor = active ? cs.primary : const Color(0xFF6C768A);
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: border),
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 20, color: iconColor),
-          const SizedBox(height: 6),
+          Icon(icon, size: 22, color: iconColor),
+          const SizedBox(height: 8),
           Text(
             title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall?.copyWith(
-              fontSize: 11.5,
+              fontSize: 12,
               fontWeight: FontWeight.w700,
               color: textColor,
               height: 1,
@@ -382,23 +615,20 @@ class _CategoryCard extends StatelessWidget {
 }
 
 class _ListingCard extends StatelessWidget {
-  final String badgeText;
-  final Color badgeColor;
-  final String title;
-  final String location;
-  final String price;
-  final ImageProvider image;
+  final ListingVM item;
   final VoidCallback onFav;
 
-  const _ListingCard({
-    required this.badgeText,
-    required this.badgeColor,
-    required this.title,
-    required this.location,
-    required this.price,
-    required this.image,
-    required this.onFav,
-  });
+  const _ListingCard({required this.item, required this.onFav});
+
+  Color _badgeColor(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final b = (item.badge ?? "New").toLowerCase();
+    if (b == "urgent") return const Color(0xFFFF5A5A);
+    if (b == "featured") return primary;
+    return const Color(0xFFFFB020);
+  }
+
+  String _badgeText() => item.badge ?? "New";
 
   @override
   Widget build(BuildContext context) {
@@ -427,7 +657,7 @@ class _ListingCard extends StatelessWidget {
               children: [
                 AspectRatio(
                   aspectRatio: 16 / 9,
-                  child: Image(image: image, fit: BoxFit.cover),
+                  child: Image(image: item.image, fit: BoxFit.cover),
                 ),
                 Positioned(
                   left: 10,
@@ -438,11 +668,11 @@ class _ListingCard extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: badgeColor,
+                      color: _badgeColor(context),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      badgeText,
+                      _badgeText(),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: Colors.white,
                         fontSize: 11.5,
@@ -484,7 +714,7 @@ class _ListingCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        title,
+                        item.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -503,7 +733,7 @@ class _ListingCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            location,
+                            item.location,
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontSize: 12,
                               color: const Color(0xFF6C768A),
@@ -516,7 +746,7 @@ class _ListingCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  price,
+                  item.price,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: cs.primary,
