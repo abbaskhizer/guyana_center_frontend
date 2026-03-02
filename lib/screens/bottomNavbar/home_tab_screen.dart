@@ -12,7 +12,7 @@ class HomeTabScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(HomeTabController());
+    final controller = Get.put(HomeTabController(), permanent: true);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -36,55 +36,12 @@ class _MobileLayout extends StatelessWidget {
     final cs = theme.colorScheme;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
       children: [
-        Row(
-          children: [
-            IconButton(
-              onPressed: () {},
-              icon: Icon(Icons.menu_rounded, color: cs.onSurface),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                "GUYANACENTRAL",
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.4,
-                  color: cs.onSurface,
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 32,
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: cs.primary,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: Text(
-                  "Login",
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+        _TopBar(controller: controller),
         const SizedBox(height: 14),
 
         const _HeroSection(web: false),
-
         const SizedBox(height: 18),
 
         _SectionHeader(
@@ -147,49 +104,146 @@ class _MobileLayout extends StatelessWidget {
         ),
         const SizedBox(height: 10),
 
-        const Row(
-          children: [
-            Expanded(
-              child: _PropertyCard(
-                title: "Modern Villa with Pool",
-                price: "\$50,000",
-                image: AssetImage("assets/images/house1.jpg"),
+        Obx(() {
+          final props = controller.properties;
+          final p1 = props.isNotEmpty ? props[0] : null;
+          final p2 = props.length > 1 ? props[1] : null;
+
+          return Row(
+            children: [
+              Expanded(
+                child: p1 == null
+                    ? const SizedBox()
+                    : _PropertyCard(
+                        title: p1.title,
+                        price: p1.price,
+                        image: p1.image,
+                      ),
               ),
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: _PropertyCard(
-                title: "Luxury Estate",
-                price: "\$1,200,000",
-                image: AssetImage("assets/images/house2.jpg"),
+              const SizedBox(width: 12),
+              Expanded(
+                child: p2 == null
+                    ? const SizedBox()
+                    : _PropertyCard(
+                        title: p2.title,
+                        price: p2.price,
+                        image: p2.image,
+                      ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        }),
 
         const SizedBox(height: 14),
 
-        const Row(
+        Row(
           children: [
             Expanded(
-              child: _StatChip(value: "50K+", label: "Listings"),
+              child: _StatChip(
+                value: "50K+",
+                label: "Active Listings",
+                baseColor: cs.primary,
+              ),
             ),
             SizedBox(width: 10),
             Expanded(
-              child: _StatChip(value: "100K+", label: "Users"),
+              child: _StatChip(
+                value: "100K+",
+                label: "Happy Users",
+                baseColor: Color(0xFFFF0000),
+              ),
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Expanded(
-              child: _StatChip(value: "12", label: "Cities"),
+              child: _StatChip(
+                value: "12",
+                label: "Categories",
+                baseColor: cs.secondary,
+              ),
             ),
-            SizedBox(width: 10),
-            Expanded(
-              child: _StatChip(value: "FREE", label: "Post Ads"),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: _StatChip(
+                value: "FREE",
+                label: "Always Free",
+                baseColor: Color(0xFFFF8A00),
+              ),
             ),
           ],
         ),
+      ],
+    );
+  }
+}
 
-        const SizedBox(height: 24),
+class _TopBar extends StatelessWidget {
+  const _TopBar({required this.controller});
+
+  final HomeTabController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Row(
+      children: [
+        InkWell(
+          onTap: () {},
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(6),
+            child: Icon(Icons.menu_rounded, color: cs.onSurface, size: 22),
+          ),
+        ),
+        const SizedBox(width: 10),
+
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.4,
+                color: cs.onSurface,
+              ),
+              children: [
+                TextSpan(
+                  text: "GUYANA",
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: cs.onSurface,
+                  ),
+                ),
+                TextSpan(
+                  text: "CENTRAL",
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFFFF8A00),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        SizedBox(
+          height: 34,
+          child: ElevatedButton(
+            onPressed: controller.goTOLogin,
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              shape: const StadiumBorder(),
+              elevation: 0,
+            ),
+            child: Text(
+              "Login",
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: cs.onPrimary,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -214,162 +268,191 @@ class _WebLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final w = MediaQuery.of(context).size.width;
 
-    return Column(
-      children: [
-        Expanded(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1200),
-              child: CustomScrollView(
-                slivers: [
-                  const SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(16, 18, 16, 10),
-                      child: _HeroSection(web: true),
-                    ),
-                  ),
-
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
-                      child: _SectionHeader(
-                        title: "Browse Categories",
-                        actionText: "See All",
-                        onTap: () {},
-                      ),
-                    ),
-                  ),
-
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    sliver: Obx(
-                      () => SliverGrid(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final item = controller.categories[index];
-                          return _CategoryCard(
-                            icon: item.icon,
-                            title: item.title,
-                            active: item.active,
-                          );
-                        }, childCount: controller.categories.length),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: _catCols(w),
-                          crossAxisSpacing: 14,
-                          mainAxisSpacing: 14,
-                          childAspectRatio: 1.55,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 22, 16, 10),
-                      child: _SectionHeader(
-                        title: "Featured Listings",
-                        actionText: "View All",
-                        onTap: () {},
-                      ),
-                    ),
-                  ),
-
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    sliver: Obx(
-                      () => SliverGrid(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final item = controller.featuredListings[index];
-                          return _ListingCard(item: item, onFav: () {});
-                        }, childCount: controller.featuredListings.length),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: _listingCols(w),
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          childAspectRatio: 0.95,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 22, 16, 10),
-                      child: _SectionHeader(
-                        title: "Real Estate",
-                        actionText: "View All",
-                        onTap: () {},
-                      ),
-                    ),
-                  ),
-
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    sliver: SliverGrid(
-                      delegate: SliverChildListDelegate(const [
-                        _PropertyCard(
-                          title: "Modern Villa with Pool",
-                          price: "\$50,000",
-                          image: AssetImage("assets/images/house1.jpg"),
-                        ),
-                        _PropertyCard(
-                          title: "Luxury Estate",
-                          price: "\$1,200,000",
-                          image: AssetImage("assets/images/house2.jpg"),
-                        ),
-                        _PropertyCard(
-                          title: "City Apartment",
-                          price: "\$250,000",
-                          image: AssetImage("assets/images/house1.jpg"),
-                        ),
-                      ]),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: w >= 1100 ? 3 : 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: 1.15,
-                      ),
-                    ),
-                  ),
-
-                  const SliverToBoxAdapter(child: SizedBox(height: 18)),
-                  const SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: _StatChip(value: "50K+", label: "Listings"),
-                          ),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: _StatChip(value: "100K+", label: "Users"),
-                          ),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: _StatChip(value: "12", label: "Cities"),
-                          ),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: _StatChip(value: "FREE", label: "Post Ads"),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 26)),
-
-                  const SliverToBoxAdapter(child: WebFooter()),
-                  const SliverToBoxAdapter(child: SizedBox(height: 24)),
-                ],
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1200),
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+                child: Row(
+                  children: [Expanded(child: _TopBar(controller: controller))],
+                ),
               ),
             ),
-          ),
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16, 8, 16, 10),
+                child: _HeroSection(web: true),
+              ),
+            ),
+
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+                child: _SectionHeader(
+                  title: "Browse Categories",
+                  actionText: "See All",
+                  onTap: _noop,
+                ),
+              ),
+            ),
+
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              sliver: Obx(
+                () => SliverGrid(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final item = controller.categories[index];
+                    return _CategoryCard(
+                      icon: item.icon,
+                      title: item.title,
+                      active: item.active,
+                    );
+                  }, childCount: controller.categories.length),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: _catCols(w),
+                    crossAxisSpacing: 14,
+                    mainAxisSpacing: 14,
+                    childAspectRatio: 1.55,
+                  ),
+                ),
+              ),
+            ),
+
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 22, 16, 10),
+                child: _SectionHeader(
+                  title: "Featured Listings",
+                  actionText: "View All",
+                  onTap: _noop,
+                ),
+              ),
+            ),
+
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              sliver: Obx(
+                () => SliverGrid(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final item = controller.featuredListings[index];
+                    return _ListingCard(item: item, onFav: () {});
+                  }, childCount: controller.featuredListings.length),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: _listingCols(w),
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.95,
+                  ),
+                ),
+              ),
+            ),
+
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 22, 16, 10),
+                child: _SectionHeader(
+                  title: "Real Estate",
+                  actionText: "View All",
+                  onTap: _noop,
+                ),
+              ),
+            ),
+
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              sliver: Obx(
+                () => SliverGrid(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final p = controller.properties[index];
+                    return _PropertyCard(
+                      title: p.title,
+                      price: p.price,
+                      image: p.image,
+                    );
+                  }, childCount: controller.properties.length),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: w >= 1100 ? 3 : 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 1.15,
+                  ),
+                ),
+              ),
+            ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 18)),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _StatChip(
+                        value: "50K+",
+                        label: "Active Listings",
+                        baseColor: cs.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _StatChip(
+                        value: "100K+",
+                        label: "Happy Users",
+                        baseColor: Color(0xFFFF0000),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _StatChip(
+                        value: "12",
+                        label: "Categories",
+                        baseColor: cs.secondary,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: _StatChip(
+                        value: "FREE",
+                        label: "Always Free",
+                        baseColor: Color(0xFFFF8A00),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 22,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: cs.surface,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: cs.outlineVariant),
+                  ),
+                  child: WebFooter(),
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
+
+  static void _noop() {}
 }
 
 class _HeroSection extends StatelessWidget {
@@ -381,7 +464,7 @@ class _HeroSection extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    final headline = theme.textTheme.headlineSmall?.copyWith(
+    final titleStyle = theme.textTheme.headlineSmall?.copyWith(
       fontSize: web ? 44 : 28,
       height: 1.12,
       fontWeight: FontWeight.w900,
@@ -389,13 +472,13 @@ class _HeroSection extends StatelessWidget {
     );
 
     final subtitle = theme.textTheme.bodyMedium?.copyWith(
-      color: const Color(0xFF6B7280),
+      color: cs.onSurface.withOpacity(0.55),
       height: 1.35,
       fontSize: web ? 14 : 12.5,
-      fontWeight: FontWeight.w500,
+      fontWeight: FontWeight.w600,
     );
 
-    final content = Column(
+    return Column(
       crossAxisAlignment: web
           ? CrossAxisAlignment.center
           : CrossAxisAlignment.start,
@@ -403,19 +486,53 @@ class _HeroSection extends StatelessWidget {
         RichText(
           textAlign: web ? TextAlign.center : TextAlign.start,
           text: TextSpan(
-            style: headline,
+            style: titleStyle,
             children: [
-              const TextSpan(text: "Find "),
+              TextSpan(
+                text: "Find ",
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
               TextSpan(
                 text: "Anything.\n",
-                style: TextStyle(color: cs.primary),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFFFF0000),
+                ),
               ),
-              const TextSpan(text: "Sell "),
-              const TextSpan(
+              TextSpan(
+                text: "Sell ",
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              TextSpan(
                 text: "Everything.\n",
-                style: TextStyle(color: Color(0xFFFF8A00)),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFFFF8A00),
+                ),
               ),
-              const TextSpan(text: "Pay Nothing."),
+              TextSpan(
+                text: "Pay ",
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              TextSpan(
+                text: "Nothing.",
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
+                  color: cs.primary,
+                ),
+              ),
             ],
           ),
         ),
@@ -425,88 +542,51 @@ class _HeroSection extends StatelessWidget {
           textAlign: web ? TextAlign.center : TextAlign.start,
           style: subtitle,
         ),
-        const SizedBox(height: 18),
-
-        SizedBox(
-          width: web ? 560 : double.infinity,
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: "Search for anything...",
-              prefixIcon: const Icon(Icons.search_rounded),
-              suffixIcon: Padding(
-                padding: const EdgeInsets.all(6),
-                child: SizedBox(
-                  width: 44,
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: cs.primary,
-                      elevation: 0,
-                      padding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Icon(Icons.search_rounded, size: 18),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-
-        if (web) ...[
-          const SizedBox(height: 12),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 10,
-            runSpacing: 10,
-            children: const [
-              _ChipTab(text: "Home", active: true),
-              _ChipTab(text: "Trending"),
-              _ChipTab(text: "Cars"),
-              _ChipTab(text: "Property"),
-              _ChipTab(text: "Jobs"),
-            ],
-          ),
-        ],
+        const SizedBox(height: 16),
+        SizedBox(width: web ? 560 : double.infinity, child: _SearchBar()),
       ],
     );
-
-    return web
-        ? Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: content,
-          )
-        : content;
   }
 }
 
-class _ChipTab extends StatelessWidget {
-  final String text;
-  final bool active;
-  const _ChipTab({required this.text, this.active = false});
+class _SearchBar extends StatelessWidget {
+  const _SearchBar();
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: active ? cs.primary.withOpacity(0.10) : cs.surface,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: active
-              ? cs.primary.withOpacity(0.25)
-              : const Color(0xFFE5E7EB),
+
+    return TextField(
+      decoration: InputDecoration(
+        hintText: "Search for anything...",
+        prefixIcon: Icon(Icons.search_rounded, color: cs.onSurfaceVariant),
+        filled: true,
+        fillColor: cs.surface,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: cs.outlineVariant),
         ),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: active ? cs.primary : const Color(0xFF6B7280),
-          fontWeight: FontWeight.w700,
-          fontSize: 12,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: cs.primary, width: 1.4),
+        ),
+        suffixIcon: Padding(
+          padding: const EdgeInsets.all(6),
+          child: SizedBox(
+            width: 44,
+            height: 44,
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.zero,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Icon(Icons.search_rounded, size: 18),
+            ),
+          ),
         ),
       ),
     );
@@ -534,7 +614,7 @@ class _SectionHeader extends StatelessWidget {
         Text(
           title,
           style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w900,
             fontSize: 14.5,
             color: cs.onSurface,
           ),
@@ -550,9 +630,8 @@ class _SectionHeader extends StatelessWidget {
           child: Text(
             actionText,
             style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w800,
               color: cs.primary,
-              fontWeight: FontWeight.w700,
-              fontSize: 12.5,
             ),
           ),
         ),
@@ -577,39 +656,41 @@ class _CategoryCard extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    final bg = active ? cs.primary.withOpacity(0.10) : cs.surface;
-    final border = active
-        ? cs.primary.withOpacity(0.25)
-        : theme.dividerColor.withOpacity(0.35);
+    final bgColor = active ? cs.primary : cs.surface;
+    final borderColor = active ? cs.primary : cs.outlineVariant;
 
-    final iconColor = active ? cs.primary : const Color(0xFF9AA3B2);
-    final textColor = active ? cs.primary : const Color(0xFF6C768A);
+    final iconColor = active ? cs.onPrimary : cs.onSurfaceVariant;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: border),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 22, color: iconColor),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall?.copyWith(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: textColor,
-              height: 1,
-            ),
+    final textColor = active ? cs.primary : cs.onSurfaceVariant;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          height: 50,
+          width: 50,
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: borderColor),
           ),
-        ],
-      ),
+          alignment: Alignment.center,
+          child: Icon(icon, size: 22, color: iconColor),
+        ),
+
+        const SizedBox(height: 8),
+
+        Text(
+          title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: textColor,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -639,10 +720,10 @@ class _ListingCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.35)),
+        border: Border.all(color: cs.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: cs.onSurface.withOpacity(0.06),
             blurRadius: 18,
             offset: const Offset(0, 10),
           ),
@@ -657,8 +738,19 @@ class _ListingCard extends StatelessWidget {
               children: [
                 AspectRatio(
                   aspectRatio: 16 / 9,
-                  child: Image(image: item.image, fit: BoxFit.cover),
+                  child: Image(
+                    image: item.image,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: cs.surfaceVariant,
+                      child: Icon(
+                        Icons.broken_image_outlined,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
                 ),
+
                 Positioned(
                   left: 10,
                   top: 10,
@@ -676,11 +768,12 @@ class _ListingCard extends StatelessWidget {
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: Colors.white,
                         fontSize: 11.5,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
                   ),
                 ),
+
                 Positioned(
                   right: 10,
                   top: 10,
@@ -726,17 +819,18 @@ class _ListingCard extends StatelessWidget {
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.location_on_rounded,
                             size: 14,
-                            color: Color(0xFF9AA3B2),
+                            color: cs.onSurface.withOpacity(0.45),
                           ),
                           const SizedBox(width: 4),
                           Text(
                             item.location,
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontSize: 12,
-                              color: const Color(0xFF6C768A),
+                              color: cs.onSurface.withOpacity(0.55),
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
@@ -782,10 +876,10 @@ class _PropertyCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.35)),
+        border: Border.all(color: cs.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: cs.onSurface.withOpacity(0.06),
             blurRadius: 16,
             offset: const Offset(0, 10),
           ),
@@ -798,7 +892,17 @@ class _PropertyCard extends StatelessWidget {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
             child: AspectRatio(
               aspectRatio: 16 / 10,
-              child: Image(image: image, fit: BoxFit.cover),
+              child: Image(
+                image: image,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  color: cs.surfaceVariant,
+                  child: Icon(
+                    Icons.broken_image_outlined,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+              ),
             ),
           ),
           Padding(
@@ -837,38 +941,43 @@ class _PropertyCard extends StatelessWidget {
 class _StatChip extends StatelessWidget {
   final String value;
   final String label;
+  final Color baseColor;
 
-  const _StatChip({required this.value, required this.label});
+  const _StatChip({
+    required this.value,
+    required this.label,
+    required this.baseColor,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final borderColor = baseColor.withOpacity(.30);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+      height: 90, // ✅ same height for all
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: cs.primary.withOpacity(0.08),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cs.primary.withOpacity(0.22)),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center, // center vertically
         children: [
           Text(
             value,
             style: theme.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w900,
-              color: cs.primary,
-              fontSize: 12.5,
+              color: baseColor,
+              fontSize: 15,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 4),
           Text(
             label,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
               fontSize: 11,
-              color: cs.onSurface.withOpacity(0.55),
               fontWeight: FontWeight.w700,
             ),
           ),
