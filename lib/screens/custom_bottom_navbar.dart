@@ -72,8 +72,8 @@ class CustomBottomNavBar extends StatelessWidget {
 
                 Expanded(
                   child: _NavItem(
-                    icon: Icons.chat_bubble_outline_rounded,
-                    label: "Messages",
+                    icon: Icons.favorite_border,
+                    label: "Favorites",
                     active: currentIndex == 3,
                     onPressed: () => c.changeTab(3),
                     inactiveColor: inactive,

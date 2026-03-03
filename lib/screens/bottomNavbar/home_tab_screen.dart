@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/bottomNavbar/home_tab_controller.dart';
+import 'package:guyana_center_frontend/widgets/guyana_central_logo.dart';
 import 'package:guyana_center_frontend/widgets/web_footer.dart';
 
 class HomeTabScreen extends StatelessWidget {
@@ -40,38 +41,43 @@ class _MobileLayout extends StatelessWidget {
       children: [
         _TopBar(controller: controller),
         const SizedBox(height: 14),
-
         const _HeroSection(web: false),
         const SizedBox(height: 18),
-
         _SectionHeader(
           title: "Browse Categories",
           actionText: "See All",
-          onTap: () {},
+          onTap: controller.openAllCategoriesScreen,
         ),
         const SizedBox(height: 10),
 
-        Obx(() {
-          final list = controller.categories;
-          final show = list.length >= 4 ? list.take(4).toList() : list.toList();
-          return Row(
-            children: List.generate(show.length, (i) {
-              final item = show[i];
-              return Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    right: i == show.length - 1 ? 0 : 10,
-                  ),
-                  child: _CategoryCard(
-                    icon: item.icon,
-                    title: item.title,
-                    active: item.active,
-                  ),
-                ),
-              );
-            }),
-          );
-        }),
+        /// ✅ HOME shows: All + 4 (total 5)
+        SizedBox(
+          height: 92,
+          child: Obx(() {
+            final list = controller.homeCategories;
+            final selected = controller.selectedCategoryIndex.value;
+
+            return ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: list.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 14),
+              itemBuilder: (_, i) {
+                final item = list[i];
+                final active = i == selected;
+
+                return _CategoryCard(
+                  assetImage: item.assetImage ?? "",
+                  title: item.title,
+                  active: active,
+                  onTap: () {
+                    controller.selectHomeCategory(i);
+                    controller.openFromHomeCategory(i);
+                  },
+                );
+              },
+            );
+          }),
+        ),
 
         const SizedBox(height: 18),
 
@@ -104,35 +110,29 @@ class _MobileLayout extends StatelessWidget {
         ),
         const SizedBox(height: 10),
 
-        Obx(() {
-          final props = controller.properties;
-          final p1 = props.isNotEmpty ? props[0] : null;
-          final p2 = props.length > 1 ? props[1] : null;
-
-          return Row(
-            children: [
-              Expanded(
-                child: p1 == null
-                    ? const SizedBox()
-                    : _PropertyCard(
-                        title: p1.title,
-                        price: p1.price,
-                        image: p1.image,
-                      ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: p2 == null
-                    ? const SizedBox()
-                    : _PropertyCard(
-                        title: p2.title,
-                        price: p2.price,
-                        image: p2.image,
-                      ),
-              ),
-            ],
-          );
-        }),
+        SizedBox(
+          height: 252,
+          child: Obx(() {
+            final props = controller.properties;
+            return ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: props.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (_, i) {
+                final p = props[i];
+                return _PropertyCard(
+                  title: p.title,
+                  location: p.location,
+                  price: p.price,
+                  meta: p.meta,
+                  image: p.image,
+                  isFav: p.isFav,
+                  onFavTap: () => controller.togglePropertyFav(i),
+                );
+              },
+            );
+          }),
+        ),
 
         const SizedBox(height: 14),
 
@@ -145,8 +145,8 @@ class _MobileLayout extends StatelessWidget {
                 baseColor: cs.primary,
               ),
             ),
-            SizedBox(width: 10),
-            Expanded(
+            const SizedBox(width: 10),
+            const Expanded(
               child: _StatChip(
                 value: "100K+",
                 label: "Happy Users",
@@ -178,7 +178,6 @@ class _MobileLayout extends StatelessWidget {
 
 class _TopBar extends StatelessWidget {
   const _TopBar({required this.controller});
-
   final HomeTabController controller;
 
   @override
@@ -188,44 +187,19 @@ class _TopBar extends StatelessWidget {
 
     return Row(
       children: [
-        InkWell(
-          onTap: () {},
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.all(6),
-            child: Icon(Icons.menu_rounded, color: cs.onSurface, size: 22),
-          ),
-        ),
-        const SizedBox(width: 10),
-
-        Expanded(
-          child: RichText(
-            text: TextSpan(
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.4,
-                color: cs.onSurface,
-              ),
-              children: [
-                TextSpan(
-                  text: "GUYANA",
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: cs.onSurface,
-                  ),
-                ),
-                TextSpan(
-                  text: "CENTRAL",
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFFFF8A00),
-                  ),
-                ),
-              ],
+        Padding(
+          padding: const EdgeInsets.all(6),
+          child: InkWell(
+            onTap: () => Get.back(),
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.all(6),
+              child: Icon(Icons.menu_rounded, color: cs.onSurface, size: 22),
             ),
           ),
         ),
-
+        const SizedBox(width: 10),
+        Expanded(child: GuyanaCentralLogo()),
         SizedBox(
           height: 34,
           child: ElevatedButton(
@@ -253,11 +227,7 @@ class _WebLayout extends StatelessWidget {
   final HomeTabController controller;
   const _WebLayout({required this.controller});
 
-  int _catCols(double w) {
-    if (w >= 1300) return 6;
-    if (w >= 1100) return 5;
-    return 4;
-  }
+  int _catCols(double w) => 5; // ✅ All + 4 = 5 items view
 
   int _listingCols(double w) {
     if (w >= 1400) return 4;
@@ -267,8 +237,7 @@ class _WebLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final cs = Theme.of(context).colorScheme;
     final w = MediaQuery.of(context).size.width;
 
     return Center(
@@ -290,38 +259,47 @@ class _WebLayout extends StatelessWidget {
                 child: _HeroSection(web: true),
               ),
             ),
-
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
                 child: _SectionHeader(
                   title: "Browse Categories",
                   actionText: "See All",
-                  onTap: _noop,
+                  onTap: controller.openAllCategoriesScreen,
                 ),
               ),
             ),
 
+            /// ✅ WEB: show All + 4 (5 items)
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              sliver: Obx(
-                () => SliverGrid(
+              sliver: Obx(() {
+                final list = controller.homeCategories;
+
+                return SliverGrid(
                   delegate: SliverChildBuilderDelegate((context, index) {
-                    final item = controller.categories[index];
+                    final item = list[index];
+                    final active =
+                        index == controller.selectedCategoryIndex.value;
+
                     return _CategoryCard(
-                      icon: item.icon,
+                      assetImage: item.assetImage ?? "",
                       title: item.title,
-                      active: item.active,
+                      active: active,
+                      onTap: () {
+                        controller.selectHomeCategory(index);
+                        controller.openFromHomeCategory(index);
+                      },
                     );
-                  }, childCount: controller.categories.length),
+                  }, childCount: list.length),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: _catCols(w),
                     crossAxisSpacing: 14,
                     mainAxisSpacing: 14,
                     childAspectRatio: 1.55,
                   ),
-                ),
-              ),
+                );
+              }),
             ),
 
             SliverToBoxAdapter(
@@ -330,7 +308,7 @@ class _WebLayout extends StatelessWidget {
                 child: _SectionHeader(
                   title: "Featured Listings",
                   actionText: "View All",
-                  onTap: _noop,
+                  onTap: () {},
                 ),
               ),
             ),
@@ -359,7 +337,7 @@ class _WebLayout extends StatelessWidget {
                 child: _SectionHeader(
                   title: "Real Estate",
                   actionText: "View All",
-                  onTap: _noop,
+                  onTap: () {},
                 ),
               ),
             ),
@@ -372,15 +350,19 @@ class _WebLayout extends StatelessWidget {
                     final p = controller.properties[index];
                     return _PropertyCard(
                       title: p.title,
+                      location: p.location,
                       price: p.price,
+                      meta: p.meta,
                       image: p.image,
+                      isFav: p.isFav,
+                      onFavTap: () => controller.togglePropertyFav(index),
                     );
                   }, childCount: controller.properties.length),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: w >= 1100 ? 3 : 2,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
-                    childAspectRatio: 1.15,
+                    childAspectRatio: 1.08,
                   ),
                 ),
               ),
@@ -390,7 +372,6 @@ class _WebLayout extends StatelessWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-
                 child: Row(
                   children: [
                     Expanded(
@@ -401,7 +382,7 @@ class _WebLayout extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    Expanded(
+                    const Expanded(
                       child: _StatChip(
                         value: "100K+",
                         label: "Happy Users",
@@ -451,8 +432,6 @@ class _WebLayout extends StatelessWidget {
       ),
     );
   }
-
-  static void _noop() {}
 }
 
 class _HeroSection extends StatelessWidget {
@@ -490,44 +469,44 @@ class _HeroSection extends StatelessWidget {
             children: [
               TextSpan(
                 text: "Find ",
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontSize: 30,
                   fontWeight: FontWeight.w900,
                 ),
               ),
               TextSpan(
                 text: "Anything.\n",
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontSize: 30,
                   fontWeight: FontWeight.w900,
-                  color: Color(0xFFFF0000),
+                  color: const Color(0xFFFF0000),
                 ),
               ),
               TextSpan(
                 text: "Sell ",
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontSize: 30,
                   fontWeight: FontWeight.w900,
                 ),
               ),
               TextSpan(
                 text: "Everything.\n",
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontSize: 30,
                   fontWeight: FontWeight.w900,
-                  color: Color(0xFFFF8A00),
+                  color: const Color(0xFFFF8A00),
                 ),
               ),
               TextSpan(
                 text: "Pay ",
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontSize: 30,
                   fontWeight: FontWeight.w900,
                 ),
               ),
               TextSpan(
                 text: "Nothing.",
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontSize: 30,
                   fontWeight: FontWeight.w900,
                   color: cs.primary,
@@ -543,7 +522,7 @@ class _HeroSection extends StatelessWidget {
           style: subtitle,
         ),
         const SizedBox(height: 16),
-        SizedBox(width: web ? 560 : double.infinity, child: _SearchBar()),
+        SizedBox(width: web ? 560 : double.infinity, child: const _SearchBar()),
       ],
     );
   }
@@ -641,14 +620,16 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _CategoryCard extends StatelessWidget {
-  final IconData icon;
+  final String assetImage;
   final String title;
   final bool active;
+  final VoidCallback onTap;
 
   const _CategoryCard({
-    required this.icon,
+    required this.assetImage,
     required this.title,
-    this.active = false,
+    required this.active,
+    required this.onTap,
   });
 
   @override
@@ -656,41 +637,51 @@ class _CategoryCard extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    final bgColor = active ? cs.primary : cs.surface;
-    final borderColor = active ? cs.primary : cs.outlineVariant;
+    final boxColor = active ? cs.primary : const Color(0xFFF3F4F6);
+    final textColor = active ? cs.primary : cs.onSurface.withOpacity(.65);
 
-    final iconColor = active ? cs.onPrimary : cs.onSurfaceVariant;
-
-    final textColor = active ? cs.primary : cs.onSurfaceVariant;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          height: 50,
-          width: 50,
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: borderColor),
-          ),
-          alignment: Alignment.center,
-          child: Icon(icon, size: 22, color: iconColor),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: SizedBox(
+        width: 82,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 56,
+              width: 56,
+              decoration: BoxDecoration(
+                color: boxColor,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              alignment: Alignment.center,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Image.asset(
+                  assetImage,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => Icon(
+                    Icons.broken_image_outlined,
+                    color: active ? Colors.white : cs.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+              ),
+            ),
+          ],
         ),
-
-        const SizedBox(height: 8),
-
-        Text(
-          title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-            color: textColor,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -743,6 +734,7 @@ class _ListingCard extends StatelessWidget {
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
                       color: cs.surfaceVariant,
+                      alignment: Alignment.center,
                       child: Icon(
                         Icons.broken_image_outlined,
                         color: cs.onSurfaceVariant,
@@ -750,7 +742,6 @@ class _ListingCard extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 Positioned(
                   left: 10,
                   top: 10,
@@ -773,7 +764,6 @@ class _ListingCard extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 Positioned(
                   right: 10,
                   top: 10,
@@ -858,13 +848,23 @@ class _ListingCard extends StatelessWidget {
 
 class _PropertyCard extends StatelessWidget {
   final String title;
+  final String location;
   final String price;
+  final String meta;
   final ImageProvider image;
+  final bool isFav;
+  final VoidCallback? onTap;
+  final VoidCallback? onFavTap;
 
   const _PropertyCard({
     required this.title,
+    required this.location,
     required this.price,
+    required this.meta,
     required this.image,
+    this.isFav = false,
+    this.onTap,
+    this.onFavTap,
   });
 
   @override
@@ -872,67 +872,136 @@ class _PropertyCard extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: cs.outlineVariant),
-        boxShadow: [
-          BoxShadow(
-            color: cs.onSurface.withOpacity(0.06),
-            blurRadius: 16,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-            child: AspectRatio(
-              aspectRatio: 16 / 10,
-              child: Image(
-                image: image,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  color: cs.surfaceVariant,
-                  child: Icon(
-                    Icons.broken_image_outlined,
-                    color: cs.onSurfaceVariant,
-                  ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 250,
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: cs.outlineVariant),
+          boxShadow: [
+            BoxShadow(
+              color: cs.onSurface.withOpacity(0.06),
+              blurRadius: 18,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(18),
+              ),
+              child: AspectRatio(
+                aspectRatio: 16 / 10,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image(
+                      image: image,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: cs.surfaceVariant,
+                        alignment: Alignment.center,
+                        child: Icon(
+                          Icons.broken_image_outlined,
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: Material(
+                        color: Colors.white.withOpacity(0.92),
+                        shape: const CircleBorder(),
+                        elevation: 1,
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: onFavTap,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Icon(
+                              isFav ? Icons.favorite : Icons.favorite_border,
+                              size: 18,
+                              color: isFav ? Colors.red : Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 13.5,
-                    color: cs.onSurface,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 13.5,
+                      color: cs.onSurface,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  price,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: cs.primary,
-                    fontSize: 13,
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 14,
+                        color: cs.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          location,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        price,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFFFF0000),
+                          fontSize: 13,
+                        ),
+                      ),
+                      Text(
+                        meta,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -953,16 +1022,17 @@ class _StatChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final borderColor = baseColor.withOpacity(.30);
+    final cs = theme.colorScheme;
 
     return Container(
-      height: 90, // ✅ same height for all
+      height: 90,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: borderColor),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center, // center vertically
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             value,
@@ -977,6 +1047,7 @@ class _StatChip extends StatelessWidget {
             label,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
+              color: cs.onSurface.withOpacity(.55),
               fontSize: 11,
               fontWeight: FontWeight.w700,
             ),

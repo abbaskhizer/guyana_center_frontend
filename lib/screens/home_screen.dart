@@ -2,9 +2,10 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/custom_bottom_nav_controller.dart';
+
 import 'package:guyana_center_frontend/screens/bottomNavbar/browse_screen.dart';
 import 'package:guyana_center_frontend/screens/bottomNavbar/home_tab_screen.dart';
-import 'package:guyana_center_frontend/screens/bottomNavbar/messages_screen.dart';
+import 'package:guyana_center_frontend/screens/bottomNavbar/favorites_screen.dart';
 import 'package:guyana_center_frontend/screens/bottomNavbar/sell_screen.dart';
 import 'package:guyana_center_frontend/screens/bottomNavbar/setting_screen.dart';
 import 'package:guyana_center_frontend/screens/custom_bottom_navbar.dart';
@@ -15,12 +16,12 @@ class HomeScreen extends StatelessWidget {
 
   final CustomBottomNavController c = Get.put(CustomBottomNavController());
 
-  final pages = const [
-    HomeTabScreen(),
-    BrowseScreen(),
+  final pages = [
+    const HomeTabScreen(),
+    const BrowseScreen(),
     SellScreen(),
-    MessagesScreen(),
-    SettingScreen(),
+    const FavoritesScreen(),
+    const SettingScreen(),
   ];
 
   @override
