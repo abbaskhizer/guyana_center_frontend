@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:guyana_center_frontend/modal/browse_categoryVM.dart';
 
 import 'package:guyana_center_frontend/screens/all_category_screen.dart.dart';
-import 'package:guyana_center_frontend/screens/auth/login_signup_screeen.dart';
+import 'package:guyana_center_frontend/screens/auth/login_signup_screen.dart';
 import 'package:guyana_center_frontend/screens/browse_listing_screen.dart';
 
 class HomeTabController extends GetxController {

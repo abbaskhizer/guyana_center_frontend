@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/listing_detail_controller.dart';
 import 'package:guyana_center_frontend/screens/agent_profile_screen.dart';
-import 'package:guyana_center_frontend/widgets/guyana_central_logo.dart';
+import 'package:guyana_center_frontend/widgets/mobile_top_bar.dart';
 import 'package:guyana_center_frontend/widgets/profile_dot.dart';
 
 class ListingDetailScreen extends StatelessWidget {

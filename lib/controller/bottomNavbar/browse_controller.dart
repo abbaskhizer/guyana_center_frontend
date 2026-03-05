@@ -8,11 +8,11 @@ class BrowseController extends GetxController {
   final activeChip = 0.obs;
 
   final isGrid = true.obs;
+
   final sortLabel = 'Sort'.obs;
 
   final listings = <BrowseListingVM>[].obs;
 
-  // ✅ Figma style popular searches
   final popularSearches = <String>[
     'Toyota Hilux 2024',
     'Apartment for Rent',
@@ -24,35 +24,49 @@ class BrowseController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
     listings.assignAll(_seed());
   }
 
-  void setSearch(String v) => searchText.value = v.trim();
-
-  void clearSearch() => searchText.value = '';
-
-  void setChip(int i) {
-    if (i < 0 || i >= chips.length) return;
-    activeChip.value = i;
+  void setSearch(String value) {
+    searchText.value = value.trim();
   }
 
-  void toggleView() => isGrid.value = !isGrid.value;
+  void clearSearch() {
+    searchText.value = '';
+  }
+
+  void setChip(int index) {
+    if (index < 0 || index >= chips.length) return;
+
+    activeChip.value = index;
+  }
+
+  void toggleView() {
+    isGrid.value = !isGrid.value;
+  }
+
+  void setSort(String label) {
+    sortLabel.value = label;
+  }
 
   List<BrowseListingVM> get filtered {
-    final q = searchText.value.toLowerCase();
+    final query = searchText.value.toLowerCase();
     final chip = chips[activeChip.value].toLowerCase();
 
-    bool chipOk(BrowseListingVM x) =>
-        chip == 'all' ? true : x.category.toLowerCase() == chip;
+    bool chipFilter(BrowseListingVM item) {
+      if (chip == 'all') return true;
+      return item.category.toLowerCase() == chip;
+    }
 
-    final base = listings.where(chipOk);
+    final base = listings.where(chipFilter);
 
-    if (q.isEmpty) return base.toList();
+    if (query.isEmpty) return base.toList();
 
-    return base.where((x) {
-      return x.title.toLowerCase().contains(q) ||
-          x.location.toLowerCase().contains(q) ||
-          x.category.toLowerCase().contains(q);
+    return base.where((item) {
+      return item.title.toLowerCase().contains(query) ||
+          item.location.toLowerCase().contains(query) ||
+          item.category.toLowerCase().contains(query);
     }).toList();
   }
 
@@ -77,6 +91,7 @@ class BrowseController extends GetxController {
       description:
           'Toyota Hiace Super GL Gas. Not heavy T, inspected and ready for immediate transfer.\n\n• Fully powered\n• 27 rims, slightly lowered\n• Can be sold with or without music system',
     ),
+
     BrowseListingVM(
       id: '2',
       title: 'Toyota Hilux 2021 SR5',

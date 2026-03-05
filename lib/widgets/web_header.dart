@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/route_manager.dart';
+import 'package:guyana_center_frontend/screens/auth/login_signup_screen.dart';
 
 class WebHeader extends StatelessWidget {
   const WebHeader({super.key});
@@ -66,7 +69,9 @@ class WebHeader extends StatelessWidget {
 
           // ── Log In ──
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              Get.to(LoginSignupScreen());
+            },
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

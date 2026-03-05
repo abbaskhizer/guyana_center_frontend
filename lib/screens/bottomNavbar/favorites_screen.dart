@@ -5,7 +5,7 @@ import 'package:guyana_center_frontend/controller/bottomNavbar/favorites_control
 
 import 'package:guyana_center_frontend/modal/favItem.dart';
 import 'package:guyana_center_frontend/widgets/app_drawar.dart';
-import 'package:guyana_center_frontend/widgets/guyana_central_logo.dart';
+import 'package:guyana_center_frontend/widgets/mobile_top_bar.dart';
 import 'package:guyana_center_frontend/widgets/profile_dot.dart';
 
 class FavoritesScreen extends StatelessWidget {

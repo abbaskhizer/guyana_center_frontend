@@ -1,475 +1,446 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import 'package:guyana_center_frontend/controller/bottomNavbar/browse_controller.dart';
 import 'package:guyana_center_frontend/modal/browse_categoryVM.dart';
-import 'package:guyana_center_frontend/screens/agent_profile_screen.dart';
-import 'package:guyana_center_frontend/screens/store_screen.dart';
-import 'package:guyana_center_frontend/widgets/guyana_central_logo.dart';
-
+import 'package:guyana_center_frontend/widgets/mobile_top_bar.dart';
+import 'package:guyana_center_frontend/widgets/web_footer.dart';
 import 'package:guyana_center_frontend/screens/listing_detail_screen.dart';
-import 'package:guyana_center_frontend/widgets/profile_dot.dart';
 
 class BrowseScreen extends StatelessWidget {
   const BrowseScreen({super.key});
 
+  bool _isWebDesktop(BuildContext context) =>
+      kIsWeb && MediaQuery.of(context).size.width >= 1000;
+
   @override
   Widget build(BuildContext context) {
-    final c = Get.put(BrowseController());
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final controller = Get.put(BrowseController(), permanent: true);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: _isWebDesktop(context)
+          ? const Color(0xFFF8F8F8)
+          : Theme.of(context).colorScheme.surface,
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
-          children: [
-            // Hide custom header on web (WebHeader is shown instead)
-            if (!kIsWeb)
-              Row(
-                children: [
-                  InkWell(
-                    onTap: () {},
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: Icon(
-                        Icons.menu_rounded,
-                        color: cs.onSurface,
-                        size: 22,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Expanded(child: GuyanaCentralLogo()),
-                  IconButton(
-                    onPressed: () {
-                      Get.to(StoresScreen());
-                    },
-                    icon: Icon(
-                      Icons.notifications_none_rounded,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  ProfileDot(
-                    onTap: () {
-                      Get.to(AgentProfileScreen());
-                    },
-                  ),
-                ],
-              ),
+        child: _isWebDesktop(context)
+            ? _WebLayout(controller: controller)
+            : _MobileLayout(controller: controller),
+      ),
+    );
+  }
+}
 
-            if (!kIsWeb) const SizedBox(height: 10),
+class _MobileLayout extends StatelessWidget {
+  final BrowseController controller;
 
-            Row(
+  const _MobileLayout({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
+      children: [
+        MobileTopBar(),
+        const SizedBox(height: 12),
+        BrowseSearchBar(controller: controller),
+        const SizedBox(height: 12),
+        BrowseFilters(controller: controller),
+        const SizedBox(height: 12),
+        BrowseResults(controller: controller),
+      ],
+    );
+  }
+}
+
+class _WebLayout extends StatelessWidget {
+  final BrowseController controller;
+
+  const _WebLayout({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(40, 24, 40, 16),
+            child: BrowseSearchBar(controller: controller),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Obx(() {
-                    final hasText = c.searchText.value.isNotEmpty;
-                    return TextField(
-                      onChanged: c.setSearch,
-                      decoration: InputDecoration(
-                        hintText: 'Search',
-                        prefixIcon: Icon(
-                          Icons.search_rounded,
-                          color: cs.onSurfaceVariant,
-                        ),
-                        suffixIcon: hasText
-                            ? IconButton(
-                                onPressed: c.clearSearch,
-                                icon: Icon(
-                                  Icons.close_rounded,
-                                  color: cs.onSurfaceVariant,
-                                ),
-                              )
-                            : null,
-                        filled: true,
-                        fillColor: cs.surface,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(color: cs.outlineVariant),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(color: cs.primary, width: 1.4),
-                        ),
-                      ),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: cs.onSurface,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    );
-                  }),
-                ),
-                const SizedBox(width: 10),
-                InkWell(
-                  onTap: () {},
-                  borderRadius: BorderRadius.circular(14),
-                  child: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: cs.primary,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(Icons.search_rounded, color: cs.onPrimary),
-                  ),
-                ),
+                BrowseFilters(controller: controller),
+                const SizedBox(height: 16),
+                BrowseResults(controller: controller),
+                SizedBox(height: 10),
               ],
             ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: WebFooter()),
+      ],
+    );
+  }
+}
 
-            const SizedBox(height: 10),
+class BrowseSearchBar extends StatelessWidget {
+  final BrowseController controller;
 
-            Obx(() {
-              final q = c.searchText.value.trim();
+  const BrowseSearchBar({required this.controller});
 
-              if (c.showEmptyState) {
-                return _EmptySearchState(
-                  query: q,
-                  onTryDifferent: c.clearSearch,
-                  onBrowseAll: () {
-                    c.clearSearch();
-                    c.setChip(0);
-                  },
-                );
-              }
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
 
-              final count = c.filtered.length;
+    return Row(
+      children: [
+        Expanded(
+          child: Obx(() {
+            final hasText = controller.searchText.value.isNotEmpty;
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    q.isEmpty ? '$count results' : '$count results for "$q"',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: cs.onSurface.withOpacity(.55),
-                      fontWeight: FontWeight.w700,
-                    ),
+            return TextField(
+              onChanged: controller.setSearch,
+              decoration: InputDecoration(
+                hintText: "Search listings...",
+                prefixIcon: Icon(Icons.search, color: cs.onSurfaceVariant),
+                suffixIcon: hasText
+                    ? IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: controller.clearSearch,
+                      )
+                    : null,
+                filled: true,
+                fillColor: cs.surface,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: cs.primary),
+                ),
+              ),
+            );
+          }),
+        ),
+        const SizedBox(width: 10),
+        ElevatedButton(
+          onPressed: () {},
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          ),
+          child: const Text(
+            "Search",
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class BrowseFilters extends StatelessWidget {
+  final BrowseController controller;
+
+  const BrowseFilters({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Obx(() {
+      return Row(
+        children: [
+          Row(
+            children: List.generate(controller.chips.length, (i) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: GestureDetector(
+                  onTap: () => controller.setChip(i),
+                  child: _Chip(
+                    controller.chips[i],
+                    controller.activeChip.value == i,
                   ),
-                  const SizedBox(height: 10),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 34,
-                          child: Obx(() {
-                            final tabs = c.chips;
-                            final active = c.activeChip.value;
-
-                            return ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: tabs.length,
-                              separatorBuilder: (_, __) =>
-                                  const SizedBox(width: 10),
-                              itemBuilder: (_, i) => _ChipPill(
-                                text: tabs[i],
-                                active: i == active,
-                                onTap: () => c.setChip(i),
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      InkWell(
-                        onTap: () {},
-                        borderRadius: BorderRadius.circular(12),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.sort_rounded,
-                              size: 18,
-                              color: cs.onSurfaceVariant,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              c.sortLabel.value,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: cs.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Obx(() {
-                        final grid = c.isGrid.value;
-                        return InkWell(
-                          onTap: c.toggleView,
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: cs.surface,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: cs.outlineVariant),
-                            ),
-                            alignment: Alignment.center,
-                            child: Icon(
-                              grid
-                                  ? Icons.grid_view_rounded
-                                  : Icons.view_list_rounded,
-                              size: 18,
-                              color: cs.onSurfaceVariant,
-                            ),
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  GridView.builder(
-                    itemCount: c.filtered.length,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                          childAspectRatio: 0.66,
-                        ),
-                    itemBuilder: (_, i) {
-                      final item = c.filtered[i];
-
-                      return InkWell(
-                        borderRadius: BorderRadius.circular(18),
-                        onTap: () {
-                          Get.to(
-                            () => const ListingDetailScreen(),
-                            arguments: item,
-                          );
-                        },
-                        child: _ListingCard(item: item),
-                      );
-                    },
-                  ),
-
-                  const SizedBox(height: 8),
-                ],
+                ),
               );
             }),
-          ],
+          ),
+          const Spacer(),
+          Icon(Icons.tune, size: 18, color: cs.onSurfaceVariant),
+          const SizedBox(width: 6),
+          const Text("Sort", style: TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(width: 10),
+
+          GestureDetector(
+            onTap: controller.toggleView,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: controller.isGrid.value
+                    ? Colors.grey.shade300
+                    : Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.grid_view, size: 18),
+            ),
+          ),
+
+          const SizedBox(width: 6),
+
+          GestureDetector(
+            onTap: controller.toggleView,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: !controller.isGrid.value
+                    ? Colors.grey.shade300
+                    : Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.view_list, size: 18),
+            ),
+          ),
+        ],
+      );
+    });
+  }
+}
+
+class _Chip extends StatelessWidget {
+  final String label;
+  final bool active;
+
+  const _Chip(this.label, this.active);
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: active ? cs.primary : const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontWeight: FontWeight.w700,
+          color: active ? Colors.white : Colors.black,
         ),
       ),
     );
+  }
+}
+
+class BrowseResults extends StatelessWidget {
+  final BrowseController controller;
+
+  const BrowseResults({required this.controller});
+
+  int _gridCount(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
+    if (!kIsWeb) return 2;
+    if (width > 1300) return 4;
+    if (width > 900) return 3;
+    return 2;
+  }
+
+  double _cardHeight(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
+    if (!kIsWeb) return 320; // mobile
+    if (width > 1300) return 420; // large web
+    if (width > 900) return 340; // medium web
+    return 280; // small web
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final q = controller.searchText.value.trim();
+
+      if (controller.showEmptyState) {
+        return _EmptySearchState(
+          query: q,
+          onTryDifferent: controller.clearSearch,
+          onBrowseAll: controller.clearSearch,
+        );
+      }
+
+      return controller.isGrid.value
+          ? GridView.builder(
+              itemCount: controller.filtered.length,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: _gridCount(context),
+                mainAxisSpacing: 14,
+                crossAxisSpacing: 14,
+                mainAxisExtent: _cardHeight(context),
+              ),
+              itemBuilder: (_, i) {
+                final item = controller.filtered[i];
+
+                return InkWell(
+                  borderRadius: BorderRadius.circular(18),
+                  onTap: () {
+                    Get.to(() => const ListingDetailScreen(), arguments: item);
+                  },
+                  child: _ListingCard(item: item),
+                );
+              },
+            )
+          : ListView.builder(
+              itemCount: controller.filtered.length,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (_, i) {
+                final item = controller.filtered[i];
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _ListingCard(item: item),
+                );
+              },
+            );
+    });
   }
 }
 
 class _ListingCard extends StatelessWidget {
   final BrowseListingVM item;
+
   const _ListingCard({required this.item});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: cs.outlineVariant),
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
         boxShadow: [
           BoxShadow(
-            color: cs.onSurface.withOpacity(0.06),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-            child: Stack(
-              children: [
-                AspectRatio(
+          /// IMAGE
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
+                child: AspectRatio(
                   aspectRatio: 16 / 11,
-                  child: Image.network(
-                    item.imageUrl,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, progress) {
-                      if (progress == null) return child;
-                      return Container(
-                        color: cs.surfaceVariant,
-                        alignment: Alignment.center,
-                        child: SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: cs.primary,
-                          ),
-                        ),
-                      );
-                    },
-                    errorBuilder: (_, __, ___) => Container(
-                      color: cs.surfaceVariant,
-                      alignment: Alignment.center,
-                      child: Icon(
-                        Icons.broken_image_outlined,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
+                  child: Image.network(item.imageUrl, fit: BoxFit.cover),
                 ),
+              ),
 
-                if (item.featured)
-                  Positioned(
-                    left: 10,
-                    top: 10,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: cs.primary,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        'Featured',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: cs.onPrimary,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ),
-                  ),
-
+              if (item.featured)
                 Positioned(
-                  right: 10,
-                  top: 10,
-                  child: Material(
-                    color: cs.surface.withOpacity(0.9),
-                    shape: const CircleBorder(),
-                    child: InkWell(
-                      onTap: () {},
-                      customBorder: const CircleBorder(),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          Icons.favorite_border_rounded,
-                          size: 18,
-                          color: cs.onSurface,
-                        ),
+                  left: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: kIsWeb ? const Color(0xFFF59E0B) : primary,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text(
+                      "Featured",
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
 
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.category,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: cs.onSurface.withOpacity(.55),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  item.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: cs.onSurface,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  item.price,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: cs.primary,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.location_on_outlined,
-                      size: 14,
-                      color: cs.onSurfaceVariant,
+          /// CONTENT
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.category,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        item.location,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: cs.onSurface.withOpacity(.55),
-                          fontWeight: FontWeight.w700,
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  Text(
+                    item.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                  ),
+
+                  SizedBox(height: 6),
+
+                  Text(
+                    item.price,
+                    style: TextStyle(
+                      color: primary,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on_outlined, size: 14),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          item.location,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ChipPill extends StatelessWidget {
-  final String text;
-  final bool active;
-  final VoidCallback onTap;
-
-  const _ChipPill({
-    required this.text,
-    required this.active,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(22),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: active ? cs.primary : cs.surface,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: active ? cs.primary : cs.outlineVariant),
-        ),
-        child: Text(
-          text,
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w900,
-            color: active ? cs.onPrimary : cs.onSurface,
-          ),
-        ),
       ),
     );
   }
@@ -488,76 +459,35 @@ class _EmptySearchState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
     return Padding(
-      padding: const EdgeInsets.only(top: 18),
+      padding: const EdgeInsets.only(top: 60),
       child: Column(
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: cs.surface,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: cs.outlineVariant),
-            ),
-            alignment: Alignment.center,
-            child: Icon(Icons.search_rounded, color: cs.onSurfaceVariant),
-          ),
-          const SizedBox(height: 14),
+          const Icon(Icons.search, size: 50, color: Colors.grey),
+          const SizedBox(height: 16),
           Text(
             'No results for "$query"',
-            textAlign: TextAlign.center,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: cs.onSurface,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
           ),
           const SizedBox(height: 8),
-          Text(
-            'We couldn’t find any listings matching your search.\nTry adjusting your keywords or browse our categories.',
+          const Text(
+            "Try adjusting your keywords or browse categories.",
             textAlign: TextAlign.center,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: cs.onSurface.withOpacity(.55),
-              fontWeight: FontWeight.w600,
-              height: 1.4,
-            ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
                 child: ElevatedButton(
                   onPressed: onTryDifferent,
-                  child: Text(
-                    'Try a Different Search',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: cs.onPrimary,
-                    ),
-                  ),
+                  child: const Text("Try Different Search"),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton(
                   onPressed: onBrowseAll,
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: cs.outlineVariant),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: Text(
-                    'Browse All',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: cs.onSurface,
-                    ),
-                  ),
+                  child: const Text("Browse All"),
                 ),
               ),
             ],

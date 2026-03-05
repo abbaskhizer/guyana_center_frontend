@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/bottomNavbar/sell_controller.dart';
-import 'package:guyana_center_frontend/widgets/guyana_central_logo.dart';
+import 'package:guyana_center_frontend/widgets/mobile_top_bar.dart';
 
 class SellScreen extends StatelessWidget {
   const SellScreen({super.key});
@@ -11,7 +11,7 @@ class SellScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final controller = Get.put(SellController());
+    final controller = Get.put(SellController(), permanent: true);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,

@@ -20,7 +20,7 @@ class BrowseListingController extends GetxController {
   final currentPage = 1.obs;
   final totalPages = 1.obs;
 
-  final pageSize = 6;
+  final pageSize = 2;
 
   final allListings = <ListingVM>[
     const ListingVM(

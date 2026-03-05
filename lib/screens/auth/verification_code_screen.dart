@@ -1,246 +1,453 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/auth/verification_code_controller.dart';
+import 'package:guyana_center_frontend/widgets/web_header.dart';
 import 'package:pinput/pinput.dart';
 
 class VerificationCodeScreen extends StatelessWidget {
   const VerificationCodeScreen({super.key});
 
+  bool _isWebDesktop(BuildContext context) =>
+      kIsWeb && MediaQuery.of(context).size.width >= 1000;
+
   @override
   Widget build(BuildContext context) {
     final c = Get.put(VerificationCodeController());
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      backgroundColor: _isWebDesktop(context)
+          ? Colors.white
+          : theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: _isWebDesktop(context)
+            ? _WebVerificationLayout(controller: c)
+            : _MobileVerificationLayout(controller: c),
+      ),
+    );
+  }
+}
+
+class _MobileVerificationLayout extends StatelessWidget {
+  final VerificationCodeController controller;
+  const _MobileVerificationLayout({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(
+              child: _VerificationForm(
+                controller: controller,
+                showBack: true,
+                centerOnWeb: false,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _WebVerificationLayout extends StatelessWidget {
+  final VerificationCodeController controller;
+  const _WebVerificationLayout({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+
+    return Column(
+      children: [
+        const WebHeader(),
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1200),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 48, 16, 48),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Center(
+                              child: RichText(
+                                text: TextSpan(
+                                  style: theme.textTheme.headlineSmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 0.4,
+                                        color: Colors.black,
+                                      ),
+                                  children: [
+                                    TextSpan(
+                                      text: "GUYANA",
+                                      style: theme.textTheme.headlineSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                    ),
+                                    TextSpan(
+                                      text: "CENTRAL",
+                                      style: theme.textTheme.headlineSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w900,
+                                            color: const Color(0xFFFFA43A),
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              "Verify your identity",
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
+                            const SizedBox(height: 28),
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 420),
+                              child: Container(
+                                padding: const EdgeInsets.fromLTRB(
+                                  26,
+                                  22,
+                                  26,
+                                  22,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: const Color(0xFFE5E7EB),
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.04),
+                                      blurRadius: 18,
+                                      offset: const Offset(0, 10),
+                                    ),
+                                  ],
+                                ),
+                                child: _VerificationForm(
+                                  controller: controller,
+                                  showBack: false,
+                                  centerOnWeb: true,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              "By continuing, you agree to pin.it's Terms of Service and Privacy Policy",
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: cs.onSurfaceVariant.withOpacity(0.55),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _VerificationForm extends StatelessWidget {
+  final VerificationCodeController controller;
+  final bool showBack;
+  final bool centerOnWeb;
+
+  const _VerificationForm({
+    required this.controller,
+    required this.showBack,
+    required this.centerOnWeb,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = controller;
+    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+
+    final pinSize = centerOnWeb ? 44.0 : 56.0;
+    final buttonHeight = centerOnWeb ? 48.0 : 54.0;
 
     final defaultPinTheme = PinTheme(
-      width: 46,
-      height: 52,
-      textStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
+      width: pinSize,
+      height: pinSize,
+      textStyle: theme.textTheme.titleMedium?.copyWith(
         fontWeight: FontWeight.w800,
-        color: cs.onSurface, // ✅ text color theme
+        color: cs.onSurface,
       ),
       decoration: BoxDecoration(
-        color: cs.surface, // ✅ background theme
+        color: cs.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: cs.outlineVariant, // ✅ default border
-        ),
+        border: Border.all(color: cs.outlineVariant),
       ),
     );
 
     final focusedPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
-        border: Border.all(
-          color: cs.primary, // ✅ focus border
-          width: 1.6,
-        ),
+        border: Border.all(color: cs.primary, width: 1.6),
       ),
     );
 
     final errorPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
-        border: Border.all(
-          color: cs.error, // ✅ error border
-          width: 1.6,
-        ),
+        border: Border.all(color: cs.error, width: 1.6),
       ),
     );
 
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    onPressed: () => Get.back(),
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 18,
-                    ),
-                  ),
+    // ✅ FIX: mobile + web dono pe title/text/email center
+    final titleAlign = TextAlign.center;
+    final crossAlign = CrossAxisAlignment.center;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (showBack) ...[
+          Align(
+            alignment: Alignment.centerLeft,
+            child: IconButton(
+              onPressed: () => Get.back(),
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Center(
+            child: RichText(
+              text: TextSpan(
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.4,
+                  color: Colors.black,
                 ),
-                const SizedBox(height: 10),
-
-                Center(
-                  child: RichText(
-                    text: TextSpan(
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.4,
-                        color: Colors.black,
-                      ),
-                      children: [
-                        TextSpan(
-                          text: "GUYANA",
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.w800),
-                        ),
-                        TextSpan(
-                          text: "CENTRAL",
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFFFFA43A),
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-
-                // shield icon circle
-                Center(
-                  child: Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: cs.primary),
-                      color: cs.primary.withOpacity(0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.verified_user_rounded, color: cs.primary),
-                  ),
-                ),
-
-                const SizedBox(height: 18),
-
-                Center(
-                  child: Text(
-                    "Enter verification code",
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                Center(
-                  child: Text(
-                    "We've sent a 6-digit code to",
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.black54,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 4),
-
-                Center(
-                  child: Text(
-                    c.email,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                children: [
+                  TextSpan(
+                    text: "GUYANA",
+                    style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                ),
-
-                const SizedBox(height: 20),
-
-                Center(
-                  child: Pinput(
-                    length: 6,
-                    controller: c.pinCtrl,
-                    focusNode: c.focusNode,
-                    defaultPinTheme: defaultPinTheme,
-
-                    focusedPinTheme: focusedPinTheme,
-                    separatorBuilder: (index) => const SizedBox(width: 10),
-                    keyboardType: TextInputType.number,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    onCompleted: (_) => c.verifyCode(),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                Center(
-                  child: Obx(() {
-                    final s = c.secondsLeft.value;
-                    if (s > 0) {
-                      return Text(
-                        "Resend code in ${s}s",
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      );
-                    }
-                    return TextButton(
-                      onPressed: c.resendCode,
-                      child: Text(
-                        "Resend code",
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          color: cs.primary,
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-
-                const SizedBox(height: 18),
-
-                SizedBox(
-                  height: 54,
-                  child: ElevatedButton(
-                    onPressed: c.verifyCode,
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: Text(
-                      "Verify code",
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w900,
-                      ),
+                  TextSpan(
+                    text: "CENTRAL",
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFFFFA43A),
                     ),
                   ),
-                ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 18),
+        ],
 
-                SizedBox(height: 150),
-
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: cs.onSurfaceVariant)),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: Text("OR"),
-                    ),
-                    Expanded(child: Divider(color: cs.onSurfaceVariant)),
-                  ],
-                ),
-
-                const SizedBox(height: 18),
-
-                Center(
-                  child: TextButton.icon(
-                    onPressed: () => Get.back(),
-                    icon: Icon(
-                      Icons.arrow_back,
-                      weight: 700,
-                      color: cs.onSurfaceVariant,
-                    ),
-                    label: Text(
-                      "Back to log in",
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: cs.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+        Center(
+          child: Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: const Color(0xFF16A34A).withOpacity(0.12),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.verified_user_rounded,
+              color: Color(0xFF16A34A),
+              size: 26,
             ),
           ),
         ),
-      ),
+
+        const SizedBox(height: 18),
+
+        Column(
+          crossAxisAlignment: crossAlign,
+          children: [
+            Text(
+              "Enter verification code",
+              textAlign: titleAlign,
+              style:
+                  (centerOnWeb
+                          ? theme.textTheme.titleMedium
+                          : theme.textTheme.titleLarge)
+                      ?.copyWith(fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              "We've sent a 6-digit code to",
+              textAlign: titleAlign,
+              style:
+                  (centerOnWeb
+                          ? theme.textTheme.bodySmall
+                          : theme.textTheme.bodyMedium)
+                      ?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              c.email,
+              textAlign: titleAlign,
+              style:
+                  (centerOnWeb
+                          ? theme.textTheme.bodySmall
+                          : theme.textTheme.bodyMedium)
+                      ?.copyWith(fontWeight: FontWeight.w800),
+            ),
+          ],
+        ),
+
+        SizedBox(height: centerOnWeb ? 18 : 20),
+
+        Center(
+          child: Pinput(
+            length: 6,
+            controller: c.pinCtrl,
+            focusNode: c.focusNode,
+            defaultPinTheme: defaultPinTheme,
+            focusedPinTheme: focusedPinTheme,
+            errorPinTheme: errorPinTheme,
+            separatorBuilder: (_) => const SizedBox(width: 10),
+            keyboardType: TextInputType.number,
+            mainAxisAlignment: MainAxisAlignment.center,
+            onCompleted: (_) => c.verifyCode(),
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        Center(
+          child: Obx(() {
+            final s = c.secondsLeft.value;
+            if (s > 0) {
+              return Text(
+                "Resend code in ${s}s",
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              );
+            }
+            return TextButton(
+              onPressed: c.resendCode,
+              child: Text(
+                "Resend code",
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: cs.primary,
+                ),
+              ),
+            );
+          }),
+        ),
+
+        SizedBox(height: centerOnWeb ? 18 : 22),
+
+        SizedBox(
+          height: buttonHeight,
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: c.verifyCode,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF16A34A),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+            child: Text(
+              "Verify code",
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+
+        // mobile center feel ke liye chota gap
+        SizedBox(height: centerOnWeb ? 18 : 24),
+
+        Row(
+          children: [
+            Expanded(child: Divider(color: cs.outlineVariant)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Text(
+                "OR",
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Expanded(child: Divider(color: cs.outlineVariant)),
+          ],
+        ),
+
+        SizedBox(height: centerOnWeb ? 14 : 18),
+
+        if (centerOnWeb)
+          SizedBox(
+            height: 44,
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => Get.back(),
+              icon: Icon(Icons.arrow_back, color: cs.onSurfaceVariant),
+              label: Text(
+                "Back to log in",
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: cs.outlineVariant),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          )
+        else
+          Center(
+            child: TextButton.icon(
+              onPressed: () => Get.back(),
+              icon: Icon(
+                Icons.arrow_back,
+                weight: 700,
+                color: cs.onSurfaceVariant,
+              ),
+              label: Text(
+                "Back to log in",
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

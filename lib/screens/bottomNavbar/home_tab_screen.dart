@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/bottomNavbar/home_tab_controller.dart';
-import 'package:guyana_center_frontend/widgets/guyana_central_logo.dart';
+import 'package:guyana_center_frontend/widgets/mobile_top_bar.dart';
 import 'package:guyana_center_frontend/widgets/web_footer.dart';
 import 'package:guyana_center_frontend/screens/bottomNavbar/web_categories_grid.dart';
 import 'package:guyana_center_frontend/widgets/featured_sections.dart';
@@ -20,7 +20,9 @@ class HomeTabScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: _isWebDesktop(context) ? Colors.white : theme.scaffoldBackgroundColor,
+      backgroundColor: _isWebDesktop(context)
+          ? Colors.white
+          : theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: _isWebDesktop(context)
             ? _WebLayout(controller: controller)
@@ -42,7 +44,7 @@ class _MobileLayout extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
       children: [
-        _TopBar(controller: controller),
+        MobileTopBar(),
         const SizedBox(height: 14),
         const _HeroSection(web: false),
         const SizedBox(height: 18),
@@ -179,53 +181,6 @@ class _MobileLayout extends StatelessWidget {
   }
 }
 
-class _TopBar extends StatelessWidget {
-  const _TopBar({required this.controller});
-  final HomeTabController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
-    return Row(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(6),
-          child: InkWell(
-            onTap: () => Get.back(),
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.all(6),
-              child: Icon(Icons.menu_rounded, color: cs.onSurface, size: 22),
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(child: GuyanaCentralLogo()),
-        SizedBox(
-          height: 34,
-          child: ElevatedButton(
-            onPressed: controller.goTOLogin,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              shape: const StadiumBorder(),
-              elevation: 0,
-            ),
-            child: Text(
-              "Login",
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w900,
-                color: cs.onPrimary,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _WebLayout extends StatelessWidget {
   final HomeTabController controller;
   const _WebLayout({required this.controller});
@@ -235,124 +190,125 @@ class _WebLayout extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return CustomScrollView(
-          slivers: [
-            // Hero section - centered
-            SliverToBoxAdapter(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1200),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-                    child: _HeroSection(web: true),
+      slivers: [
+        // Hero section - centered
+        SliverToBoxAdapter(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+                child: _HeroSection(web: true),
+              ),
+            ),
+          ),
+        ),
+
+        /// ✅ WEB: Full-width FAFAFA background with padding
+        SliverToBoxAdapter(
+          child: Container(
+            color: const Color(0xFFFAFAFA),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
+                // Browse Categories section header
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 16, 0, 10),
+                  child: _SectionHeader(
+                    title: "Browse Categories",
+                    actionText: "See All",
+                    onTap: controller.openAllCategoriesScreen,
                   ),
                 ),
-              ),
-            ),
-            /// ✅ WEB: Full-width FAFAFA background with padding
-            SliverToBoxAdapter(
-              child: Container(
-                color: const Color(0xFFFAFAFA),
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 16),
-                    // Browse Categories section header
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 16, 0, 10),
-                      child: _SectionHeader(
-                        title: "Browse Categories",
-                        actionText: "See All",
-                        onTap: controller.openAllCategoriesScreen,
+                const SizedBox(height: 16),
+                // Categories grid
+                WebCategoriesGrid(controller: controller),
+                const SizedBox(height: 32),
+                const FeaturedVehiclesSection(),
+                const SizedBox(height: 48),
+                const RealEstateSection(),
+                const SizedBox(height: 48),
+                // Stats section in single white card
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 48,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(48),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _StatChip(
+                          value: "50K+",
+                          label: "Active Listings",
+                          baseColor: const Color(0xFF16A34A),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Categories grid
-                    WebCategoriesGrid(controller: controller),
-                    const SizedBox(height: 32),
-                    const FeaturedVehiclesSection(),
-                    const SizedBox(height: 48),
-                    const RealEstateSection(),
-                    const SizedBox(height: 48),
-                    // Stats section in single white card
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 48),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(48),
+                      Container(
+                        height: 60,
+                        width: 1,
+                        color: const Color(0xFFF3F4F6),
                       ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: _StatChip(
-                              value: "50K+",
-                              label: "Active Listings",
-                              baseColor: const Color(0xFF16A34A),
-                            ),
-                          ),
-                          Container(
-                            height: 60,
-                            width: 1,
-                            color: const Color(0xFFF3F4F6),
-                          ),
-                          const Expanded(
-                            child: _StatChip(
-                              value: "100K+",
-                              label: "Happy Users",
-                              baseColor: const Color(0xFFDC2626),
-                            ),
-                          ),
-                          Container(
-                            height: 60,
-                            width: 1,
-                            color: const Color(0xFFF3F4F6),
-                          ),
-                          Expanded(
-                            child: _StatChip(
-                              value: "12",
-                              label: "Categories",
-                              baseColor: const Color(0xFFD97706),
-                            ),
-                          ),
-                          Container(
-                            height: 60,
-                            width: 1,
-                            color: const Color(0xFFF3F4F6),
-                          ),
-                          const Expanded(
-                            child: _StatChip(
-                              value: "FREE",
-                              label: "Always & Forever",
-                              baseColor: const Color(0xFF1F2937),
-                            ),
-                          ),
-                        ],
+                      const Expanded(
+                        child: _StatChip(
+                          value: "100K+",
+                          label: "Happy Users",
+                          baseColor: const Color(0xFFDC2626),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 64),
-                    Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1200),
-                        child: const TopStoresSection(),
+                      Container(
+                        height: 60,
+                        width: 1,
+                        color: const Color(0xFFF3F4F6),
                       ),
-                    ),
-                    const SizedBox(height: 64),
-                    const WhyTrinisLoveSection(),
-                    const SizedBox(height: 80),
-                  ],
+                      Expanded(
+                        child: _StatChip(
+                          value: "12",
+                          label: "Categories",
+                          baseColor: const Color(0xFFD97706),
+                        ),
+                      ),
+                      Container(
+                        height: 60,
+                        width: 1,
+                        color: const Color(0xFFF3F4F6),
+                      ),
+                      const Expanded(
+                        child: _StatChip(
+                          value: "FREE",
+                          label: "Always & Forever",
+                          baseColor: const Color(0xFF1F2937),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: 64),
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1200),
+                    child: const TopStoresSection(),
+                  ),
+                ),
+                const SizedBox(height: 64),
+                const WhyTrinisLoveSection(),
+                const SizedBox(height: 80),
+              ],
             ),
+          ),
+        ),
 
-            SliverToBoxAdapter(
-              child: Container(
-                color: cs.surface,
-                child: WebFooter(),
-              ),
-            ),
-          ],
-        );
+        SliverToBoxAdapter(
+          child: Container(color: cs.surface, child: WebFooter()),
+        ),
+      ],
+    );
   }
 }
 
@@ -375,7 +331,7 @@ class _HeroSection extends StatelessWidget {
     final subtitle = theme.textTheme.bodyMedium?.copyWith(
       color: web ? const Color(0xFF9CA3AF) : cs.onSurface.withOpacity(0.55),
       height: 1.45,
-      fontSize: web ? 12.5 : 12.5,
+      fontSize: 12.5,
       fontWeight: FontWeight.w500,
     );
 
@@ -384,29 +340,30 @@ class _HeroSection extends StatelessWidget {
           ? CrossAxisAlignment.center
           : CrossAxisAlignment.start,
       children: [
+        // ✅ WEB badge
         if (web)
           ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 320),
+            constraints: const BoxConstraints(maxWidth: 360),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
               decoration: BoxDecoration(
-                color: const Color(0xFFBBF7D0),
+                color: const Color(0xFFEAFBF0),
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: const Color(0xFF86EFAC), width: 1.5),
+                border: Border.all(color: const Color(0xFF86EFAC), width: 1),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    width: 8,
-                    height: 8,
+                    width: 7,
+                    height: 7,
                     decoration: const BoxDecoration(
                       color: Color(0xFF16A34A),
                       shape: BoxShape.circle,
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Flexible(
+                  Expanded(
                     child: Text(
                       '50,000+ active listings across Trinidad & Tobago',
                       maxLines: 1,
@@ -414,9 +371,8 @@ class _HeroSection extends StatelessWidget {
                       softWrap: false,
                       textAlign: TextAlign.center,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        fontWeight: FontWeight.w300,
+                        fontWeight: FontWeight.w600,
                         color: const Color(0xFF16A34A),
-                        letterSpacing: 0.15,
                       ),
                     ),
                   ),
@@ -424,7 +380,19 @@ class _HeroSection extends StatelessWidget {
               ),
             ),
           ),
-        if (web) const SizedBox(height: 26),
+
+        // ✅ APP label
+        if (!web)
+          Text(
+            "Your Local Marketplace",
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: cs.onSurface.withOpacity(.55),
+            ),
+          ),
+
+        SizedBox(height: web ? 26 : 10),
+
         RichText(
           textAlign: web ? TextAlign.center : TextAlign.start,
           text: TextSpan(
@@ -433,29 +401,31 @@ class _HeroSection extends StatelessWidget {
               TextSpan(
                 text: "Find ",
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontSize: web ? 54 : 30,
+                  fontSize: web ? 54 : 35,
                   fontWeight: FontWeight.w900,
+                  color: cs.onSurface,
                 ),
               ),
               TextSpan(
                 text: "Anything.\n",
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontSize: web ? 54 : 30,
+                  fontSize: web ? 54 : 35,
                   fontWeight: FontWeight.w900,
-                  color: const Color(0xFFFF0000),
+                  color: const Color(0xFFE53935),
                 ),
               ),
               TextSpan(
                 text: "Sell ",
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontSize: web ? 54 : 30,
+                  fontSize: web ? 54 : 35,
                   fontWeight: FontWeight.w900,
+                  color: cs.onSurface,
                 ),
               ),
               TextSpan(
                 text: "Everything.\n",
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontSize: web ? 54 : 30,
+                  fontSize: web ? 54 : 35,
                   fontWeight: FontWeight.w900,
                   color: const Color(0xFFFF8A00),
                 ),
@@ -463,14 +433,15 @@ class _HeroSection extends StatelessWidget {
               TextSpan(
                 text: "Pay ",
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontSize: web ? 54 : 30,
+                  fontSize: web ? 54 : 35,
                   fontWeight: FontWeight.w900,
+                  color: cs.onSurface,
                 ),
               ),
               TextSpan(
                 text: "Nothing.",
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontSize: web ? 54 : 30,
+                  fontSize: web ? 54 : 35,
                   fontWeight: FontWeight.w900,
                   color: cs.primary,
                 ),
@@ -478,13 +449,20 @@ class _HeroSection extends StatelessWidget {
             ],
           ),
         ),
+
         const SizedBox(height: 14),
+
+        // ✅ Subtitle different for Web & App (matches your 2 screenshots)
         Text(
-          'The free classifieds marketplace for Trinis — cars, homes,\njobs, electronics & more.',
+          web
+              ? 'The free classifieds marketplace for Trinis — cars, homes,\njobs, electronics & more.'
+              : 'Buy and sell locally with zero fees. The simplest\nway to find great deals near you.',
           textAlign: web ? TextAlign.center : TextAlign.start,
           style: subtitle,
         ),
+
         const SizedBox(height: 26),
+
         SizedBox(
           width: web ? 720 : double.infinity,
           child: web ? const _WebSearchBar() : const _SearchBar(),
@@ -1113,9 +1091,17 @@ class _StatChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: cs.surface, // background color from theme
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: cs.outlineVariant, // border color from theme
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -1124,7 +1110,7 @@ class _StatChip extends StatelessWidget {
             style: theme.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w900,
               color: baseColor,
-              fontSize: 32,
+              fontSize: 15,
               letterSpacing: -0.5,
             ),
           ),
@@ -1133,7 +1119,7 @@ class _StatChip extends StatelessWidget {
             label,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: const Color(0xFF9CA3AF),
+              color: cs.onSurface.withOpacity(.6),
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
