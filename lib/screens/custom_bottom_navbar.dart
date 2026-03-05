@@ -12,15 +12,12 @@ class CustomBottomNavBar extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    // Bar bg: light => background, dark => surface
     final barColor = theme.brightness == Brightness.dark
         ? cs.surface
         : cs.background;
 
-    // Inactive icon/text color: aapki theme ke hisab se
     final inactive = cs.onSurfaceVariant;
 
-    // Shadow: dark mode me thoda soft
     final shadow = theme.brightness == Brightness.dark
         ? Colors.black.withOpacity(0.35)
         : Colors.black.withOpacity(0.08);
@@ -32,7 +29,6 @@ class CustomBottomNavBar extends StatelessWidget {
         clipBehavior: Clip.none,
         alignment: Alignment.bottomCenter,
         children: [
-          // ✅ Full-width straight bar (theme based)
           Container(
             height: 80,
             width: double.infinity,
@@ -53,7 +49,7 @@ class CustomBottomNavBar extends StatelessWidget {
                     icon: Icons.home_outlined,
                     label: "Home",
                     active: currentIndex == 0,
-                    onPressed: () => c.changeTab(0),
+                    onPressed: () => c.goToTab(0), // ✅
                     inactiveColor: inactive,
                   ),
                 ),
@@ -62,12 +58,11 @@ class CustomBottomNavBar extends StatelessWidget {
                     icon: Icons.search_rounded,
                     label: "Browse",
                     active: currentIndex == 1,
-                    onPressed: () => c.changeTab(1),
+                    onPressed: () => c.goToTab(1), // ✅
                     inactiveColor: inactive,
                   ),
                 ),
 
-                // ✅ Middle space for floating button
                 const Expanded(child: SizedBox()),
 
                 Expanded(
@@ -75,7 +70,7 @@ class CustomBottomNavBar extends StatelessWidget {
                     icon: Icons.favorite_border,
                     label: "Favorites",
                     active: currentIndex == 3,
-                    onPressed: () => c.changeTab(3),
+                    onPressed: () => c.goToTab(3), // ✅
                     inactiveColor: inactive,
                   ),
                 ),
@@ -84,7 +79,7 @@ class CustomBottomNavBar extends StatelessWidget {
                     icon: Icons.settings_outlined,
                     label: "Settings",
                     active: currentIndex == 4,
-                    onPressed: () => c.changeTab(4),
+                    onPressed: () => c.goToTab(4), // ✅
                     inactiveColor: inactive,
                   ),
                 ),
@@ -92,18 +87,17 @@ class CustomBottomNavBar extends StatelessWidget {
             ),
           ),
 
-          // ✅ Floating center "Sell" button (theme primary)
           Positioned(
             top: -28,
             child: GestureDetector(
-              onTap: () => c.changeTab(2),
+              onTap: () => c.goToTab(2), // ✅
               child: Column(
                 children: [
                   Container(
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      color: cs.primary, // ✅ kPrimaryColor will come here
+                      color: cs.primary,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(

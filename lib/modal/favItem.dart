@@ -5,7 +5,7 @@ class FavItemVM {
   final String price;
   final String location;
   final String imageUrl;
-  final String badge; // e.g. "New", "Urgent"
+  final String badge;
   final bool featured;
 
   FavItemVM({
@@ -13,16 +13,16 @@ class FavItemVM {
     required this.price,
     required this.location,
     required this.imageUrl,
-    this.badge = "New",
+    required this.badge,
     this.featured = false,
   });
 }
 
 class SavedSearchVM {
-  final String title; // e.g. "Apartment"
-  final String subtitle; // e.g. "Vehicles 1"
-  final String query; // e.g. "Used"
-  final String location; // e.g. "Trinidad"
+  final String title;
+  final String subtitle;
+  final String query;
+  final String location;
 
   SavedSearchVM({
     required this.title,

@@ -110,9 +110,10 @@ class ForgotPasswordScreen extends StatelessWidget {
                               color: Colors.white,
                               strokeWidth: 2,
                             )
-                          : const Text(
+                          : Text(
                               "Send reset link",
-                              style: TextStyle(fontWeight: FontWeight.w700),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.w900),
                             ),
                     ),
                   );

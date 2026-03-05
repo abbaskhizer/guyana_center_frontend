@@ -14,35 +14,37 @@ import 'package:guyana_center_frontend/widgets/web_header.dart';
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
 
-  final CustomBottomNavController c = Get.put(CustomBottomNavController());
+  // ✅ SINGLE instance
+  final CustomBottomNavController c = Get.put(
+    CustomBottomNavController(),
+    permanent: true,
+  );
 
-  final pages = [
-    const HomeTabScreen(),
-    const BrowseScreen(),
+  final pages = const [
+    HomeTabScreen(),
+    BrowseScreen(),
     SellScreen(),
-    const FavoritesScreen(),
-    const SettingScreen(),
+    FavoritesScreen(),
+    SettingScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-
-    // Web on desktop (wide screen) → web layout
-    // Web on mobile (narrow) or native app → app layout
     final bool isWebDesktop = kIsWeb && screenWidth >= 600;
 
     return Scaffold(
       body: Column(
         children: [
-          // Web header — only on web desktop
           if (isWebDesktop) const WebHeader(),
 
-          // Page content
-          Expanded(child: Obx(() => pages[c.index.value])),
+          Expanded(
+            child: Obx(
+              () => IndexedStack(index: c.index.value, children: pages),
+            ),
+          ),
         ],
       ),
-      // Bottom navbar — only on app or web mobile (not web desktop)
       bottomNavigationBar: isWebDesktop ? null : CustomBottomNavBar(),
     );
   }

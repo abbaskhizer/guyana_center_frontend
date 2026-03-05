@@ -1,4 +1,3 @@
-// 2) browse_controller.dart
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/modal/browse_categoryVM.dart';
 
@@ -13,6 +12,15 @@ class BrowseController extends GetxController {
 
   final listings = <BrowseListingVM>[].obs;
 
+  // ✅ Figma style popular searches
+  final popularSearches = <String>[
+    'Toyota Hilux 2024',
+    'Apartment for Rent',
+    'iPhone 15 Pro Max',
+    'Office Furniture Set',
+    'BMW 3 Series',
+  ];
+
   @override
   void onInit() {
     super.onInit();
@@ -20,8 +28,14 @@ class BrowseController extends GetxController {
   }
 
   void setSearch(String v) => searchText.value = v.trim();
+
   void clearSearch() => searchText.value = '';
-  void setChip(int i) => activeChip.value = i;
+
+  void setChip(int i) {
+    if (i < 0 || i >= chips.length) return;
+    activeChip.value = i;
+  }
+
   void toggleView() => isGrid.value = !isGrid.value;
 
   List<BrowseListingVM> get filtered {

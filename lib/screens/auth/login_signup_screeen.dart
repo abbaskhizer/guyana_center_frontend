@@ -270,9 +270,16 @@ class LoginSignupScreen extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(isLogin ? "Log In" : "Create Account"),
+                        Text(
+                          isLogin ? "Log In" : "Create Account",
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w900),
+                        ),
                         const SizedBox(width: 10),
-                        const Icon(Icons.arrow_forward_rounded),
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ],
                     ),
                   ),

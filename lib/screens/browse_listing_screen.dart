@@ -5,6 +5,7 @@ import 'package:guyana_center_frontend/controller/browse_llisting_controller.dar
 import 'package:guyana_center_frontend/modal/browse_categoryVM.dart';
 import 'package:guyana_center_frontend/modal/listingVM.dart';
 import 'package:guyana_center_frontend/screens/agent_profile_screen.dart';
+import 'package:guyana_center_frontend/screens/custom_bottom_navbar.dart';
 import 'package:guyana_center_frontend/widgets/app_drawar.dart';
 import 'package:guyana_center_frontend/widgets/guyana_central_logo.dart';
 import 'package:guyana_center_frontend/widgets/profile_dot.dart';
@@ -39,6 +40,7 @@ class _CategoryListingsScreenState extends State<CategoryListingsScreen> {
     final cs = theme.colorScheme;
 
     return Scaffold(
+      bottomNavigationBar: CustomBottomNavBar(),
       backgroundColor: theme.scaffoldBackgroundColor,
       drawer: const AppDrawer(),
       body: SafeArea(

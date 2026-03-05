@@ -167,14 +167,19 @@ class VerificationCodeScreen extends StatelessWidget {
                       return Text(
                         "Resend code in ${s}s",
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.black38,
                           fontWeight: FontWeight.w600,
                         ),
                       );
                     }
                     return TextButton(
                       onPressed: c.resendCode,
-                      child: const Text("Resend code"),
+                      child: Text(
+                        "Resend code",
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: cs.primary,
+                        ),
+                      ),
                     );
                   }),
                 ),
@@ -190,9 +195,11 @@ class VerificationCodeScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       "Verify code",
-                      style: TextStyle(fontWeight: FontWeight.w800),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
                 ),
