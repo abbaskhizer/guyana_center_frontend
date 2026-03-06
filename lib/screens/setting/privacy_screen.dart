@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/setting/privacy_controller.dart';
@@ -9,89 +10,116 @@ class PrivacyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.put(PrivacyController());
-    final cs = Theme.of(context).colorScheme;
+    Get.put(PrivacyController());
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Top bar
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Get.back(),
-                    icon: Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 18,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    "Privacy",
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Profile Visibility
-              SectionCard(
-                title: "Profile Visibility",
-                children: [
-                  const SizedBox(height: 6),
-                  Obx(() {
-                    return _VisibilitySegment(
-                      isPublic: c.isPublic.value,
-                      onChanged: c.setVisibility,
-                      cs: cs,
-                    );
-                  }),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Activity & Content
-              SectionCard(
-                title: "Activity & Content",
-                children: [
-                  Obx(
-                    () => SwitchTile(
-                      title: "Show activity status",
-                      value: c.showActivityStatus.value,
-                      onChanged: (v) => c.showActivityStatus.value = v,
-                      showTopDivider: false,
-                    ),
-                  ),
-                  Obx(
-                    () => SwitchTile(
-                      title: "Show saved boards",
-                      value: c.showSavedBoards.value,
-                      onChanged: (v) => c.showSavedBoards.value = v,
-                    ),
-                  ),
-                  Obx(
-                    () => SwitchTile(
-                      title: "Search engine indexing",
-                      value: c.searchEngineIndexing.value,
-                      onChanged: (v) => c.searchEngineIndexing.value = v,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+      body: const SafeArea(
+        child: SingleChildScrollView(child: PrivacyContent(showTopBar: true)),
       ),
+    );
+  }
+}
+
+class PrivacyContent extends StatelessWidget {
+  final bool showTopBar;
+  const PrivacyContent({super.key, this.showTopBar = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Get.isRegistered<PrivacyController>()
+        ? Get.find<PrivacyController>()
+        : Get.put(PrivacyController());
+
+    final cs = Theme.of(context).colorScheme;
+
+    final content = Column(
+      children: [
+        SectionCard(
+          title: "Profile Visibility",
+          children: [
+            const SizedBox(height: 6),
+            Obx(() {
+              return _VisibilitySegment(
+                isPublic: c.isPublic.value,
+                onChanged: c.setVisibility,
+                cs: cs,
+              );
+            }),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+
+        SectionCard(
+          title: "Activity & Content",
+          children: [
+            Obx(
+              () => SwitchTile(
+                title: "Show activity status",
+                value: c.showActivityStatus.value,
+                onChanged: (v) => c.showActivityStatus.value = v,
+                showTopDivider: false,
+              ),
+            ),
+            Obx(
+              () => SwitchTile(
+                title: "Show saved boards",
+                value: c.showSavedBoards.value,
+                onChanged: (v) => c.showSavedBoards.value = v,
+              ),
+            ),
+            Obx(
+              () => SwitchTile(
+                title: "Search engine indexing",
+                value: c.searchEngineIndexing.value,
+                onChanged: (v) => c.searchEngineIndexing.value = v,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (showTopBar)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 0),
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: () => Get.back(),
+                  icon: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 18,
+                    color: cs.onSurface,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  "Privacy",
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: cs.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+        if (!kIsWeb)
+          Container(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
+            width: double.infinity,
+            // height: double.infinity,
+            decoration: BoxDecoration(color: cs.surface),
+            child: content,
+          )
+        else
+          content,
+      ],
     );
   }
 }
@@ -109,8 +137,7 @@ class _VisibilitySegment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ Figma-like grey using theme
-    final inactiveBg = cs.surfaceContainerHighest.withOpacity(.75);
+    final inactiveBg = cs.surface;
     final inactiveFg = cs.onSurfaceVariant;
 
     return Row(
@@ -119,7 +146,7 @@ class _VisibilitySegment extends StatelessWidget {
           child: _SegItem(
             active: isPublic,
             label: "Public",
-            icon: Icons.public,
+            image: 'assets/public.png',
             onTap: () => onChanged(true),
             cs: cs,
             inactiveBg: inactiveBg,
@@ -131,7 +158,7 @@ class _VisibilitySegment extends StatelessWidget {
           child: _SegItem(
             active: !isPublic,
             label: "Private",
-            icon: Icons.lock_outline,
+            image: 'assets/lock.png',
             onTap: () => onChanged(false),
             cs: cs,
             inactiveBg: inactiveBg,
@@ -147,7 +174,7 @@ class _SegItem extends StatelessWidget {
   const _SegItem({
     required this.active,
     required this.label,
-    required this.icon,
+    required this.image,
     required this.onTap,
     required this.cs,
     required this.inactiveBg,
@@ -156,7 +183,7 @@ class _SegItem extends StatelessWidget {
 
   final bool active;
   final String label;
-  final IconData icon;
+  final String image;
   final VoidCallback onTap;
   final ColorScheme cs;
   final Color inactiveBg;
@@ -184,7 +211,13 @@ class _SegItem extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 18, color: fg),
+            Image.asset(
+              image,
+              height: 18,
+              width: 18,
+              color: fg,
+              fit: BoxFit.contain,
+            ),
             const SizedBox(height: 6),
             Text(
               label,

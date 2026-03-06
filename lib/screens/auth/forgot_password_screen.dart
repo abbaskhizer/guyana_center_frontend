@@ -285,7 +285,7 @@ class _ForgotForm extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: c.isLoading.value ? null : c.sendResetLink,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF16A34A),
+                    backgroundColor: cs.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),

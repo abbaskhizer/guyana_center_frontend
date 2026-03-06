@@ -42,7 +42,7 @@ class _MobileAuthLayout extends StatelessWidget {
       child: _AuthForm(
         controller: controller,
         showBack: true,
-        horizontalFormPadding: 45,
+        horizontalFormPadding: 35,
       ),
     );
   }
@@ -189,7 +189,7 @@ class _AuthForm extends StatelessWidget {
                   textAlign: TextAlign.center,
                 );
               }),
-              const SizedBox(height: 18),
+              const SizedBox(height: 30),
               Obx(() {
                 return _AuthToggle(
                   isLogin: c.isLogin.value,
@@ -329,7 +329,7 @@ class _AuthForm extends StatelessWidget {
           if (c.isLogin.value) return const SizedBox.shrink();
           return Column(
             children: [
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -364,6 +364,11 @@ class _AuthForm extends StatelessWidget {
           return SizedBox(
             height: 54,
             child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
               onPressed: c.submit,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -371,21 +376,19 @@ class _AuthForm extends StatelessWidget {
                   Text(
                     isLogin ? "Log In" : "Create Account",
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.white,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Icon(
-                    Icons.arrow_forward_rounded,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                  Icon(Icons.arrow_forward_rounded, color: Colors.white),
                 ],
               ),
             ),
           );
         }),
 
-        const SizedBox(height: 25),
+        const SizedBox(height: 30),
 
         Center(
           child: Obx(() {
@@ -406,7 +409,7 @@ class _AuthForm extends StatelessWidget {
                   child: Text(
                     isLogin ? "Sign Up" : "Log In",
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: cs.primary,
+                      color: Color(0xFFEA4335),
                       fontWeight: FontWeight.w800,
                     ),
                   ),

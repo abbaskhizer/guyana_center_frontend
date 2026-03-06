@@ -41,12 +41,10 @@ class _MobileVerificationLayout extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: Center(
-              child: _VerificationForm(
-                controller: controller,
-                showBack: true,
-                centerOnWeb: false,
-              ),
+            child: _VerificationForm(
+              controller: controller,
+              showBack: true,
+              centerOnWeb: false,
             ),
           ),
         );
@@ -370,7 +368,7 @@ class _VerificationForm extends StatelessWidget {
           child: ElevatedButton(
             onPressed: c.verifyCode,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF16A34A),
+              backgroundColor: cs.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
@@ -385,8 +383,7 @@ class _VerificationForm extends StatelessWidget {
           ),
         ),
 
-        // mobile center feel ke liye chota gap
-        SizedBox(height: centerOnWeb ? 18 : 24),
+        SizedBox(height: centerOnWeb ? 18 : 150),
 
         Row(
           children: [

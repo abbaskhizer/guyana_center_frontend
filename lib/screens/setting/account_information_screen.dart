@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/setting/account_infromation_controller.dart';
@@ -7,31 +8,181 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.put(AccountController());
-    final cs = Theme.of(context).colorScheme;
+    Get.put(AccountController());
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Top bar
-              Row(
+      body: const SafeArea(
+        child: SingleChildScrollView(child: AccountContent(showTopBar: true)),
+      ),
+    );
+  }
+}
+
+class AccountContent extends StatelessWidget {
+  final bool showTopBar;
+  const AccountContent({super.key, this.showTopBar = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Get.isRegistered<AccountController>()
+        ? Get.find<AccountController>()
+        : Get.put(AccountController());
+
+    final cs = Theme.of(context).colorScheme;
+
+    final content = Column(
+      children: [
+        _SectionCard(
+          title: "Account Information",
+          children: [
+            const SizedBox(height: 6),
+            Obx(
+              () => _InfoRow(
+                title: "Full Name",
+                value: c.fullName.value,
+                trailingText: "Edit",
+                onTapTrailing: () => c.editField(
+                  title: "Full Name",
+                  field: c.fullName,
+                  currentValue: c.fullName.value,
+                ),
+              ),
+            ),
+            _divider(context),
+            Obx(
+              () => _InfoRow(
+                title: "Email",
+                value: c.email.value,
+                verified: c.emailVerified.value,
+              ),
+            ),
+            _divider(context),
+            Obx(
+              () => _InfoRow(
+                title: "Phone",
+                value: c.phone.value,
+                verified: c.phoneVerified.value,
+              ),
+            ),
+            _divider(context),
+            Obx(
+              () => _InfoRow(
+                title: "License",
+                value: c.license.value,
+                trailingText: "Edit",
+                onTapTrailing: () => c.editField(
+                  title: "License",
+                  field: c.license,
+                  currentValue: c.license.value,
+                ),
+              ),
+            ),
+            _divider(context),
+            Obx(
+              () => _InfoRow(
+                title: "Location",
+                value: c.location.value,
+                trailingText: "Edit",
+                onTapTrailing: () => c.editField(
+                  title: "Location",
+                  field: c.location,
+                  currentValue: c.location.value,
+                ),
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+
+        _SectionCard(
+          title: "Connected Accounts",
+          children: [
+            const SizedBox(height: 6),
+            Obx(
+              () => _ConnectedRow(
+                iconBg: cs.surface,
+                iconColor: cs.onSurfaceVariant,
+                icon: Icons.g_mobiledata_rounded,
+                title: "Google",
+                subtitle: c.googleEmail.value,
+                connected: c.googleConnected.value,
+                onConnect: c.connectGoogle,
+                onDisconnect: c.disconnectGoogle,
+              ),
+            ),
+            _divider(context),
+            Obx(
+              () => _ConnectedRow(
+                iconBg: cs.surface,
+                iconColor: cs.onSurfaceVariant,
+                icon: Icons.facebook,
+                title: "Facebook",
+                subtitle: c.facebookConnected.value
+                    ? "Connected"
+                    : "Not connected",
+                connected: c.facebookConnected.value,
+                onConnect: c.connectFacebook,
+                onDisconnect: c.disconnectFacebook,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+
+        _SectionCard(
+          title: "Membership",
+          children: [
+            const SizedBox(height: 6),
+            Obx(
+              () => Row(
                 children: [
-                  IconButton(
-                    onPressed: () => Get.back(),
-                    icon: Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 18,
-                      color: cs.onSurface,
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Color(0xFFD08A00),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    alignment: Alignment.center,
+                    child: Image.asset(
+                      'assets/crown.png',
+                      height: 20,
+                      width: 20,
+                      color: cs.onTertiary,
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          c.planName.value,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                color: cs.onSurface,
+                              ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          c.planDesc.value,
+                          maxLines: 2,
+                          softWrap: true,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: cs.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
                   Text(
-                    "Account",
+                    c.planPrice.value,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w900,
                       color: cs.onSurface,
@@ -39,229 +190,102 @@ class AccountScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+            ),
+          ],
+        ),
 
-              // Account Information
-              _SectionCard(
-                title: "Account Information",
+        const SizedBox(height: 16),
+
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: cs.errorContainer.withOpacity(.55),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            children: [
+              Row(
                 children: [
-                  const SizedBox(height: 6),
-                  Obx(
-                    () => _InfoRow(
-                      title: "Full Name",
-                      value: c.fullName.value,
-                      trailingText: "Edit",
-                      onTapTrailing: () => c.editField(
-                        title: "Full Name",
-                        field: c.fullName,
-                        currentValue: c.fullName.value,
-                      ),
-                    ),
-                  ),
-                  _divider(context),
-
-                  Obx(
-                    () => _InfoRow(
-                      title: "Email",
-                      value: c.email.value,
-                      verified: c.emailVerified.value,
-                    ),
-                  ),
-                  _divider(context),
-
-                  Obx(
-                    () => _InfoRow(
-                      title: "Phone",
-                      value: c.phone.value,
-                      verified: c.phoneVerified.value,
-                    ),
-                  ),
-                  _divider(context),
-
-                  Obx(
-                    () => _InfoRow(
-                      title: "License",
-                      value: c.license.value,
-                      trailingText: "Edit",
-                      onTapTrailing: () => c.editField(
-                        title: "License",
-                        field: c.license,
-                        currentValue: c.license.value,
-                      ),
-                    ),
-                  ),
-                  _divider(context),
-
-                  Obx(
-                    () => _InfoRow(
-                      title: "Location",
-                      value: c.location.value,
-                      trailingText: "Edit",
-                      onTapTrailing: () => c.editField(
-                        title: "Location",
-                        field: c.location,
-                        currentValue: c.location.value,
+                  Icon(Icons.warning_amber_rounded, color: cs.error),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "Once deleted, all your data will be permanently lost.",
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                 ],
               ),
-
-              const SizedBox(height: 16),
-
-              // Connected Accounts
-              _SectionCard(
-                title: "Connected Accounts",
-                children: [
-                  const SizedBox(height: 6),
-                  Obx(
-                    () => _ConnectedRow(
-                      iconBg: cs.surfaceContainerHighest,
-                      iconColor: cs.onSurfaceVariant,
-                      icon: Icons.g_mobiledata_rounded,
-                      title: "Google",
-                      subtitle: c.googleEmail.value,
-                      connected: c.googleConnected.value,
-                      onConnect: c.connectGoogle,
-                      onDisconnect: c.disconnectGoogle,
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: OutlinedButton.icon(
+                  onPressed: c.deleteAccount,
+                  icon: Icon(Icons.delete_outline, color: cs.error),
+                  label: Text(
+                    "Delete Account",
+                    style: TextStyle(
+                      color: cs.error,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
-                  _divider(context),
-                  Obx(
-                    () => _ConnectedRow(
-                      iconBg: cs.surfaceContainerHighest,
-                      iconColor: cs.onSurfaceVariant,
-                      icon: Icons.facebook,
-                      title: "Facebook",
-                      subtitle: c.facebookConnected.value
-                          ? "Connected"
-                          : "Not connected",
-                      connected: c.facebookConnected.value,
-                      onConnect: c.connectFacebook,
-                      onDisconnect: c.disconnectFacebook,
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: cs.error.withOpacity(.55)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    backgroundColor: cs.surface,
                   ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Membership
-              _SectionCard(
-                title: "Membership",
-                children: [
-                  const SizedBox(height: 6),
-                  Obx(
-                    () => Row(
-                      children: [
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF59E0B), // figma-like gold
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.workspace_premium_rounded,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                c.planName.value,
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w900,
-                                      color: cs.onSurface,
-                                    ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                c.planDesc.value,
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: cs.onSurfaceVariant,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          c.planPrice.value,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.w900,
-                                color: cs.onSurface,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Delete Account (Figma style)
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: cs.errorContainer.withOpacity(.55),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.warning_amber_rounded, color: cs.error),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            "Once deleted, all your data will be permanently lost.",
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: cs.onSurfaceVariant,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: OutlinedButton.icon(
-                        onPressed: c.deleteAccount,
-                        icon: Icon(Icons.delete_outline, color: cs.error),
-                        label: Text(
-                          "Delete Account",
-                          style: TextStyle(
-                            color: cs.error,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: cs.error.withOpacity(.55)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          backgroundColor: cs.surface,
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ),
             ],
           ),
         ),
-      ),
+      ],
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (showTopBar)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: () => Get.back(),
+                  icon: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 18,
+                    color: cs.onSurface,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  "Account",
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: cs.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+        if (!kIsWeb)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+            width: double.infinity,
+            decoration: BoxDecoration(color: cs.surface),
+            child: content,
+          )
+        else
+          content,
+      ],
     );
   }
 
@@ -287,10 +311,8 @@ class _SectionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: cs.background,
         borderRadius: BorderRadius.circular(18),
-        // Figma look = subtle border (not heavy)
-        border: Border.all(color: cs.outlineVariant.withOpacity(.65)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -362,7 +384,7 @@ class _InfoRow extends StatelessWidget {
             child: Text(
               trailingText!,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: cs.onSurfaceVariant, // figma "Edit" looks grey
+                color: cs.onSurfaceVariant,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -461,8 +483,6 @@ class _ConnectedRow extends StatelessWidget {
             ],
           ),
         ),
-
-        // Figma: Google shows "Connected" text, Facebook shows "Connect" button
         connected
             ? Text(
                 "Connected",

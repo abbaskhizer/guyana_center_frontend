@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class SwitchTile extends StatelessWidget {
-  SwitchTile({
+  const SwitchTile({
+    super.key,
     required this.title,
     required this.value,
     required this.onChanged,
@@ -19,9 +20,12 @@ class SwitchTile extends StatelessWidget {
 
     return Column(
       children: [
-        // ✅ Divider on TOP
         if (showTopDivider)
-          Divider(height: 1, thickness: 1, color: cs.outlineVariant),
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: cs.outlineVariant.withOpacity(.6),
+          ),
 
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 14),
@@ -30,21 +34,18 @@ class SwitchTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
                 ),
               ),
-              Switch(
+
+              Switch.adaptive(
                 value: value,
                 onChanged: onChanged,
-
-                // ✅ Figma Primary Green Track
-                activeTrackColor: cs.primary,
-                activeColor: Colors.white,
-
-                inactiveTrackColor: cs.outlineVariant,
-                inactiveThumbColor: Colors.white,
+                activeColor: cs.primary,
+                inactiveTrackColor: cs.surface,
               ),
             ],
           ),

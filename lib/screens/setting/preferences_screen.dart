@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/setting/preferences_controller.dart';
@@ -8,131 +9,157 @@ class PreferencesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.put(PreferencesController());
-    final cs = Theme.of(context).colorScheme;
+    Get.put(PreferencesController());
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
+      body: const SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Top Bar
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: c.back,
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 18,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    "Preferences",
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Appearance
-              SectionCard(
-                title: "Appearance",
-                children: [
-                  const SizedBox(height: 6),
-                  Obx(() {
-                    return _ThemeSegment(
-                      selected: c.themeMode.value,
-                      onChanged: c.setTheme,
-                      cs: cs,
-                    );
-                  }),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Language & Region
-              SectionCard(
-                title: "Language & Region",
-                children: [
-                  const SizedBox(height: 6),
-
-                  Text(
-                    "Language",
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Figma-like dropdown field
-                  InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () {
-                      // TODO: open language screen / bottom sheet
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: cs.outlineVariant),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              "English (US)",
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(fontWeight: FontWeight.w800),
-                            ),
-                          ),
-                          Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  Text(
-                    "Timezone",
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "PST (UTC-8)",
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+          child: PreferencesContent(showTopBar: true),
         ),
       ),
     );
   }
 }
 
-/// Figma style: 3 separate containers (selected=primary, unselected=grey)
+class PreferencesContent extends StatelessWidget {
+  final bool showTopBar;
+  const PreferencesContent({super.key, this.showTopBar = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Get.isRegistered<PreferencesController>()
+        ? Get.find<PreferencesController>()
+        : Get.put(PreferencesController());
+
+    final cs = Theme.of(context).colorScheme;
+
+    final content = Column(
+      children: [
+        SectionCard(
+          title: "Appearance",
+          children: [
+            const SizedBox(height: 6),
+            Obx(
+              () => _ThemeSegment(
+                selected: c.themeMode.value,
+                onChanged: c.setTheme,
+                cs: cs,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+
+        SectionCard(
+          title: "Language & Region",
+          children: [
+            const SizedBox(height: 6),
+
+            Text(
+              "Language",
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {},
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: cs.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: cs.outlineVariant),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        "English (US)",
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: cs.onSurface,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            Text(
+              "Timezone",
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              "PST (UTC-8)",
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: cs.onSurface,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (showTopBar)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 0),
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: c.back,
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  "Preferences",
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: cs.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+        if (!kIsWeb)
+          ColoredBox(
+            color: cs.surface,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
+              child: content,
+            ),
+          )
+        else
+          content,
+      ],
+    );
+  }
+}
+
 class _ThemeSegment extends StatelessWidget {
   const _ThemeSegment({
     required this.selected,
@@ -146,7 +173,7 @@ class _ThemeSegment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final inactiveBg = cs.surfaceContainerHighest;
+    final inactiveBg = cs.surface;
 
     return Row(
       children: [
@@ -226,14 +253,14 @@ class _ThemeItem extends StatelessWidget {
             Icon(
               icon,
               size: 20,
-              color: active ? Colors.white : cs.onSurfaceVariant,
+              color: active ? cs.onPrimary : cs.onSurfaceVariant,
             ),
             const SizedBox(height: 6),
             Text(
               label,
-              style: TextStyle(
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: active ? Colors.white : cs.onSurfaceVariant,
+                color: active ? cs.onPrimary : cs.onSurfaceVariant,
               ),
             ),
           ],

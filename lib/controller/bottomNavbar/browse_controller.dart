@@ -8,12 +8,11 @@ class BrowseController extends GetxController {
   final activeChip = 0.obs;
 
   final isGrid = true.obs;
-
   final sortLabel = 'Sort'.obs;
 
   final listings = <BrowseListingVM>[].obs;
 
-  final popularSearches = <String>[
+  final popularSearches = const <String>[
     'Toyota Hilux 2024',
     'Apartment for Rent',
     'iPhone 15 Pro Max',
@@ -21,15 +20,28 @@ class BrowseController extends GetxController {
     'BMW 3 Series',
   ];
 
+  String defaultSearchHint(bool web) => web ? '2BR House POS' : 'JBB House FOE';
+
+  bool get hasQuery => searchText.value.trim().isNotEmpty;
+
+  String displayQuery(bool web) {
+    final value = searchText.value.trim();
+    return value.isEmpty ? defaultSearchHint(web) : value;
+  }
+
+  String get emptyStateTitleQuery {
+    final value = searchText.value.trim();
+    return value.isEmpty ? 'Search' : value;
+  }
+
   @override
   void onInit() {
     super.onInit();
-
     listings.assignAll(_seed());
   }
 
   void setSearch(String value) {
-    searchText.value = value.trim();
+    searchText.value = value.trimLeft();
   }
 
   void clearSearch() {
@@ -38,7 +50,6 @@ class BrowseController extends GetxController {
 
   void setChip(int index) {
     if (index < 0 || index >= chips.length) return;
-
     activeChip.value = index;
   }
 
@@ -46,12 +57,20 @@ class BrowseController extends GetxController {
     isGrid.value = !isGrid.value;
   }
 
+  void setGridView() {
+    isGrid.value = true;
+  }
+
+  void setListView() {
+    isGrid.value = false;
+  }
+
   void setSort(String label) {
     sortLabel.value = label;
   }
 
   List<BrowseListingVM> get filtered {
-    final query = searchText.value.toLowerCase();
+    final query = searchText.value.trim().toLowerCase();
     final chip = chips[activeChip.value].toLowerCase();
 
     bool chipFilter(BrowseListingVM item) {
@@ -70,7 +89,7 @@ class BrowseController extends GetxController {
     }).toList();
   }
 
-  bool get showEmptyState => searchText.value.isNotEmpty && filtered.isEmpty;
+  bool get showEmptyState => hasQuery && filtered.isEmpty;
 
   List<BrowseListingVM> _seed() => [
     BrowseListingVM(
@@ -91,7 +110,6 @@ class BrowseController extends GetxController {
       description:
           'Toyota Hiace Super GL Gas. Not heavy T, inspected and ready for immediate transfer.\n\n• Fully powered\n• 27 rims, slightly lowered\n• Can be sold with or without music system',
     ),
-
     BrowseListingVM(
       id: '2',
       title: 'Toyota Hilux 2021 SR5',

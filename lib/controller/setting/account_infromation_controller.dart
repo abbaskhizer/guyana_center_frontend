@@ -20,7 +20,7 @@ class AccountController extends GetxController {
 
   // Membership
   final planName = "Pro Digital Plan".obs;
-  final planDesc = "Unlimited pins · Priority support".obs;
+  final planDesc = "Unlimited pins ·Priority \nsupport".obs;
   final planPrice = "\$20/mo".obs;
 
   // Actions

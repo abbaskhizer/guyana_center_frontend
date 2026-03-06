@@ -37,8 +37,8 @@ class MyApp extends StatelessWidget {
               brightness: Brightness.light,
             ).copyWith(
               primary: kPrimaryColor,
-              background: kBackgroundColor,
-              surface: Color(0xFFF9FAFB),
+              background: Colors.white,
+              surface: Color(0xFFF5F5F5),
               outlineVariant: const Color(0xFFD6DAE3), // figma border
               onSurface: const Color(0xFF111827), // figma text
             ),

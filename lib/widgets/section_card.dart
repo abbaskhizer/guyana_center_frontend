@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 class SectionCard extends StatelessWidget {
   const SectionCard({
     super.key,
-    this.icon, // ✅ nullable
-    required this.title,
+    this.icon,
+    this.title,
+    this.subtitle,
     required this.children,
   });
 
-  final IconData? icon; // ✅ changed
-  final String title;
+  final IconData? icon;
+  final String? title;
+  final String? subtitle;
   final List<Widget> children;
 
   @override
@@ -17,31 +19,52 @@ class SectionCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: cs.background,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: cs.outlineVariant),
+        border: Border.all(color: cs.outlineVariant.withOpacity(.45)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              // ✅ Only show icon if provided
-              if (icon != null) ...[
-                Icon(icon, size: 20, color: cs.onSurface),
-                const SizedBox(width: 8),
+          if (title != null || subtitle != null)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (title != null)
+                  Row(
+                    children: [
+                      if (icon != null) ...[
+                        Icon(icon, size: 18, color: cs.onSurfaceVariant),
+                        const SizedBox(width: 8),
+                      ],
+                      Expanded(
+                        child: Text(
+                          title!,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                color: cs.onSurface,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle!,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 14),
               ],
-              Text(
-                title,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
+            ),
           ...children,
         ],
       ),

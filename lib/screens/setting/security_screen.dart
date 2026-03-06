@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/setting/security_controller.dart';
@@ -9,193 +10,216 @@ class SecurityScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.put(SecurityController());
-    final cs = Theme.of(context).colorScheme;
+    Get.put(SecurityController());
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Top Bar
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Get.back(),
-                    icon: Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 18,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    "Security",
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+      body: const SafeArea(
+        child: SingleChildScrollView(child: SecurityContent(showTopBar: true)),
+      ),
+    );
+  }
+}
 
-              /// Password
-              SectionCard(
-                title: "Password",
-                children: [
-                  Row(
+class SecurityContent extends StatelessWidget {
+  final bool showTopBar;
+  const SecurityContent({super.key, this.showTopBar = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Get.isRegistered<SecurityController>()
+        ? Get.find<SecurityController>()
+        : Get.put(SecurityController());
+
+    final cs = Theme.of(context).colorScheme;
+
+    final content = Column(
+      children: [
+        SectionCard(
+          title: "Password",
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "••••••••",
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w900,
-                                    color: cs.onSurface,
-                                  ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              "Changed 3 months ago",
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: cs.onSurfaceVariant,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                          ],
+                      Text(
+                        "••••••••",
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: cs.onSurface,
                         ),
                       ),
-                      InkWell(
-                        onTap: () {},
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: cs.errorContainer.withOpacity(.55),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            "Change",
-                            style: TextStyle(
-                              color: cs.error,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
+                      const SizedBox(height: 6),
+                      Text(
+                        "Changed 3 months ago",
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              /// Two-Factor Auth
-              SectionCard(
-                title: "Two-Factor Auth",
-                children: [
-                  Obx(
-                    () => SwitchTile(
-                      title: "Extra login verification",
-                      value: c.twoFactorEnabled.value,
-                      onChanged: c.toggle2FA,
-                      showTopDivider: false,
+                ),
+                InkWell(
+                  onTap: () {},
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: cs.errorContainer.withOpacity(.55),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      "Change",
+                      style: TextStyle(
+                        color: cs.error,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              /// Active Sessions (Figma: inner tiles look slightly grey)
-              SectionCard(
-                title: "Active Sessions",
-                children: [
-                  SessionTile(
-                    icon: Icons.computer_outlined,
-                    title: "MacBook Pro",
-                    subtitle: "Chrome",
-                    status: "Now",
-                    isCurrent: true,
-                  ),
-                  SessionTile(
-                    icon: Icons.phone_iphone_outlined,
-                    title: "iPhone 15",
-                    subtitle: "Safari",
-                    status: "2h ago",
-                  ),
-                  SessionTile(
-                    icon: Icons.desktop_windows_outlined,
-                    title: "Windows PC",
-                    subtitle: "Firefox",
-                    status: "3d ago",
-                  ),
-                  const SizedBox(height: 18),
-                  InkWell(
-                    onTap: () {},
-                    child: Row(
-                      children: [
-                        Icon(Icons.logout, color: cs.error, size: 18),
-                        const SizedBox(width: 8),
-                        Text(
-                          "Sign out all others",
-                          style: TextStyle(
-                            color: cs.error,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              /// Login History
-              SectionCard(
-                title: "Login History",
-                children: [
-                  _HistoryTile(
-                    title: "Today, 9:42 AM",
-                    subtitle: "Chrome · Mac",
-                    success: true,
-                  ),
-                  Divider(color: cs.outlineVariant.withOpacity(.8)),
-                  _HistoryTile(
-                    title: "Yesterday",
-                    subtitle: "Safari · iOS",
-                    success: true,
-                  ),
-                  Divider(color: cs.outlineVariant.withOpacity(.8)),
-                  _HistoryTile(
-                    title: "Jan 8",
-                    subtitle: "Firefox · Win",
-                    success: true,
-                  ),
-                  Divider(color: cs.outlineVariant.withOpacity(.8)),
-                  _HistoryTile(
-                    title: "Jan 7",
-                    subtitle: "Unknown · Linux",
-                    success: false,
-                  ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
-      ),
+
+        const SizedBox(height: 16),
+
+        SectionCard(
+          title: "Two-Factor Auth",
+          children: [
+            Obx(
+              () => SwitchTile(
+                title: "Extra login verification",
+                value: c.twoFactorEnabled.value,
+                onChanged: c.toggle2FA,
+                showTopDivider: false,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+
+        SectionCard(
+          title: "Active Sessions",
+          children: [
+            SessionTile(
+              icon: Icons.computer_outlined,
+              title: "MacBook Pro",
+              subtitle: "Chrome",
+              status: "Now",
+              isCurrent: true,
+            ),
+            SessionTile(
+              icon: Icons.phone_iphone_outlined,
+              title: "iPhone 15",
+              subtitle: "Safari",
+              status: "2h ago",
+            ),
+            SessionTile(
+              icon: Icons.desktop_windows_outlined,
+              title: "Windows PC",
+              subtitle: "Firefox",
+              status: "3d ago",
+            ),
+            const SizedBox(height: 18),
+            InkWell(
+              onTap: () {},
+              child: Row(
+                children: [
+                  Icon(Icons.logout, color: cs.error, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Sign out all others",
+                    style: TextStyle(
+                      color: cs.error,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+
+        SectionCard(
+          title: "Login History",
+          children: [
+            _HistoryTile(
+              title: "Today, 9:42 AM",
+              subtitle: "Chrome · Mac",
+              success: true,
+            ),
+            Divider(color: cs.outlineVariant.withOpacity(.8)),
+            _HistoryTile(
+              title: "Yesterday",
+              subtitle: "Safari · iOS",
+              success: true,
+            ),
+            Divider(color: cs.outlineVariant.withOpacity(.8)),
+            _HistoryTile(
+              title: "Jan 8",
+              subtitle: "Firefox · Win",
+              success: true,
+            ),
+            Divider(color: cs.outlineVariant.withOpacity(.8)),
+            _HistoryTile(
+              title: "Jan 7",
+              subtitle: "Unknown · Linux",
+              success: false,
+            ),
+          ],
+        ),
+      ],
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (showTopBar)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 0),
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: () => Get.back(),
+                  icon: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 18,
+                    color: cs.onSurface,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  "Security",
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: cs.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+        if (!kIsWeb)
+          ColoredBox(
+            color: cs.surface,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
+              child: content,
+            ),
+          )
+        else
+          content,
+      ],
     );
   }
 }
@@ -219,9 +243,7 @@ class SessionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-
-    // Figma-style: inner tile slightly grey on light, dark uses surface containers
-    final tileBg = cs.surfaceContainerHighest.withOpacity(.55);
+    final tileBg = cs.surface;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -235,7 +257,6 @@ class SessionTile extends StatelessWidget {
           children: [
             Icon(icon, size: 20, color: cs.onSurfaceVariant),
             const SizedBox(width: 12),
-
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,7 +279,6 @@ class SessionTile extends StatelessWidget {
                 ],
               ),
             ),
-
             if (isCurrent)
               Row(
                 children: [

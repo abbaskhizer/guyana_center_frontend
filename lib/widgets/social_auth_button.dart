@@ -21,7 +21,7 @@ class SocialAuthButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          backgroundColor: cs.surface, // ✅ theme surface
+          backgroundColor: cs.surface,
           side: BorderSide(color: cs.outlineVariant),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
@@ -36,7 +36,7 @@ class SocialAuthButton extends StatelessWidget {
               text,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w700,
-                color: cs.onSurface, // ✅ theme text color
+                color: cs.onSurface,
               ),
             ),
           ],

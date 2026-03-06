@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/setting/billing_controller.dart';
@@ -10,143 +11,176 @@ class BillingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.put(BillingController());
-    final cs = Theme.of(context).colorScheme;
+    Get.put(BillingController());
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Top Bar
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Get.back(),
-                    icon: Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 18,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    "Billing",
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Current Plan Card
-              Obx(
-                () => _CurrentPlanCard(
-                  planName: c.planName.value,
-                  planDesc: c.planDesc.value,
-                  planPrice: c.planPrice.value,
-                  onChangePlan: c.changePlan,
-                ),
-              ),
-
-              const SizedBox(height: 14),
-
-              // Upgrade tile
-              _UpgradeTile(onTap: c.upgradeEnterprise),
-
-              const SizedBox(height: 16),
-
-              // Payment Methods
-              SectionCard(
-                title: "Payment Methods",
-                children: [
-                  const SizedBox(height: 6),
-                  Obx(() {
-                    return Column(
-                      children: [
-                        for (int i = 0; i < c.methods.length; i++)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: _PaymentTile(
-                              method: c.methods[i],
-                              onTap: () => c.setDefaultMethod(i),
-                            ),
-                          ),
-                      ],
-                    );
-                  }),
-                  const SizedBox(height: 2),
-                  _AddPaymentButton(onTap: c.addPaymentMethod),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // History
-              SectionCard(
-                title: "History",
-                children: [
-                  const SizedBox(height: 6),
-                  Obx(() {
-                    return Column(
-                      children: [
-                        for (int i = 0; i < c.history.length; i++) ...[
-                          _HistoryTile(item: c.history[i]),
-                          if (i != c.history.length - 1)
-                            Divider(color: cs.outlineVariant.withOpacity(.7)),
-                        ],
-                      ],
-                    );
-                  }),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Billing Address
-              SectionCard(
-                title: "Billing Address",
-                children: [
-                  const SizedBox(height: 6),
-                  Obx(
-                    () => Text(
-                      c.billingName.value,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: cs.onSurface,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Obx(
-                    () => Text(
-                      c.billingLine1.value,
-                      style: TextStyle(color: cs.onSurfaceVariant),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Obx(
-                    () => Text(
-                      c.billingLine2.value,
-                      style: TextStyle(color: cs.onSurfaceVariant),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+      body: const SafeArea(
+        child: SingleChildScrollView(child: BillingContent(showTopBar: true)),
       ),
     );
   }
 }
 
-/// Current Plan Card (Figma)
+class BillingContent extends StatelessWidget {
+  final bool showTopBar;
+  const BillingContent({super.key, this.showTopBar = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Get.isRegistered<BillingController>()
+        ? Get.find<BillingController>()
+        : Get.put(BillingController());
+
+    final cs = Theme.of(context).colorScheme;
+
+    final content = Column(
+      children: [
+        SectionCard(
+          children: [
+            Obx(
+              () => _CurrentPlanCard(
+                planName: c.planName.value,
+                planDesc: c.planDesc.value,
+                planPrice: c.planPrice.value,
+                onChangePlan: c.changePlan,
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            _UpgradeTile(onTap: c.upgradeEnterprise),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+
+        SectionCard(
+          title: "Payment Methods",
+          children: [
+            const SizedBox(height: 6),
+            Obx(
+              () => Column(
+                children: [
+                  for (int i = 0; i < c.methods.length; i++)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _PaymentTile(
+                        method: c.methods[i],
+                        onTap: () => c.setDefaultMethod(i),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 2),
+            _AddPaymentButton(onTap: c.addPaymentMethod),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+
+        SectionCard(
+          title: "History",
+          children: [
+            const SizedBox(height: 6),
+            Obx(
+              () => Column(
+                children: [
+                  for (int i = 0; i < c.history.length; i++) ...[
+                    _HistoryTile(item: c.history[i]),
+                    if (i != c.history.length - 1)
+                      Divider(color: cs.outlineVariant.withOpacity(.7)),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+
+        SectionCard(
+          title: "Billing Address",
+          children: [
+            const SizedBox(height: 6),
+            Obx(
+              () => Text(
+                c.billingName.value,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: cs.onSurface,
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Obx(
+              () => Text(
+                c.billingLine1.value,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(height: 2),
+            Obx(
+              () => Text(
+                c.billingLine2.value,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (showTopBar)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 0),
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: () => Get.back(),
+                  icon: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 18,
+                    color: cs.onSurface,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  "Billing",
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: cs.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+        if (!kIsWeb)
+          ColoredBox(
+            color: cs.surface,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
+              child: content,
+            ),
+          )
+        else
+          content,
+      ],
+    );
+  }
+}
+
 class _CurrentPlanCard extends StatelessWidget {
   const _CurrentPlanCard({
     required this.planName,
@@ -192,7 +226,6 @@ class _CurrentPlanCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-
           Text(
             planName,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -201,7 +234,6 @@ class _CurrentPlanCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-
           Text(
             planDesc,
             style: const TextStyle(
@@ -209,9 +241,7 @@ class _CurrentPlanCard extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-
           const SizedBox(height: 14),
-
           Row(
             children: [
               Expanded(
@@ -238,7 +268,7 @@ class _CurrentPlanCard extends StatelessWidget {
                   child: Text(
                     "Change Plan",
                     style: TextStyle(
-                      color: cs.primary, // theme primary
+                      color: Color(0xFFF97316),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -266,9 +296,8 @@ class _UpgradeTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: cs.surface,
+          color: Color(0xFFE9E2D0),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: cs.outlineVariant),
         ),
         child: Row(
           children: [
@@ -337,6 +366,7 @@ class _PaymentTile extends StatelessWidget {
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w900,
+                  fontSize: 10,
                 ),
               ),
             ),
@@ -413,12 +443,12 @@ class _AddPaymentButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.add_rounded, size: 18, color: cs.primary),
+              Icon(Icons.add_rounded, size: 18, color: cs.error),
               const SizedBox(width: 8),
               Text(
                 "Add Payment Method",
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: cs.primary,
+                  color: cs.error,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -441,9 +471,9 @@ class _HistoryTile extends StatelessWidget {
 
     final chipBg = isPaid
         ? cs.primaryContainer.withOpacity(.6)
-        : Color(0xFFF59E0B);
+        : const Color(0xFFFFF3D6);
 
-    final chipFg = isPaid ? cs.primary : cs.tertiary;
+    final chipFg = isPaid ? cs.primary : const Color(0xFFF59E0B);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
