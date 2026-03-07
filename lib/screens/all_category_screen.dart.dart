@@ -97,18 +97,10 @@ class _WebLayout extends StatelessWidget {
   const _WebLayout({required this.controller});
 
   double _contentMaxWidth(double w) {
-    // HomeTab jaisa canvas width
-    if (w >= 1440) return 1120;
-    if (w >= 1200) return 1120;
+    if (w >= 1440) return 1320;
+    if (w >= 1200) return 1200;
     if (w >= 1000) return 980;
     return w - 32;
-  }
-
-  Color _surfaceWhite(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Theme.of(context).brightness == Brightness.dark
-        ? cs.surface
-        : Colors.white;
   }
 
   @override
@@ -141,7 +133,9 @@ class _WebLayout extends StatelessWidget {
 
                   Container(
                     width: double.infinity,
-                    color: _surfaceWhite(context),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF161616)
+                        : Colors.white,
                     child: centered(
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 14, 0, 12),
@@ -164,7 +158,9 @@ class _WebLayout extends StatelessWidget {
             SliverToBoxAdapter(
               child: Container(
                 width: double.infinity,
-                color: const Color(0xFFFAFAFA),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Theme.of(context).scaffoldBackgroundColor
+                    : const Color(0xFFFAFAFA),
                 child: centered(
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,13 +174,13 @@ class _WebLayout extends StatelessWidget {
                       const SizedBox(height: 14),
 
                       const _StatsRow(isWeb: true),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 48),
 
                       _WebCategoriesContainer(controller: controller),
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 48),
 
                       const _NeedHelpCta(),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 48),
                     ],
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -237,25 +233,70 @@ class _BreadcrumbTitleBlock extends StatelessWidget {
               ),
             ],
           ),
-        const SizedBox(height: 8),
-        Text(
-          "All Categories",
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w900,
-            color: cs.onSurface,
-            fontSize: isWeb ? 28 : null,
-          ),
+        if (!isWeb) const SizedBox(height: 8),
+        Row(
+          children: [
+            if (isWeb) ...[
+              Image.asset(
+                'assets/icons/app_icon.png', // Fallback for the lines or replace with specific asset if needed, or build custom lines. Let's build custom lines.
+                height: 38,
+                errorBuilder: (context, error, stackTrace) {
+                  return Row(
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF16A34A),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Container(
+                        width: 6,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD97706),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Container(
+                        width: 6,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFDC2626),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+              if (isWeb) const SizedBox(width: 12),
+            ],
+            Text(
+              "All Categories",
+              style: theme.textTheme.headlineLarge?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: cs.onSurface,
+                fontSize: isWeb ? 34 : null,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: isWeb ? 16 : 6),
         Obx(() {
           final count = c.categories.length;
           return Text(
-            "Browse $count categories with 55,000+ listings across\n"
-            "vehicles, real estate, electronics & more.",
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: cs.onSurface.withOpacity(.55),
-              height: 1.35,
-              fontWeight: FontWeight.w600,
+            isWeb
+                ? "Browse $count categories with over 50,000 listings across Trinidad & Tobago.\nFind exactly what you need."
+                : "Browse $count categories with 55,000+ listings across\nvehicles, real estate, electronics & more.",
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: cs.onSurface.withOpacity(.45),
+              height: 1.5,
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
             ),
           );
         }),
@@ -272,11 +313,33 @@ class _WebBreadcrumbLine extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    return Text(
-      "All categories",
-      style: theme.textTheme.bodySmall?.copyWith(
-        color: cs.onSurface.withOpacity(.45),
-        fontWeight: FontWeight.w700,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Text(
+            "Home",
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: cs.onSurface.withOpacity(.45),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Icon(
+              Icons.chevron_right,
+              size: 16,
+              color: cs.onSurface.withOpacity(.3),
+            ),
+          ),
+          Text(
+            "All Categories",
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: cs.onSurface,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -332,7 +395,15 @@ class _WebIconBtn extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: cs.outlineVariant),
       ),
-      child: Icon(icon, size: 18, color: cs.onSurface.withOpacity(.7)),
+      child: Icon(
+        icon,
+        size: 18,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(
+                0xFF1E1E1E,
+              ) // For visibility against always-white background
+            : cs.onSurface.withOpacity(.7),
+      ),
     );
   }
 }
@@ -595,33 +666,43 @@ class _StatsRow extends StatelessWidget {
       children: [
         Expanded(
           child: _StatCard(
-            value: "55,000+",
-            label: "Active Listings",
+            value: "50,000+",
+            label: "Total Listings",
             valueColor: isWeb ? const Color(0xFF16A34A) : mobileColor,
+            icon: Icons.sell_outlined,
+            isWeb: isWeb,
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 16),
         Expanded(
           child: _StatCard(
-            value: "1,100+",
-            label: "New Daily",
+            value: "1,200+",
+            label: "New Today",
             valueColor: isWeb ? const Color(0xFFDC2626) : mobileColor,
+            icon: Icons.flash_on_rounded,
+            isWeb: isWeb,
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 16),
         Expanded(
           child: _StatCard(
-            value: "10K+",
-            label: "Happy Users",
+            value: "100K+",
+            label: "Active Users",
             valueColor: isWeb ? const Color(0xFFD97706) : mobileColor,
+            icon: Icons.people_alt_outlined,
+            isWeb: isWeb,
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 16),
         Expanded(
           child: _StatCard(
             value: "12",
             label: "Categories",
-            valueColor: isWeb ? const Color(0xFF1F2937) : mobileColor,
+            valueColor: isWeb
+                ? Theme.of(context).colorScheme.onSurface
+                : mobileColor,
+            icon: Icons.pie_chart_outline_rounded,
+            isWeb: isWeb,
           ),
         ),
       ],
@@ -633,17 +714,87 @@ class _StatCard extends StatelessWidget {
   final String value;
   final String label;
   final Color valueColor;
+  final IconData? icon;
+  final bool isWeb;
 
   const _StatCard({
     required this.value,
     required this.label,
     required this.valueColor,
+    this.icon,
+    this.isWeb = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    if (isWeb && icon != null) {
+      return Container(
+        height: 120, // Even taller matching Figma block completely
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        decoration: BoxDecoration(
+          color: isDark
+              ? const Color(0xFF1F1F1F)
+              : Colors.white, // Deeper contrast in Dark Mode
+          borderRadius: BorderRadius.circular(20),
+          border: isDark
+              ? Border.all(color: Colors.transparent)
+              : Border.all(color: Colors.transparent),
+          boxShadow: [
+            if (!isDark)
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 15,
+                offset: const Offset(0, 4),
+              ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? valueColor.withOpacity(0.2)
+                    : valueColor.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: valueColor, size: 24),
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    value,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: cs.onSurface,
+                      fontSize: 22,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    label,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontSize: 13,
+                      color: cs.onSurface.withOpacity(.5),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Container(
       height: 70,
@@ -698,9 +849,24 @@ class _SearchField extends StatelessWidget {
       height: height,
       child: TextField(
         onChanged: onChanged,
+        style: TextStyle(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.black
+              : cs.onSurface,
+        ),
         decoration: InputDecoration(
           hintText: hint,
-          prefixIcon: Icon(Icons.search_rounded, color: cs.onSurfaceVariant),
+          hintStyle: TextStyle(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black54
+                : cs.onSurfaceVariant,
+          ),
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black54
+                : cs.onSurfaceVariant,
+          ),
           filled: true,
           fillColor: Colors.white,
           enabledBorder: OutlineInputBorder(
@@ -793,69 +959,83 @@ class _WebCategoriesContainer extends StatelessWidget {
 
   int _columnsForWidth(double w) {
     // ✅ Figma desktop layout
-    if (w >= 1200) return 3;
-    if (w >= 900) return 2;
+    if (w >= 1100) return 3;
+    if (w >= 800) return 2;
     return 1;
-  }
-
-  Color _surfaceWhite(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Theme.of(context).brightness == Brightness.dark
-        ? cs.surface
-        : Colors.white;
   }
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    const spacing = 16.0;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    const spacing = 24.0; // More spacing for Figma matching
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: _surfaceWhite(context),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: cs.outlineVariant),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _ListHeaderRow(controller: controller),
-          const SizedBox(height: 14),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ✅ Figma Header Row inline
+        Obx(() {
+          final count = controller.filtered.length;
+          return Row(
+            children: [
+              Icon(
+                Icons.grid_view_rounded,
+                size: 20,
+                color: cs.onSurface.withOpacity(.6),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                "All Categories",
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: cs.onSurface,
+                  fontSize: 18,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                "$count categories",
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: cs.onSurface.withOpacity(.45),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          );
+        }),
+        const SizedBox(height: 20),
 
-          // ✅ Grid
-          Obx(() {
-            final list = controller.filtered;
+        // ✅ Grid
+        Obx(() {
+          final list = controller.filtered;
 
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                final cols = _columnsForWidth(constraints.maxWidth);
-                final totalSpacing = spacing * (cols - 1);
-                final itemW = (constraints.maxWidth - totalSpacing) / cols;
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final cols = _columnsForWidth(constraints.maxWidth);
+              final totalSpacing = spacing * (cols - 1);
+              final itemW = (constraints.maxWidth - totalSpacing) / cols;
 
-                return Wrap(
-                  spacing: spacing,
-                  runSpacing: spacing,
-                  children: List.generate(list.length, (i) {
-                    final item = list[i];
-                    return SizedBox(
-                      width: itemW,
-                      // ✅ Figma cards same height
-                      height: 172,
-                      child: _WebCategoryCard(
-                        item: item,
-                        onTap: () => Get.to(
-                          () => CategoryListingsScreen(category: item),
-                        ),
-                      ),
-                    );
-                  }),
-                );
-              },
-            );
-          }),
-        ],
-      ),
+              return Wrap(
+                spacing: spacing,
+                runSpacing: spacing,
+                children: List.generate(list.length, (i) {
+                  final item = list[i];
+                  return SizedBox(
+                    width: itemW,
+                    height:
+                        250, // Strict exact height for Web Grid cards according to design
+                    child: _WebCategoryCard(
+                      item: item,
+                      onTap: () =>
+                          Get.to(() => CategoryListingsScreen(category: item)),
+                    ),
+                  );
+                }),
+              );
+            },
+          );
+        }),
+      ],
     );
   }
 }
@@ -866,24 +1046,25 @@ class _WebCategoryCard extends StatelessWidget {
   const _WebCategoryCard({required this.item, required this.onTap});
 
   Color _cardBg(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Theme.of(context).brightness == Brightness.dark
-        ? cs.surface
-        : Colors.white; // ✅ figma white
+        ? const Color(
+            0xFF1F1F1F,
+          ) // Strictly mapping custom dark background instead of global surface
+        : Colors.white;
   }
 
   Color _chipBg(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Theme.of(context).brightness == Brightness.dark
-        ? cs.surfaceVariant
-        : const Color(0xFFF3F4F6);
+        ? cs.surfaceVariant.withOpacity(0.5)
+        : const Color(0xFFFAFAFA); // Barely noticeable off-white
   }
 
   Color _chipBorder(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Theme.of(context).brightness == Brightness.dark
-        ? cs.outlineVariant
-        : const Color(0xFFE5E7EB);
+        ? cs.outlineVariant.withOpacity(0.2)
+        : const Color(0xFFF3F4F6); // Very slight border color almost invisible
   }
 
   Color _chipText(BuildContext context) {
@@ -917,7 +1098,7 @@ class _WebCategoryCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: _cardBg(context),
           borderRadius: BorderRadius.circular(16),
@@ -931,13 +1112,13 @@ class _WebCategoryCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  height: 42,
-                  width: 42,
+                  height: 48,
+                  width: 48,
                   decoration: BoxDecoration(
                     color: item.tint ?? cs.surfaceVariant,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(10),
                   child: Image.asset(
                     item.assetImage ?? "assets/vehicle.png",
                     fit: BoxFit.contain,
@@ -948,11 +1129,11 @@ class _WebCategoryCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
 
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 1),
+                    padding: const EdgeInsets.only(top: 4),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -963,7 +1144,7 @@ class _WebCategoryCard extends StatelessWidget {
                           style: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w900,
                             color: cs.onSurface,
-                            fontSize: 13.5,
+                            fontSize: 16,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -973,8 +1154,8 @@ class _WebCategoryCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: _mutedText(context),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12,
                             height: 1.25,
                           ),
                         ),
@@ -987,20 +1168,14 @@ class _WebCategoryCard extends StatelessWidget {
 
                 // ✅ Right arrow (figma)
                 Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? cs.surfaceVariant
-                        : const Color(0xFFF9FAFB),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: cs.outlineVariant),
-                  ),
-                  alignment: Alignment.center,
+                  width: 24,
+                  height: 24,
+                  decoration: const BoxDecoration(color: Colors.transparent),
+                  alignment: Alignment.centerRight,
                   child: Icon(
                     Icons.chevron_right_rounded,
-                    size: 18,
-                    color: cs.onSurface.withOpacity(.45),
+                    size: 20,
+                    color: cs.onSurface.withOpacity(.3),
                   ),
                 ),
               ],
@@ -1010,17 +1185,17 @@ class _WebCategoryCard extends StatelessWidget {
 
             // ✅ Chips (wrap like figma)
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: 12,
+              runSpacing: 12,
               children: chips.take(6).map((t) {
                 return Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
+                    horizontal: 14,
+                    vertical: 8,
                   ),
                   decoration: BoxDecoration(
                     color: _chipBg(context),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: _chipBorder(context)),
                   ),
                   child: Text(
@@ -1030,7 +1205,7 @@ class _WebCategoryCard extends StatelessWidget {
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: _chipText(context),
                       fontWeight: FontWeight.w600,
-                      fontSize: 10.5,
+                      fontSize: 11,
                       height: 1.1,
                     ),
                   ),
@@ -1187,55 +1362,140 @@ class _NeedHelpCta extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final isWeb = kIsWeb && MediaQuery.of(context).size.width >= 1000;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      width: double.infinity,
+      height: isWeb ? 180 : null,
+      padding: EdgeInsets.symmetric(
+        horizontal: isWeb ? 48 : 24,
+        vertical: isWeb ? 32 : 24,
+      ),
       decoration: BoxDecoration(
         color: const Color(0xFF16A34A),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(24),
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF15803D), // slightly darker green
+            Color(0xFF16A34A), // brand green
+          ],
+          begin: Alignment.bottomLeft,
+          end: Alignment.topRight,
+        ),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
+      child: isWeb
+          ? Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Can't find what you need?",
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          fontSize: 28,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        "Post a free ad and let sellers come to you. It takes less than 60 seconds.",
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white.withOpacity(.9),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 32),
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF16A34A),
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 28,
+                      vertical: 18,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "Post Free Ad",
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF16A34A),
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.arrow_forward_rounded, size: 20),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   "Can't find what you need?",
-                  style: theme.textTheme.bodyMedium?.copyWith(
+                  style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 Text(
-                  "Post a free ad and reach buyers fast.",
+                  "Post a free ad and let sellers come to you. It takes less than 60 seconds.",
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.white.withOpacity(.85),
-                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withOpacity(.9),
+                    fontWeight: FontWeight.w500,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFF16A34A),
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Post Free Ad",
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF16A34A),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.arrow_forward_rounded, size: 20),
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: 12),
-          ElevatedButton.icon(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: cs.onSurface,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            icon: const Icon(Icons.add_rounded, size: 18),
-            label: const Text("Post Free Ad"),
-          ),
-        ],
-      ),
     );
   }
 }

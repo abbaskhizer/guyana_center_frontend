@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/bottomNavbar/home_tab_controller.dart';
+import 'package:guyana_center_frontend/controller/custom_bottom_nav_controller.dart';
 import 'package:guyana_center_frontend/widgets/mobile_top_bar.dart';
 import 'package:guyana_center_frontend/widgets/web_footer.dart';
 import 'package:guyana_center_frontend/screens/bottomNavbar/web_categories_grid.dart';
@@ -20,9 +21,7 @@ class HomeTabScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: _isWebDesktop(context)
-          ? Colors.white
-          : theme.scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: _isWebDesktop(context)
             ? _WebLayout(controller: controller)
@@ -187,7 +186,8 @@ class _WebLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return CustomScrollView(
       slivers: [
@@ -204,10 +204,10 @@ class _WebLayout extends StatelessWidget {
           ),
         ),
 
-        /// ✅ WEB: Full-width FAFAFA background with padding
+        /// ✅ WEB: Full-width background with padding
         SliverToBoxAdapter(
           child: Container(
-            color: const Color(0xFFFAFAFA),
+            color: theme.colorScheme.background,
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
@@ -233,57 +233,72 @@ class _WebLayout extends StatelessWidget {
                 const SizedBox(height: 48),
                 // Stats section in single white card
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 48,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 48),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(48),
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(
+                          theme.brightness == Brightness.dark ? 0.2 : 0.03,
+                        ),
+                        blurRadius: 20,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Row(
                     children: [
                       Expanded(
-                        child: _StatChip(
+                        child: _WebStatChip(
                           value: "50K+",
                           label: "Active Listings",
                           baseColor: const Color(0xFF16A34A),
                         ),
                       ),
                       Container(
-                        height: 60,
+                        height: 50,
                         width: 1,
-                        color: const Color(0xFFF3F4F6),
+                        color: theme.colorScheme.outlineVariant.withOpacity(
+                          0.5,
+                        ),
                       ),
-                      const Expanded(
-                        child: _StatChip(
+                      Expanded(
+                        child: _WebStatChip(
                           value: "100K+",
                           label: "Happy Users",
                           baseColor: const Color(0xFFDC2626),
                         ),
                       ),
                       Container(
-                        height: 60,
+                        height: 50,
                         width: 1,
-                        color: const Color(0xFFF3F4F6),
+                        color: theme.colorScheme.outlineVariant.withOpacity(
+                          0.5,
+                        ),
                       ),
                       Expanded(
-                        child: _StatChip(
+                        child: _WebStatChip(
                           value: "12",
                           label: "Categories",
                           baseColor: const Color(0xFFD97706),
                         ),
                       ),
                       Container(
-                        height: 60,
+                        height: 50,
                         width: 1,
-                        color: const Color(0xFFF3F4F6),
+                        color: theme.colorScheme.outlineVariant.withOpacity(
+                          0.5,
+                        ),
                       ),
-                      const Expanded(
-                        child: _StatChip(
+                      Expanded(
+                        child: _WebStatChip(
                           value: "FREE",
                           label: "Always & Forever",
-                          baseColor: const Color(0xFF1F2937),
+                          baseColor: theme.colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -484,6 +499,12 @@ class _WebSearchBar extends StatelessWidget {
         SizedBox(
           height: 56,
           child: TextField(
+            readOnly: true,
+            onTap: () {
+              if (Get.isRegistered<CustomBottomNavController>()) {
+                Get.find<CustomBottomNavController>().goToTab(1);
+              }
+            },
             decoration: InputDecoration(
               hintText: 'Search cars, phones, houses, jobs...',
               hintStyle: theme.textTheme.bodySmall?.copyWith(
@@ -491,11 +512,11 @@ class _WebSearchBar extends StatelessWidget {
                 fontWeight: FontWeight.w500,
               ),
               filled: true,
-              fillColor: Colors.white,
-              prefixIcon: const Icon(
+              fillColor: theme.colorScheme.surface,
+              prefixIcon: Icon(
                 Icons.search_rounded,
                 size: 18,
-                color: Color(0xFFCBD5E1),
+                color: theme.colorScheme.onSurfaceVariant,
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -503,11 +524,11 @@ class _WebSearchBar extends StatelessWidget {
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
               ),
               suffixIcon: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
@@ -523,7 +544,11 @@ class _WebSearchBar extends StatelessWidget {
                     SizedBox(
                       height: 40,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          if (Get.isRegistered<CustomBottomNavController>()) {
+                            Get.find<CustomBottomNavController>().goToTab(1);
+                          }
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF16A34A),
                           foregroundColor: Colors.white,
@@ -579,19 +604,27 @@ class _TrendChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Text(
-        label,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: const Color(0xFF6B7280),
-          fontWeight: FontWeight.w500,
-          fontSize: 11,
+    return InkWell(
+      onTap: () {
+        if (Get.isRegistered<CustomBottomNavController>()) {
+          Get.find<CustomBottomNavController>().goToTab(1);
+        }
+      },
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: theme.colorScheme.outlineVariant),
+        ),
+        child: Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
+            fontSize: 11,
+          ),
         ),
       ),
     );
@@ -603,7 +636,8 @@ class _SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return TextField(
       decoration: InputDecoration(
@@ -1073,6 +1107,49 @@ class _PropertyCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _WebStatChip extends StatelessWidget {
+  final String value;
+  final String label;
+  final Color baseColor;
+
+  const _WebStatChip({
+    required this.value,
+    required this.label,
+    required this.baseColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          value,
+          style: theme.textTheme.headlineLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            color: baseColor,
+            fontSize: 36,
+            letterSpacing: -1.0,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: cs.onSurface.withOpacity(0.5),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
     );
   }
 }

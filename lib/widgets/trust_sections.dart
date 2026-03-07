@@ -44,14 +44,14 @@ class TopStoresSection extends StatelessWidget {
                   'Top Stores',
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w900,
-                    color: const Color(0xFF1F2937),
+                    color: theme.colorScheme.onSurface,
                     fontSize: 24,
                   ),
                 ),
                 Text(
                   'Trusted sellers on Pin.tt',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF9CA3AF),
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
                     fontSize: 14,
                   ),
                 ),
@@ -69,7 +69,11 @@ class TopStoresSection extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  const Icon(Icons.chevron_right, color: Color(0xFF16A34A), size: 18),
+                  const Icon(
+                    Icons.chevron_right,
+                    color: Color(0xFF16A34A),
+                    size: 18,
+                  ),
                 ],
               ),
             ),
@@ -83,8 +87,9 @@ class TopStoresSection extends StatelessWidget {
                 margin: EdgeInsets.only(right: store == stores.last ? 0 : 16),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: theme.colorScheme.outlineVariant),
                 ),
                 child: Row(
                   children: [
@@ -114,13 +119,15 @@ class TopStoresSection extends StatelessWidget {
                             store['name'] as String,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1F2937),
+                              color: theme.colorScheme.onSurface,
                             ),
                           ),
                           Text(
                             store['category'] as String,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: const Color(0xFF9CA3AF),
+                              color: theme.colorScheme.onSurface.withOpacity(
+                                0.6,
+                              ),
                             ),
                           ),
                         ],
@@ -128,13 +135,17 @@ class TopStoresSection extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        const Icon(Icons.star_outline, color: Color(0xFFD97706), size: 16),
+                        const Icon(
+                          Icons.star_outline,
+                          color: Color(0xFFD97706),
+                          size: 16,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           store['rating'] as String,
                           style: theme.textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: const Color(0xFF1F2937),
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
                       ],
@@ -164,7 +175,7 @@ class WhyTrinisLoveSection extends StatelessWidget {
           'Why Trinis Love Gyanacentral',
           style: theme.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.w900,
-            color: const Color(0xFF1F2937),
+            color: theme.colorScheme.onSurface,
             fontSize: 32,
           ),
         ),
@@ -172,7 +183,7 @@ class WhyTrinisLoveSection extends StatelessWidget {
         Text(
           'Simple, free, and built for Trinidad & Tobago',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: const Color(0xFF9CA3AF),
+            color: theme.colorScheme.onSurface.withOpacity(0.6),
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
@@ -183,7 +194,8 @@ class WhyTrinisLoveSection extends StatelessWidget {
             Expanded(
               child: _BenefitCard(
                 title: '100% Free',
-                description: 'Post unlimited ads at no cost. No hidden fees, no premium plans — just free classifieds.',
+                description:
+                    'Post unlimited ads at no cost. No hidden fees, no premium plans — just free classifieds.',
                 icon: Icons.shield_outlined,
                 color: const Color(0xFF16A34A),
                 bgColor: const Color(0xFFF0FDF4),
@@ -194,7 +206,8 @@ class WhyTrinisLoveSection extends StatelessWidget {
             Expanded(
               child: _BenefitCard(
                 title: 'Fast Results',
-                description: 'Post an ad in under 60 seconds. Get calls from buyers the same day you list.',
+                description:
+                    'Post an ad in under 60 seconds. Get calls from buyers the same day you list.',
                 icon: Icons.trending_up,
                 color: const Color(0xFFDC2626),
                 bgColor: const Color(0xFFFEF2F2),
@@ -205,7 +218,8 @@ class WhyTrinisLoveSection extends StatelessWidget {
             Expanded(
               child: _BenefitCard(
                 title: 'Made for T&T',
-                description: 'Built for locals — browse by parish, connect with nearby sellers, and deal in TTD.',
+                description:
+                    'Built for locals — browse by parish, connect with nearby sellers, and deal in TTD.',
                 icon: Icons.location_on_outlined,
                 color: const Color(0xFFD97706),
                 bgColor: const Color(0xFFFFFBEB),
@@ -239,13 +253,17 @@ class _BenefitCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
       decoration: BoxDecoration(
-        color: bgColor,
+        color: isDark ? color.withOpacity(0.1) : bgColor,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: borderColor, width: 1),
+        border: Border.all(
+          color: isDark ? color.withOpacity(0.25) : borderColor,
+          width: 1,
+        ),
       ),
       child: Column(
         children: [
@@ -264,7 +282,7 @@ class _BenefitCard extends StatelessWidget {
             title,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w900,
-              color: const Color(0xFF1F2937),
+              color: theme.colorScheme.onSurface,
               fontSize: 20,
             ),
           ),

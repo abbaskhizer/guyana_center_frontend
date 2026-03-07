@@ -161,10 +161,14 @@ class _WebLayout extends StatelessWidget {
             SliverToBoxAdapter(
               child: Container(
                 width: double.infinity,
-                color: Colors.white,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(
+                        0xFF161616,
+                      ) // Match Figma Dark header specifically like All categories
+                    : Colors.white,
                 child: centered(
                   Padding(
-                    padding: const EdgeInsets.only(top: 14, bottom: 12),
+                    padding: const EdgeInsets.only(top: 14, bottom: 0),
                     child: _WebPageHeader(
                       category: category,
                       controller: controller,
@@ -178,32 +182,38 @@ class _WebLayout extends StatelessWidget {
             SliverToBoxAdapter(
               child: Container(
                 width: double.infinity,
-                color: const Color(0xFFFAFAFA),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Theme.of(context).scaffoldBackgroundColor
+                    : const Color(0xFFFAFAFA),
                 child: centered(
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 16),
-
-                      _ChipRow(controller: controller),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 24),
 
                       _SearchAndFilterRow(
                         controller: controller,
-                        hint: "Search ${category.title.toLowerCase()}...",
+                        hint: "Search in ${category.title}...",
                         isWeb: true,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 24),
 
-                      _ResultsHeaderRow(controller: controller),
-                      const SizedBox(height: 14),
+                      Text(
+                        "Showing ${controller.totalFilteredCount} results",
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: cs.onSurface.withOpacity(.45),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
 
                       _ListingsSection(controller: controller, isWeb: true),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 48),
 
                       // ✅ screenshot wali pagination (web)
                       _PaginationBar(controller: controller),
-                      const SizedBox(height: 26),
+                      const SizedBox(height: 64),
 
                       Text(
                         "Browse Other Categories",
@@ -352,6 +362,7 @@ class _WebPageHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               "Home",
@@ -368,13 +379,80 @@ class _WebPageHeader extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
+              "Categories",
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: cs.onSurface.withOpacity(.45),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 16,
+              color: cs.onSurface.withOpacity(.35),
+            ),
+            const SizedBox(width: 8),
+            Text(
               category.title,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: cs.primary,
+                color: cs.onSurface.withOpacity(.8),
                 fontWeight: FontWeight.w800,
               ),
             ),
             const Spacer(),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Container(
+              width: 76,
+              height: 76,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0FDF4),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              alignment: Alignment.center,
+              child: category.assetImage != null
+                  ? Image.asset(
+                      category.assetImage!,
+                      width: 44,
+                      height: 44,
+                      fit: BoxFit.contain,
+                    )
+                  : Image.asset(
+                      "assets/vehicle.png",
+                      width: 44,
+                      height: 44,
+                      fit: BoxFit.contain,
+                    ),
+            ),
+            const SizedBox(width: 24),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    category.title,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: cs.onSurface,
+                      fontSize: 30, // big and bold
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Cars, trucks, motorcycles & more",
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: cs.onSurface.withOpacity(.4),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Obx(
               () => _StatsStrip(
                 listings: controller.listingsCount.value,
@@ -385,16 +463,11 @@ class _WebPageHeader extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
-        _TitleRow(category: category),
-        const SizedBox(height: 6),
-        Text(
-          "Cars, trucks, motorcycles & more",
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: cs.onSurface.withOpacity(.55),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        const SizedBox(height: 20),
+        const Divider(height: 1, color: Color(0xFFF0F0F0)),
+        const SizedBox(height: 16),
+        _ChipRow(controller: controller),
+        const SizedBox(height: 16),
       ],
     );
   }
@@ -424,6 +497,47 @@ class _StatsStrip extends StatelessWidget {
       color: cs.onSurface,
     );
 
+    if (dense) {
+      Widget columnStat(String val, String lbl, Color valueColor) {
+        return Column(
+          children: [
+            Text(
+              val,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: valueColor,
+                fontSize: 22,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              lbl,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 12,
+                color: cs.onSurface.withOpacity(.4),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        );
+      }
+
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            columnStat(listings, "Total Ads", const Color(0xFF16A34A)),
+            const SizedBox(width: 42),
+            columnStat(newCount, "New Today", cs.onSurface),
+            const SizedBox(width: 42),
+            columnStat(rating, "Avg. Rating", const Color(0xFFD97706)),
+          ],
+        ),
+      );
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -432,26 +546,26 @@ class _StatsStrip extends StatelessWidget {
         Text(
           "listings",
           style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: dense ? 12 : 15,
+            fontSize: 15,
             color: cs.onSurface.withOpacity(.55),
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(width: 14),
-        Container(width: 1, height: dense ? 14 : 18, color: cs.outlineVariant),
+        Container(width: 1, height: 18, color: cs.outlineVariant),
         const SizedBox(width: 14),
         Text(newCount, style: valueStyle),
         const SizedBox(width: 6),
         Text(
           "new",
           style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: dense ? 12 : 15,
+            fontSize: 15,
             color: cs.onSurface.withOpacity(.55),
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(width: 14),
-        Container(width: 1, height: dense ? 14 : 18, color: cs.outlineVariant),
+        Container(width: 1, height: 18, color: cs.outlineVariant),
         const SizedBox(width: 14),
         const Icon(Icons.star_rounded, size: 18, color: Color(0xFFFFB020)),
         const SizedBox(width: 6),
@@ -459,7 +573,7 @@ class _StatsStrip extends StatelessWidget {
           rating,
           style: theme.textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w900,
-            fontSize: dense ? 12.5 : 15,
+            fontSize: 15,
             color: cs.onSurface,
           ),
         ),
@@ -475,7 +589,7 @@ class _ChipRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 44,
+      height: 48,
       child: Obx(() {
         final tabs = controller.chips;
         final active = controller.chipIndex.value;
@@ -483,11 +597,13 @@ class _ChipRow extends StatelessWidget {
         return ListView.separated(
           scrollDirection: Axis.horizontal,
           itemCount: tabs.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 10),
-          itemBuilder: (_, i) => _TabPill(
-            text: tabs[i],
-            active: i == active,
-            onTap: () => controller.setChip(i),
+          separatorBuilder: (_, __) => const SizedBox(width: 20),
+          itemBuilder: (_, i) => Center(
+            child: _TabPill(
+              text: tabs[i],
+              active: i == active,
+              onTap: () => controller.setChip(i),
+            ),
           ),
         );
       }),
@@ -561,48 +677,139 @@ class _SearchAndFilterRow extends StatelessWidget {
     }
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Expanded(child: field),
-        const SizedBox(width: 10),
+        Expanded(flex: 4, child: SizedBox(height: 48, child: field)),
+        const SizedBox(width: 16),
         SizedBox(
-          height: 46,
+          height: 48,
           child: ElevatedButton.icon(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
-              backgroundColor: cs.surface,
+              backgroundColor: Theme.of(context).brightness == Brightness.dark
+                  ? cs.surface
+                  : Colors.white,
               foregroundColor: cs.onSurface,
               elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: cs.outlineVariant),
+                borderRadius: BorderRadius.circular(14),
+                side: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.transparent
+                      : cs.outlineVariant,
+                ),
               ),
               textStyle: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
               ),
             ),
             icon: const Icon(Icons.tune_rounded, size: 18),
             label: const Text("Filters"),
           ),
         ),
-        const SizedBox(width: 10),
+        const Spacer(flex: 2),
+        const Spacer(flex: 3),
+        SizedBox(
+          height: 48,
+          child: ElevatedButton.icon(
+            onPressed: () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).brightness == Brightness.dark
+                  ? cs.surface
+                  : Colors.white,
+              foregroundColor: cs.onSurface,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.transparent
+                      : cs.outlineVariant,
+                ),
+              ),
+              textStyle: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
+            ),
+            icon: Icon(
+              Icons.swap_vert_rounded,
+              size: 18,
+              color: cs.onSurface.withOpacity(.6),
+            ),
+            label: const Text("Newest First"),
+          ),
+        ),
+        const SizedBox(width: 16),
         Obx(() {
           final grid = controller.isGrid.value;
-          return InkWell(
-            onTap: controller.toggleView,
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                color: cs.primary,
-                borderRadius: BorderRadius.circular(12),
+          return Container(
+            height: 48,
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? cs.surface
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.transparent
+                    : cs.outlineVariant,
               ),
-              alignment: Alignment.center,
-              child: Icon(
-                grid ? Icons.grid_view_rounded : Icons.view_agenda_rounded,
-                color: cs.onPrimary,
-                size: 18,
-              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                InkWell(
+                  onTap: () => controller.toggleView(),
+                  child: Container(
+                    height: 48,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    decoration: BoxDecoration(
+                      color: grid
+                          ? cs.surfaceVariant.withOpacity(0.5)
+                          : Colors.transparent,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(14),
+                        bottomLeft: Radius.circular(14),
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.grid_view_rounded,
+                      size: 18,
+                      color: grid ? cs.onSurface : cs.onSurface.withOpacity(.4),
+                    ),
+                  ),
+                ),
+                Container(width: 1, height: 48, color: cs.outlineVariant),
+                InkWell(
+                  onTap: () => controller.toggleView(),
+                  child: Container(
+                    height: 48,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    decoration: BoxDecoration(
+                      color: !grid
+                          ? cs.surfaceVariant.withOpacity(0.5)
+                          : Colors.transparent,
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(14),
+                        bottomRight: Radius.circular(14),
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.format_list_bulleted_rounded,
+                      size: 18,
+                      color: !grid
+                          ? cs.onSurface
+                          : cs.onSurface.withOpacity(.4),
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         }),
@@ -767,18 +974,17 @@ class _TabPill extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(30),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         decoration: BoxDecoration(
-          color: active ? cs.primary : cs.surface,
+          color: active ? const Color(0xFF16A34A) : Colors.transparent,
           borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: active ? cs.primary : cs.outlineVariant),
         ),
         child: Text(
           text,
           style: theme.textTheme.bodySmall?.copyWith(
             fontSize: 13,
-            fontWeight: FontWeight.w800,
-            color: active ? cs.onPrimary : cs.onSurface,
+            fontWeight: FontWeight.w700,
+            color: active ? Colors.white : cs.onSurface.withOpacity(.65),
           ),
         ),
       ),
@@ -889,7 +1095,9 @@ class _PagerArrow extends StatelessWidget {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Theme.of(context).colorScheme.surface
+                : Colors.white,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: border),
           ),
@@ -924,20 +1132,24 @@ class _PagePill extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
       child: Container(
-        width: 28,
-        height: 28,
+        width: 32,
+        height: 32,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: active ? activeColor : Colors.white,
+          color: active
+              ? activeColor
+              : (Theme.of(context).brightness == Brightness.dark
+                    ? cs.surface
+                    : Colors.white),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: active ? activeColor : inactiveBorder),
         ),
         child: Text(
           text,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w800,
-            fontSize: 11,
-            color: active ? Colors.white : cs.onSurface.withOpacity(.65),
+            fontWeight: active ? FontWeight.w800 : FontWeight.w600,
+            fontSize: 12,
+            color: active ? Colors.white : cs.onSurface.withOpacity(.45),
           ),
         ),
       ),
@@ -970,31 +1182,91 @@ class _OtherCategoriesRowWeb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    return const Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _StandaloneCategoryCard(
+          image: "assets/realestate.png",
+          text: "Real Estate",
+        ),
+        const SizedBox(width: 14),
+        _StandaloneCategoryCard(image: "assets/jobs.png", text: "Jobs"),
+        const SizedBox(width: 14),
+        _StandaloneCategoryCard(
+          image: "assets/electronics.png",
+          text: "Electronics",
+        ),
+        const SizedBox(width: 14),
+        _StandaloneCategoryCard(image: "assets/fashion.png", text: "Fashion"),
+        const SizedBox(width: 14),
+        _StandaloneCategoryCard(
+          image: "assets/home&gardan.png",
+          text: "Home & Furniture",
+        ),
+        const SizedBox(width: 14),
+        _StandaloneCategoryCard(
+          image: "assets/sports&hobbies.png",
+          text: "Sports & Hobbies",
+        ),
+      ],
+    );
+  }
+}
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: cs.outlineVariant),
-      ),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          OtherCategoryIcon(
-            image: "assets/realestate.png",
-            text: "Real Estate",
+class _StandaloneCategoryCard extends StatelessWidget {
+  final String image;
+  final String text;
+
+  const _StandaloneCategoryCard({required this.image, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        decoration: BoxDecoration(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? cs.surface
+              : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.transparent
+                : cs.outlineVariant.withOpacity(0.5),
           ),
-          OtherCategoryIcon(image: "assets/jobs.png", text: "Jobs"),
-          OtherCategoryIcon(
-            image: "assets/electronics.png",
-            text: "Electronics",
-          ),
-          OtherCategoryIcon(image: "assets/home&gardan.png", text: "Furniture"),
-          OtherCategoryIcon(image: "assets/sports&hobbies.png", text: "Sports"),
-          OtherCategoryIcon(image: "assets/pet&animals.png", text: "Pets"),
-        ],
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: const BoxDecoration(
+                color: Color(0xFFF0FDF4),
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Image.asset(
+                image,
+                width: 26,
+                height: 26,
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              text,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: cs.onSurface,
+                fontSize: 11,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1050,13 +1322,6 @@ class ListingCardGrid extends StatelessWidget {
   final ListingVM item;
   const ListingCardGrid({super.key, required this.item});
 
-  Color _badgeColor() {
-    final t = (item.badge ?? "").toLowerCase();
-    if (t == "sale") return const Color(0xFF22C55E);
-    if (t == "new") return const Color(0xFF3B82F6);
-    return const Color(0xFFFFB020);
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1104,83 +1369,196 @@ class ListingCardGrid extends StatelessWidget {
                     top: 10,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
+                        horizontal: 8,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: _badgeColor(),
+                        color: const Color(0xFFEAB308), // Figma: Orange yellow
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Text(
-                        item.badge!,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w900,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.whatshot_rounded,
+                            color: Colors.white,
+                            size: 12,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            item.badge!,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
+                Positioned(
+                  right: 10,
+                  top: 10,
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.camera_alt_outlined,
+                              color: Colors.white,
+                              size: 12,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              "7",
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.9),
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Icon(
+                          Icons.favorite_border_rounded,
+                          color: cs.onSurfaceVariant,
+                          size: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: cs.onSurface,
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  item.price,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: cs.primary,
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.location_on_outlined,
-                      size: 14,
-                      color: cs.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        item.location,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: cs.onSurface.withOpacity(.55),
-                          fontWeight: FontWeight.w700,
-                          fontSize: 11.5,
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFDCFCE7), // light green
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          "Used",
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: const Color(0xFF16A34A),
+                            fontWeight: FontWeight.w800,
+                            fontSize: 9,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  item.timeAgo,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: cs.onSurface.withOpacity(.45),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 11,
+                      const SizedBox(width: 8),
+                      Text(
+                        item.subType.isEmpty ? "Cars for Sale" : item.subType,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: cs.onSurface.withOpacity(.4),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  const Spacer(flex: 2),
+                  Text(
+                    item.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: cs.onSurface,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    item.price,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF16A34A), // Deep green like design
+                      fontSize: 16,
+                    ),
+                  ),
+                  const Spacer(flex: 3),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.location_on_outlined,
+                            size: 14,
+                            color: cs.onSurface.withOpacity(.4),
+                          ),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              item.location,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: cs.onSurface.withOpacity(.5),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.schedule_rounded,
+                            size: 14,
+                            color: cs.onSurface.withOpacity(.4),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            item.timeAgo,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: cs.onSurface.withOpacity(.5),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],

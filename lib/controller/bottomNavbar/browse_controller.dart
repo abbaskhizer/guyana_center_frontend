@@ -9,6 +9,7 @@ class BrowseController extends GetxController {
 
   final isGrid = true.obs;
   final sortLabel = 'Sort'.obs;
+  final forceEmptyState = false.obs;
 
   final listings = <BrowseListingVM>[].obs;
 
@@ -46,6 +47,7 @@ class BrowseController extends GetxController {
 
   void clearSearch() {
     searchText.value = '';
+    forceEmptyState.value = false;
   }
 
   void setChip(int index) {
@@ -89,7 +91,8 @@ class BrowseController extends GetxController {
     }).toList();
   }
 
-  bool get showEmptyState => hasQuery && filtered.isEmpty;
+  bool get showEmptyState =>
+      forceEmptyState.value || (hasQuery && filtered.isEmpty);
 
   List<BrowseListingVM> _seed() => [
     BrowseListingVM(

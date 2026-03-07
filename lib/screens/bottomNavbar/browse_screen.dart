@@ -18,16 +18,25 @@ class BrowseScreen extends StatelessWidget {
     final controller = Get.put(BrowseController(), permanent: true);
     final theme = Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: _isWebDesktop(context)
-          ? theme.colorScheme.surface
-          : theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: _isWebDesktop(context)
-            ? _WebLayout(controller: controller)
-            : _MobileLayout(controller: controller),
-      ),
-    );
+    return Obx(() {
+      final isEmpty = controller.showEmptyState;
+      final isWeb = _isWebDesktop(context);
+
+      return Scaffold(
+        backgroundColor: isWeb
+            ? (isEmpty
+                  ? (theme.brightness == Brightness.dark
+                        ? theme.colorScheme.surface
+                        : Colors.white)
+                  : theme.colorScheme.surface)
+            : theme.scaffoldBackgroundColor,
+        body: SafeArea(
+          child: isWeb
+              ? _WebLayout(controller: controller)
+              : _MobileLayout(controller: controller),
+        ),
+      );
+    });
   }
 }
 
@@ -65,58 +74,63 @@ class _WebLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1100),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 22, 24, 10),
-                child: _BrowseSearchSection(controller: controller, web: true),
-              ),
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
           child: Container(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF161616)
+                : Colors.white,
             width: double.infinity,
-            color: cs.surfaceContainerLowest,
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1100),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 28),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
-                    decoration: BoxDecoration(
-                      color: cs.surface,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: cs.outlineVariant),
-                      boxShadow: [
-                        BoxShadow(
-                          color: cs.shadow.withOpacity(.04),
-                          blurRadius: 14,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _BrowseFilterSection(controller: controller, web: true),
-                        const SizedBox(height: 16),
-                        BrowseResults(controller: controller),
-                      ],
-                    ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 0,
+                    vertical: 22,
+                  ),
+                  child: _BrowseSearchSection(
+                    controller: controller,
+                    web: true,
                   ),
                 ),
               ),
             ),
           ),
+        ),
+        SliverToBoxAdapter(
+          child: Obx(() {
+            final isEmpty = controller.showEmptyState;
+            return Container(
+              width: double.infinity,
+              color: isEmpty
+                  ? (Theme.of(context).brightness == Brightness.dark
+                        ? Theme.of(context).colorScheme.surface
+                        : Colors.white)
+                  : (Theme.of(context).brightness == Brightness.dark
+                        ? Theme.of(context).scaffoldBackgroundColor
+                        : const Color(0xFFFAFAFA)),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1100),
+                  child: Padding(
+                    padding: isEmpty
+                        ? EdgeInsets.zero
+                        : const EdgeInsets.fromLTRB(24, 28, 24, 28),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _BrowseFilterSection(controller: controller, web: true),
+                        if (!isEmpty) const SizedBox(height: 24),
+                        BrowseResults(controller: controller, isWeb: true),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
         ),
         const SliverToBoxAdapter(child: WebFooter()),
       ],
@@ -202,7 +216,9 @@ class _BrowseSearchBar extends StatelessWidget {
             height: web ? 48 : 46,
             width: web ? 96 : 50,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                controller.forceEmptyState.value = true;
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: cs.primary,
                 foregroundColor: cs.onPrimary,
@@ -244,100 +260,94 @@ class _BrowseFilterSection extends StatelessWidget {
       final isEmptyState = controller.showEmptyState;
       final query = controller.displayQuery(web);
 
+      if (isEmptyState) return const SizedBox.shrink();
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            isEmptyState
-                ? '0 results for "$query"'
-                : '${controller.filtered.length} results for "$query"',
+            '${controller.filtered.length} results for "$query"',
             style: theme.textTheme.bodySmall?.copyWith(
               color: cs.onSurfaceVariant,
               fontWeight: FontWeight.w500,
               fontSize: web ? 13 : 14,
             ),
           ),
-          if (!isEmptyState) ...[
-            const SizedBox(height: 14),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: web
-                      ? SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: List.generate(controller.chips.length, (
-                              i,
-                            ) {
-                              final active = controller.activeChip.value == i;
-                              return Padding(
-                                padding: EdgeInsets.only(
-                                  right: i == controller.chips.length - 1
-                                      ? 0
-                                      : 8,
-                                ),
-                                child: _FilterChip(
-                                  label: controller.chips[i],
-                                  active: active,
-                                  onTap: () => controller.setChip(i),
-                                ),
-                              );
-                            }),
-                          ),
-                        )
-                      : Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
+          const SizedBox(height: 14),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: web
+                    ? SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
                           children: List.generate(controller.chips.length, (i) {
                             final active = controller.activeChip.value == i;
-                            return _FilterChip(
-                              label: controller.chips[i],
-                              active: active,
-                              onTap: () => controller.setChip(i),
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                right: i == controller.chips.length - 1 ? 0 : 8,
+                              ),
+                              child: _FilterChip(
+                                label: controller.chips[i],
+                                active: active,
+                                onTap: () => controller.setChip(i),
+                              ),
                             );
                           }),
                         ),
-                ),
-                const SizedBox(width: 12),
-                if (web) ...[
-                  _SortButton(label: 'Most Relevant', onTap: () {}),
-                  const SizedBox(width: 8),
-                ] else ...[
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.tune_rounded,
-                        size: 17,
-                        color: cs.onSurfaceVariant,
+                      )
+                    : Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: List.generate(controller.chips.length, (i) {
+                          final active = controller.activeChip.value == i;
+                          return _FilterChip(
+                            label: controller.chips[i],
+                            active: active,
+                            onTap: () => controller.setChip(i),
+                          );
+                        }),
                       ),
-                      const SizedBox(width: 5),
-                      Text(
-                        'Sort',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurface,
-                        ),
+              ),
+              const SizedBox(width: 12),
+              if (web) ...[
+                _SortButton(label: 'Most Relevant', onTap: () {}),
+                const SizedBox(width: 8),
+              ] else ...[
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.tune_rounded,
+                      size: 17,
+                      color: cs.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      'Sort',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: cs.onSurface,
                       ),
-                    ],
-                  ),
-                  const SizedBox(width: 10),
-                ],
-                _ViewTypeButton(
-                  icon: Icons.grid_view_rounded,
-                  active: controller.isGrid.value,
-                  onTap: controller.setGridView,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 6),
-                _ViewTypeButton(
-                  icon: Icons.view_list_rounded,
-                  active: !controller.isGrid.value,
-                  onTap: controller.setListView,
-                ),
+                const SizedBox(width: 10),
               ],
-            ),
-          ],
+              _ViewTypeButton(
+                icon: Icons.grid_view_rounded,
+                active: controller.isGrid.value,
+                onTap: controller.setGridView,
+              ),
+              const SizedBox(width: 6),
+              _ViewTypeButton(
+                icon: Icons.view_list_rounded,
+                active: !controller.isGrid.value,
+                onTap: controller.setListView,
+              ),
+            ],
+          ),
         ],
       );
     });
@@ -457,8 +467,13 @@ class _ViewTypeButton extends StatelessWidget {
 
 class BrowseResults extends StatelessWidget {
   final BrowseController controller;
+  final bool isWeb;
 
-  const BrowseResults({super.key, required this.controller});
+  const BrowseResults({
+    super.key,
+    required this.controller,
+    this.isWeb = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -466,7 +481,7 @@ class BrowseResults extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      color: cs.surface,
+      color: Colors.transparent,
       child: Obx(() {
         final q = controller.searchText.value.trim();
 
@@ -481,29 +496,45 @@ class BrowseResults extends StatelessWidget {
         return controller.isGrid.value
             ? LayoutBuilder(
                 builder: (context, constraints) {
-                  final cardWidth = kIsWeb
-                      ? 210.0
-                      : (constraints.maxWidth - 14) / 2;
+                  final cols = isWeb
+                      ? (constraints.maxWidth >= 980
+                            ? 4
+                            : constraints.maxWidth >= 760
+                            ? 3
+                            : constraints.maxWidth >= 520
+                            ? 2
+                            : 1)
+                      : 2;
+                  double extent = isWeb
+                      ? (cols >= 4
+                            ? 305
+                            : cols == 3
+                            ? 330
+                            : cols == 2
+                            ? 350
+                            : 370)
+                      : 260;
 
-                  return Container(
-                    width: double.infinity,
-                    color: cs.surface,
-                    child: Wrap(
-                      spacing: 14,
-                      runSpacing: 14,
-                      children: controller.filtered.map((item) {
-                        return SizedBox(
-                          width: cardWidth,
-                          child: _BrowseListingCardWrapper(item: item),
-                        );
-                      }).toList(),
+                  return GridView.builder(
+                    itemCount: controller.filtered.length,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: cols,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      mainAxisExtent: extent,
                     ),
+                    itemBuilder: (_, i) {
+                      final item = controller.filtered[i];
+                      return _BrowseListingCardWrapper(item: item);
+                    },
                   );
                 },
               )
             : Container(
                 width: double.infinity,
-                color: cs.surface,
+                color: Colors.transparent,
                 child: ListView.separated(
                   itemCount: controller.filtered.length,
                   shrinkWrap: true,
@@ -601,16 +632,15 @@ class _ListingCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: cs.outlineVariant),
-        boxShadow: [
-          BoxShadow(
-            color: cs.shadow.withOpacity(.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: Theme.of(context).brightness == Brightness.dark
+            ? cs.surface
+            : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.transparent
+              : cs.outlineVariant.withOpacity(0.5),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -619,39 +649,70 @@ class _ListingCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(18),
+                  top: Radius.circular(16),
                 ),
                 child: AspectRatio(
-                  aspectRatio: 16 / 10,
+                  aspectRatio: 16 / 10.5,
                   child: Image.network(item.imageUrl, fit: BoxFit.cover),
                 ),
               ),
               if (item.featured)
-                const Positioned(left: 8, top: 8, child: _FeaturedBadge()),
+                Positioned(left: 12, top: 12, child: _FeaturedBadge(web: true)),
               Positioned(
-                right: 8,
-                top: 8,
-                child: Material(
-                  color: cs.surface.withOpacity(.92),
-                  shape: const CircleBorder(),
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: () {},
-                    child: Padding(
-                      padding: const EdgeInsets.all(7),
+                right: 12,
+                top: 12,
+                child: Row(
+                  children: [
+                    if (item.gallery.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.camera_alt_outlined,
+                              size: 12,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${item.gallery.length}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
                       child: Icon(
                         Icons.favorite_border_rounded,
-                        size: 18,
+                        size: 16,
                         color: cs.onSurfaceVariant,
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ],
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 12),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
             child: _ListingContent(item: item, compact: true),
           ),
         ],
@@ -699,41 +760,68 @@ class _ListingContent extends StatelessWidget {
     final cs = theme.colorScheme;
 
     final content = <Widget>[
-      Text(
-        item.category,
-        style: theme.textTheme.bodySmall?.copyWith(
-          fontSize: 11,
-          color: cs.onSurfaceVariant,
-          fontWeight: FontWeight.w600,
-        ),
+      Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0FDF4),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              item.category,
+              style: const TextStyle(
+                color: Color(0xFF16A34A),
+                fontWeight: FontWeight.w800,
+                fontSize: 10,
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHighest.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              item.condition,
+              style: TextStyle(
+                color: cs.onSurfaceVariant,
+                fontWeight: FontWeight.w700,
+                fontSize: 10,
+              ),
+            ),
+          ),
+        ],
       ),
-      const SizedBox(height: 5),
+      const SizedBox(height: 12),
       Text(
         item.title,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w800,
-          fontSize: 13.5,
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w900,
+          fontSize: 15,
           color: cs.onSurface,
         ),
       ),
-      const SizedBox(height: 8),
+      const SizedBox(height: 12),
       Text(
         item.price,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: cs.primary,
+        style: TextStyle(
+          color: const Color(0xFF16A34A),
           fontWeight: FontWeight.w900,
-          fontSize: 14,
+          fontSize: 20,
         ),
       ),
-      const SizedBox(height: 10),
+      const SizedBox(height: 18),
       Row(
         children: [
           Icon(
             Icons.location_on_outlined,
             size: 14,
-            color: cs.onSurfaceVariant,
+            color: cs.onSurfaceVariant.withOpacity(0.6),
           ),
           const SizedBox(width: 4),
           Expanded(
@@ -743,9 +831,23 @@ class _ListingContent extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
                 fontSize: 11,
-                color: cs.onSurfaceVariant,
+                color: cs.onSurfaceVariant.withOpacity(0.8),
                 fontWeight: FontWeight.w600,
               ),
+            ),
+          ),
+          Icon(
+            Icons.access_time_rounded,
+            size: 14,
+            color: cs.onSurfaceVariant.withOpacity(0.6),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            "2 hours ago",
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontSize: 11,
+              color: cs.onSurfaceVariant.withOpacity(0.8),
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -794,7 +896,7 @@ class _EmptySearchState extends StatelessWidget {
       color: cs.surface,
       child: Center(
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: isWeb ? 760 : double.infinity),
+          constraints: BoxConstraints(maxWidth: isWeb ? 1100 : double.infinity),
           child: Padding(
             padding: EdgeInsets.fromLTRB(
               isWeb ? 24 : 8,
@@ -803,205 +905,110 @@ class _EmptySearchState extends StatelessWidget {
               isWeb ? 36 : 18,
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                const SizedBox(height: 38),
                 _EmptyStateIcon(web: isWeb),
-                SizedBox(height: isWeb ? 18 : 18),
+                const SizedBox(height: 36),
                 _EmptyTitle(web: isWeb, query: displayQuery),
-                const SizedBox(height: 10),
+                const SizedBox(height: 16),
                 Text(
-                  isWeb
-                      ? 'We could not find any listings matching your search. Try different\nkeywords or browse our categories.'
-                      : 'We couldn\'t find any listings matching your\nsearch. Try adjusting your keywords or\nbrowse our categories.',
+                  'We could not find any listings matching your search. Try different\nkeywords or browse our categories.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: cs.onSurfaceVariant,
-                    height: 1.55,
-                    fontSize: isWeb ? 12 : 12,
+                    color: cs.onSurface.withOpacity(0.6),
+                    height: 1.6,
+                    fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                SizedBox(height: isWeb ? 18 : 20),
-                if (isWeb)
-                  Column(
-                    children: [
-                      SizedBox(
-                        width: 138,
-                        height: 40,
-                        child: ElevatedButton.icon(
-                          onPressed: onTryDifferent,
-                          icon: const Icon(Icons.search_rounded, size: 15),
-                          label: const Text('Try a New Search'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: cs.primary,
-                            foregroundColor: cs.onPrimary,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            textStyle: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
+                const SizedBox(height: 30),
+                SizedBox(
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    onPressed: onTryDifferent,
+                    icon: const Icon(Icons.search_rounded, size: 20),
+                    label: const Text('Try a New Search'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF16A34A),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 28),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: onBrowseAll,
-                        style: TextButton.styleFrom(
-                          foregroundColor: cs.onSurfaceVariant,
-                        ),
-                        child: const Text(
-                          'Browse All Categories',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                      textStyle: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
                       ),
-                    ],
-                  )
-                else
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 42,
-                          child: ElevatedButton(
-                            onPressed: onTryDifferent,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: cs.primary,
-                              foregroundColor: cs.onPrimary,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              textStyle: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            child: const Text('Try a Different Search'),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: SizedBox(
-                          height: 42,
-                          child: TextButton(
-                            onPressed: onBrowseAll,
-                            style: TextButton.styleFrom(
-                              foregroundColor: cs.onSurface,
-                              textStyle: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            child: const Text('Browse All'),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                SizedBox(height: isWeb ? 28 : 18),
-                if (!isWeb)
-                  Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: cs.outlineVariant.withOpacity(.45),
+                ),
+                const SizedBox(height: 14),
+                TextButton(
+                  onPressed: onBrowseAll,
+                  style: TextButton.styleFrom(
+                    foregroundColor: cs.onSurface.withOpacity(0.6),
                   ),
-                SizedBox(height: isWeb ? 24 : 18),
+                  child: const Text(
+                    'Browse All Categories',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                ),
+                const SizedBox(height: 64),
                 Text(
                   'Search Tips',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    fontSize: isWeb ? 12.5 : 15,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16,
                     color: cs.onSurface,
                   ),
                 ),
-                SizedBox(height: isWeb ? 14 : 14),
-                if (isWeb)
-                  Row(
-                    children: const [
-                      Expanded(
-                        child: _EmptyTipCard(
-                          icon: Icons.search_rounded,
-                          iconColor: Color(0xFF22C55E),
-                          iconBg: Color(0xFFEAFBF0),
-                          text:
-                              'Try broader terms like "car"\ninstead of specific model\nnumbers',
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: _EmptyTipCard(
-                          icon: Icons.sell_outlined,
-                          iconColor: Color(0xFFEF4444),
-                          iconBg: Color(0xFFFDECEC),
-                          text:
-                              'Check your spelling or try\nalternate keywords',
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: _EmptyTipCard(
-                          icon: Icons.grid_view_rounded,
-                          iconColor: Color(0xFFEAB308),
-                          iconBg: Color(0xFFFFF7D6),
-                          text:
-                              'Browse categories directly\nto discover listings',
-                        ),
-                      ),
-                    ],
-                  )
-                else
-                  const Column(
-                    children: [
-                      _EmptyTipTile(
-                        icon: Icons.spellcheck_rounded,
-                        title: 'Check Your Spelling',
-                        subtitle:
-                            'Make sure all words are spelled correctly\nand try again.',
-                      ),
-                      SizedBox(height: 12),
-                      _EmptyTipTile(
-                        icon: Icons.layers_rounded,
-                        title: 'Use Fewer Keywords',
-                        subtitle:
-                            'Try simplifying your search with broader or\nfewer terms.',
-                      ),
-                      SizedBox(height: 12),
-                      _EmptyTipTile(
-                        icon: Icons.autorenew_rounded,
-                        title: 'Try Different Words',
-                        subtitle:
-                            'Use synonyms or alternative phrases for\nbetter results.',
-                      ),
-                    ],
-                  ),
-                SizedBox(height: isWeb ? 28 : 28),
+                const SizedBox(height: 24),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 20,
+                  runSpacing: 20,
+                  children: [
+                    _EmptyTipCard(
+                      icon: Icons.search_rounded,
+                      iconColor: const Color(0xFF22C55E),
+                      iconBg: const Color(0xFFF0FDF4),
+                      text:
+                          'Try broader terms like "car"\ninstead of specific model\nnumbers',
+                    ),
+                    _EmptyTipCard(
+                      icon: Icons.sell_outlined,
+                      iconColor: const Color(0xFFEF4444),
+                      iconBg: const Color(0xFFFEF2F2),
+                      text: 'Check your spelling or try\nalternate keywords',
+                    ),
+                    _EmptyTipCard(
+                      icon: Icons.grid_view_rounded,
+                      iconColor: const Color(0xFFEAB308),
+                      iconBg: const Color(0xFFFFFBEB),
+                      text: 'Browse categories directly\nto discover listings',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 64),
                 Text(
-                  isWeb ? 'Popular Right Now' : 'Popular Searches',
+                  'Popular Right Now',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    fontSize: isWeb ? 12.5 : 15,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16,
                     color: cs.onSurface,
                   ),
                 ),
-                SizedBox(height: isWeb ? 14 : 14),
-                Center(
-                  child: Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: controller.popularSearches.map((item) {
-                      return _PopularSearchChip(label: item, web: isWeb);
-                    }).toList(),
-                  ),
+                const SizedBox(height: 24),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: controller.popularSearches.map((item) {
+                    return _PopularSearchChip(label: item, web: isWeb);
+                  }).toList(),
                 ),
               ],
             ),
@@ -1029,13 +1036,17 @@ class _EmptyTitle extends StatelessWidget {
         text: TextSpan(
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w900,
-            fontSize: 18,
+            fontSize: 32,
             color: cs.onSurface,
+            letterSpacing: -0.5,
           ),
           children: [
-            const TextSpan(text: 'No results for "'),
-            TextSpan(text: query),
-            const TextSpan(text: '"'),
+            const TextSpan(text: 'No results for "  '),
+            TextSpan(
+              text: query,
+              style: TextStyle(color: cs.onSurface),
+            ),
+            const TextSpan(text: '  "'),
           ],
         ),
       );
@@ -1061,17 +1072,28 @@ class _EmptyStateIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: web ? 44 : 56,
-      height: web ? 44 : 56,
+      width: web ? 90 : 56,
+      height: web ? 90 : 56,
       decoration: BoxDecoration(
-        color: web ? const Color(0xFFFDECEC) : const Color(0xFFF3F4F6),
+        color: web ? const Color(0xFFFFF1F2) : const Color(0xFFF3F4F6),
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
-      child: Icon(
-        web ? Icons.search_off_rounded : Icons.search_rounded,
-        size: web ? 18 : 26,
-        color: web ? const Color(0xFFF87171) : const Color(0xFFD1D5DB),
+      child: Container(
+        width: web ? 48 : 26,
+        height: web ? 48 : 26,
+        decoration: web
+            ? BoxDecoration(
+                border: Border.all(color: const Color(0xFFFDA4AF), width: 1.5),
+                shape: BoxShape.circle,
+              )
+            : null,
+        alignment: Alignment.center,
+        child: Icon(
+          web ? Icons.close_rounded : Icons.search_rounded,
+          size: web ? 22 : 26,
+          color: web ? const Color(0xFFF43F5E) : const Color(0xFFD1D5DB),
+        ),
       ),
     );
   }
@@ -1095,104 +1117,42 @@ class _EmptyTipCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+      width: 260,
+      height: 200,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: cs.outlineVariant.withOpacity(.6)),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: cs.outlineVariant.withOpacity(0.4)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(
+              cs.brightness == Brightness.dark ? 0.3 : 0.02,
+            ),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: iconBg,
-              borderRadius: BorderRadius.circular(8),
-            ),
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
             alignment: Alignment.center,
-            child: Icon(icon, size: 13, color: iconColor),
+            child: Icon(icon, size: 24, color: iconColor),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Text(
             text,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontSize: 10.5,
-              height: 1.6,
+              fontSize: 14,
+              height: 1.5,
               fontWeight: FontWeight.w500,
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _EmptyTipTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  const _EmptyTipTile({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEAFBF0),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            alignment: Alignment.center,
-            child: Icon(icon, size: 18, color: cs.primary),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 13,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                      height: 1.45,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
+              color: cs.onSurface,
             ),
           ),
         ],
@@ -1212,37 +1172,19 @@ class _PopularSearchChip extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: web ? 12 : 10,
-        vertical: web ? 7 : 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
-        color: web ? cs.surface : cs.surfaceContainerLowest,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: web ? cs.outlineVariant.withOpacity(.8) : Colors.transparent,
-        ),
+        border: Border.all(color: cs.outlineVariant.withOpacity(0.8)),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (!web) ...[
-            Icon(
-              Icons.trending_up_rounded,
-              size: 13,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: 6),
-          ],
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontSize: web ? 10.5 : 11,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-        ],
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: cs.onSurface.withOpacity(0.8),
+        ),
       ),
     );
   }

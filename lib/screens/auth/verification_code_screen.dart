@@ -17,9 +17,7 @@ class VerificationCodeScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: _isWebDesktop(context)
-          ? Colors.white
-          : theme.scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: _isWebDesktop(context)
             ? _WebVerificationLayout(controller: c)
@@ -126,10 +124,10 @@ class _WebVerificationLayout extends StatelessWidget {
                                   22,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: theme.colorScheme.surface,
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
-                                    color: const Color(0xFFE5E7EB),
+                                    color: theme.colorScheme.outlineVariant,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
@@ -189,6 +187,8 @@ class _VerificationForm extends StatelessWidget {
     final pinSize = centerOnWeb ? 44.0 : 56.0;
     final buttonHeight = centerOnWeb ? 48.0 : 54.0;
 
+    final isDark = theme.brightness == Brightness.dark;
+
     final defaultPinTheme = PinTheme(
       width: pinSize,
       height: pinSize,
@@ -197,7 +197,7 @@ class _VerificationForm extends StatelessWidget {
         color: cs.onSurface,
       ),
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: isDark ? const Color(0xFF6B7280) : cs.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: cs.outlineVariant),
       ),

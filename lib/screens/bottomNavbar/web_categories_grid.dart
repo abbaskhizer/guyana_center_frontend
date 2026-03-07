@@ -11,16 +11,15 @@ class WebCategoriesGrid extends StatelessWidget {
     final theme = Theme.of(context);
 
     // Get all categories (excluding "All") and take first 12
-    final allCategories = controller.allCategoriesForScreen
-        .take(12)
-        .toList();
+    final allCategories = controller.allCategoriesForScreen.take(12).toList();
 
     return Column(
       children: [
         // First row (6 items)
         Row(
           children: List.generate(6, (index) {
-            if (index >= allCategories.length) return const Expanded(child: SizedBox());
+            if (index >= allCategories.length)
+              return const Expanded(child: SizedBox());
             final item = allCategories[index];
             return Expanded(
               child: Padding(
@@ -35,7 +34,8 @@ class WebCategoriesGrid extends StatelessWidget {
         Row(
           children: List.generate(6, (index) {
             final secondIndex = index + 6;
-            if (secondIndex >= allCategories.length) return const Expanded(child: SizedBox());
+            if (secondIndex >= allCategories.length)
+              return const Expanded(child: SizedBox());
             final item = allCategories[secondIndex];
             return Expanded(
               child: Padding(
@@ -59,15 +59,17 @@ class _WebCategoryCard extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
+    final bool isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+        border: Border.all(color: cs.outlineVariant, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -79,7 +81,7 @@ class _WebCategoryCard extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: item.tint ?? const Color(0xFFF3F4F6),
+              color: item.tint.withOpacity(isDark ? 0.2 : 1.0),
               borderRadius: BorderRadius.circular(12),
             ),
             alignment: Alignment.center,

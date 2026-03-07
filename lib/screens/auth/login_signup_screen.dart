@@ -19,9 +19,7 @@ class LoginSignupScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: _isWebDesktop(context)
-          ? const Color(0xFFF3F4F6)
-          : theme.scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: _isWebDesktop(context)
             ? _WebAuthLayout(controller: c)
@@ -80,10 +78,12 @@ class _WebAuthLayout extends StatelessWidget {
                                 26,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.surface,
                                 borderRadius: BorderRadius.circular(22),
                                 border: Border.all(
-                                  color: const Color(0xFFE5E7EB),
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.outlineVariant,
                                 ),
                                 boxShadow: [
                                   BoxShadow(

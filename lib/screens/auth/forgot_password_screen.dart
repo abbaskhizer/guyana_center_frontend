@@ -17,9 +17,7 @@ class ForgotPasswordScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: _isWebDesktop(context)
-          ? Colors.white
-          : theme.scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: _isWebDesktop(context)
             ? _WebForgotLayout(controller: c)
@@ -121,10 +119,10 @@ class _WebForgotLayout extends StatelessWidget {
                                   22,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: theme.colorScheme.surface,
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
-                                    color: const Color(0xFFE5E7EB),
+                                    color: theme.colorScheme.outlineVariant,
                                   ),
                                   boxShadow: [
                                     BoxShadow(

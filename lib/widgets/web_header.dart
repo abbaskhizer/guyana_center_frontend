@@ -67,6 +67,18 @@ class WebHeader extends StatelessWidget {
 
           const Spacer(),
 
+          // ── Dark/Light Mode Toggle ──
+          IconButton(
+            onPressed: () {
+              Get.changeThemeMode(isDark ? ThemeMode.light : ThemeMode.dark);
+            },
+            icon: Icon(
+              isDark ? Icons.light_mode : Icons.dark_mode,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(width: 8),
+
           // ── Log In ──
           TextButton(
             onPressed: () {
