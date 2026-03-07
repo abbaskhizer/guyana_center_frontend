@@ -88,31 +88,33 @@ class CustomBottomNavBar extends StatelessWidget {
           ),
 
           Positioned(
-            top: -28,
+            top: -5,
             child: GestureDetector(
-              onTap: () => c.goToTab(2), // ✅
+              onTap: () => c.goToTab(2),
               child: Column(
                 children: [
                   Container(
-                    width: 64,
-                    height: 64,
+                    width: 55,
+                    height: 55,
                     decoration: BoxDecoration(
                       color: cs.primary,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: cs.primary.withOpacity(
-                            theme.brightness == Brightness.dark ? 0.25 : 0.45,
-                          ),
-                          blurRadius: 26,
-                          offset: const Offset(0, 12),
+                          color: Colors.black.withOpacity(.15),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
-                    child: Icon(
-                      Icons.add_rounded,
-                      color: cs.onPrimary,
-                      size: 30,
+                    child: Center(
+                      child: Image.asset(
+                        'assets/add.png',
+                        height: 22,
+                        width: 22,
+                        fit: BoxFit.contain,
+                        color: cs.onPrimary,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 6),

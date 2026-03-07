@@ -8,16 +8,15 @@ class SellController extends GetxController {
   // steps: 1,2,3
   final step = 1.obs;
 
-  // ===== Step 1 =====
   final categories = <AddCategory>[
-    const AddCategory("Vehicles", Icons.directions_car_filled_outlined),
-    const AddCategory("Real Estate", Icons.home_work_outlined),
-    const AddCategory("Electronics", Icons.electrical_services_outlined),
-    const AddCategory("Businesses", Icons.storefront_outlined),
-    const AddCategory("Fashion", Icons.checkroom_outlined),
-    const AddCategory("Home &\nGarden", Icons.chair_outlined),
-    const AddCategory("Services", Icons.handyman_outlined),
-    const AddCategory("Other", Icons.more_horiz_rounded),
+    const AddCategory("Vehicles", "assets/van.png"),
+    const AddCategory("Real Estate", "assets/re.png"),
+    const AddCategory("Electronics", "assets/com.png"),
+    const AddCategory("Businesses", "assets/b.png"),
+    const AddCategory("Fashion", "assets/shirt.png"),
+    const AddCategory("Home &\nGarden", "assets/f.png"),
+    const AddCategory("Services", "assets/s.png"),
+    const AddCategory("Other", "assets/more.png"),
   ];
 
   final selectedCategory = 0.obs;
@@ -26,15 +25,13 @@ class SellController extends GetxController {
   final descCtrl = TextEditingController();
   final descCount = 0.obs;
 
-  final conditionIndex = 0.obs; // 0,1,2
+  final conditionIndex = 0.obs;
   static const int maxDesc = 500;
 
-  // ===== Step 2 =====
-  final images = <String>[].obs; // urls/paths
+  final images = <String>[].obs;
   final priceCtrl = TextEditingController();
   final negotiable = false.obs;
 
-  // ===== Step 3 =====
   final areas = const [
     "Port of Spain",
     "Chaguanas",
@@ -62,7 +59,6 @@ class SellController extends GetxController {
     });
   }
 
-  // ----- navigation -----
   void setStep(int s) => step.value = s.clamp(1, 3);
 
   void goBack() {
@@ -81,11 +77,9 @@ class SellController extends GetxController {
     Get.snackbar("Ready", "Post ad for free (demo)");
   }
 
-  // ----- step 1 -----
   void selectCategoryIndex(int i) => selectedCategory.value = i;
   void setCondition(int i) => conditionIndex.value = i.clamp(0, 2);
 
-  // ----- step 2 -----
   void addMockPhoto() {
     if (images.length >= 10) return;
     images.add(
@@ -98,7 +92,6 @@ class SellController extends GetxController {
     images.removeAt(i);
   }
 
-  // ----- step 3 -----
   void setArea(String v) => selectedArea.value = v;
   void setContactMethod(ContactMethod m) => contactMethod.value = m;
 

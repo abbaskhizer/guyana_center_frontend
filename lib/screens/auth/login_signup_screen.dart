@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/auth/login_signup_controller.dart';
 import 'package:guyana_center_frontend/widgets/auth_input_field.dart';
@@ -52,10 +53,12 @@ class _WebAuthLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     return Column(
       children: [
         const WebHeader(),
-
         Expanded(
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -86,11 +89,12 @@ class _WebAuthLayout extends StatelessWidget {
                                   ).colorScheme.outlineVariant,
                                 ),
                                 boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.06),
-                                    blurRadius: 26,
-                                    offset: const Offset(0, 14),
-                                  ),
+                                  if (theme.brightness == Brightness.light)
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.06),
+                                      blurRadius: 26,
+                                      offset: const Offset(0, 14),
+                                    ),
                                 ],
                               ),
                               child: _AuthForm(
@@ -109,7 +113,6 @@ class _WebAuthLayout extends StatelessWidget {
             },
           ),
         ),
-
         const AuthWebFooter(),
       ],
     );
@@ -130,7 +133,8 @@ class _AuthForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = controller;
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -140,12 +144,15 @@ class _AuthForm extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: IconButton(
               onPressed: () => Get.back(),
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+              icon: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                size: 18,
+                color: cs.onSurface,
+              ),
             ),
           ),
           const SizedBox(height: 10),
         ],
-
         Padding(
           padding: EdgeInsets.symmetric(horizontal: horizontalFormPadding),
           child: Column(
@@ -153,21 +160,22 @@ class _AuthForm extends StatelessWidget {
               Center(
                 child: RichText(
                   text: TextSpan(
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0.4,
-                      color: Colors.black,
+                      color: cs.onSurface,
                     ),
                     children: [
                       TextSpan(
                         text: "GUYANA",
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w800,
+                          color: cs.onSurface,
                         ),
                       ),
                       TextSpan(
                         text: "CENTRAL",
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w800,
                           color: const Color(0xFFFFA43A),
                         ),
@@ -182,7 +190,7 @@ class _AuthForm extends StatelessWidget {
                   c.isLogin.value
                       ? "Welcome back! Sign in to your account."
                       : "Create your account to start buying & selling.",
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     color: cs.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
@@ -199,12 +207,10 @@ class _AuthForm extends StatelessWidget {
               const SizedBox(height: 16),
               SocialAuthButton(
                 text: "Continue with Google",
-                leading: Text(
-                  "G",
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFFEA4335),
-                  ),
+                leading: const FaIcon(
+                  FontAwesomeIcons.google,
+                  color: Colors.red,
+                  size: 18,
                 ),
                 onPressed: c.continueWithGoogle,
               ),
@@ -217,9 +223,7 @@ class _AuthForm extends StatelessWidget {
             ],
           ),
         ),
-
         const SizedBox(height: 35),
-
         Obx(() {
           if (c.isLogin.value) return const SizedBox.shrink();
           return Column(
@@ -235,7 +239,6 @@ class _AuthForm extends StatelessWidget {
             ],
           );
         }),
-
         AuthInputField(
           label: "Email Address",
           hint: "you@example.com",
@@ -245,15 +248,15 @@ class _AuthForm extends StatelessWidget {
           textInputAction: TextInputAction.next,
         ),
         const SizedBox(height: 14),
-
         Row(
           children: [
             Expanded(
               child: Text(
                 "Password",
-                style: Theme.of(
-                  context,
-                ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: cs.onSurface,
+                ),
               ),
             ),
             Obx(() {
@@ -269,7 +272,13 @@ class _AuthForm extends StatelessWidget {
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     onPressed: c.forgotPassword,
-                    child: const Text("Forgot password?"),
+                    child: const Text(
+                      "Forgot password?",
+                      style: TextStyle(
+                        color: Color(0xFF10B981),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
               );
@@ -277,7 +286,6 @@ class _AuthForm extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-
         Obx(() {
           final hidden = c.isPasswordHidden.value;
           return AuthInputField(
@@ -292,11 +300,11 @@ class _AuthForm extends StatelessWidget {
                 hidden
                     ? Icons.visibility_off_outlined
                     : Icons.visibility_outlined,
+                color: cs.onSurfaceVariant,
               ),
             ),
           );
         }),
-
         Obx(() {
           if (c.isLogin.value) return const SizedBox.shrink();
           return Column(
@@ -317,6 +325,7 @@ class _AuthForm extends StatelessWidget {
                       hidden
                           ? Icons.visibility_off_outlined
                           : Icons.visibility_outlined,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                 );
@@ -324,7 +333,6 @@ class _AuthForm extends StatelessWidget {
             ],
           );
         }),
-
         Obx(() {
           if (c.isLogin.value) return const SizedBox.shrink();
           return Column(
@@ -337,6 +345,8 @@ class _AuthForm extends StatelessWidget {
                     return Checkbox(
                       value: c.agreedToTerms.value,
                       onChanged: c.toggleTerms,
+                      activeColor: cs.primary,
+                      side: BorderSide(color: cs.outlineVariant),
                     );
                   }),
                   Expanded(
@@ -344,7 +354,7 @@ class _AuthForm extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 12),
                       child: Text(
                         "I agree to the Terms of Service and Privacy Policy",
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        style: theme.textTheme.bodySmall?.copyWith(
                           color: cs.onSurfaceVariant,
                           fontWeight: FontWeight.w600,
                         ),
@@ -356,18 +366,19 @@ class _AuthForm extends StatelessWidget {
             ],
           );
         }),
-
         const SizedBox(height: 30),
-
         Obx(() {
           final isLogin = c.isLogin.value;
           return SizedBox(
             height: 54,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
+                backgroundColor: cs.primary,
+                foregroundColor: cs.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
+                elevation: 0,
               ),
               onPressed: c.submit,
               child: Row(
@@ -375,21 +386,19 @@ class _AuthForm extends StatelessWidget {
                 children: [
                   Text(
                     isLogin ? "Log In" : "Create Account",
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.white,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: cs.onPrimary,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Icon(Icons.arrow_forward_rounded, color: Colors.white),
+                  Icon(Icons.arrow_forward_rounded, color: cs.onPrimary),
                 ],
               ),
             ),
           );
         }),
-
         const SizedBox(height: 30),
-
         Center(
           child: Obx(() {
             final isLogin = c.isLogin.value;
@@ -400,16 +409,17 @@ class _AuthForm extends StatelessWidget {
                   isLogin
                       ? "Don't have an account? "
                       : "Already have an account? ",
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: cs.onSurface,
+                  ),
                 ),
                 GestureDetector(
                   onTap: () => c.toggleMode(!isLogin),
                   child: Text(
                     isLogin ? "Sign Up" : "Log In",
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Color(0xFFEA4335),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFFEA4335),
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -433,7 +443,6 @@ class _AuthToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
-    final bool isDark = theme.brightness == Brightness.dark;
 
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 360),
@@ -461,10 +470,12 @@ class _AuthToggle extends StatelessWidget {
                     width: tabWidth,
                     height: double.infinity,
                     decoration: BoxDecoration(
-                      color: isDark ? cs.surfaceContainerHighest : Colors.white,
+                      color: theme.brightness == Brightness.dark
+                          ? Colors.white.withOpacity(0.08)
+                          : Colors.white,
                       borderRadius: BorderRadius.circular(999),
                       boxShadow: [
-                        if (!isDark)
+                        if (theme.brightness == Brightness.light)
                           BoxShadow(
                             color: Colors.black.withOpacity(0.06),
                             blurRadius: 14,
@@ -474,7 +485,6 @@ class _AuthToggle extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 Row(
                   children: [
                     Expanded(

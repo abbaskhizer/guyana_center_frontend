@@ -1,16 +1,10 @@
-// agent_profile_screen.dart
-// ✅ Responsive like HomeTabScreen: Mobile layout + Web desktop layout (>=1000)
-// ✅ SAME content for app + web (single source of truth)
-// ✅ Web gets extra wrapper + sidebar (only on web) + footer
-// ✅ Reduced boilerplate: shared builder returns the same widget list
-// NOTE: No bindings. Safe Get.put/Get.find pattern included.
-
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/agent_profile_controller.dart';
 import 'package:guyana_center_frontend/main.dart';
 import 'package:guyana_center_frontend/modal/agent_listing.dart';
+import 'package:guyana_center_frontend/screens/custom_bottom_navbar.dart';
 import 'package:guyana_center_frontend/widgets/web_footer.dart';
 
 class AgentProfileScreen extends StatelessWidget {
@@ -29,6 +23,7 @@ class AgentProfileScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
+      bottomNavigationBar: CustomBottomNavBar(),
       backgroundColor: isWeb ? Colors.white : theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: isWeb ? _WebShell(controller: c) : _MobileShell(controller: c),
@@ -36,8 +31,6 @@ class AgentProfileScreen extends StatelessWidget {
     );
   }
 }
-
-// ========================== MOBILE SHELL ==========================
 
 class _MobileShell extends StatelessWidget {
   final AgentProfileController controller;
@@ -48,13 +41,11 @@ class _MobileShell extends StatelessWidget {
     final content = _AgentProfileContent(controller: controller, web: false);
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
+      padding: const EdgeInsets.only(top: 10, bottom: 18),
       children: content.children(context),
     );
   }
 }
-
-// ========================== WEB SHELL ==========================
 
 class _WebShell extends StatelessWidget {
   final AgentProfileController controller;
@@ -78,7 +69,6 @@ class _WebShell extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // LEFT: shared content
                     Expanded(
                       flex: 8,
                       child: Column(
@@ -87,8 +77,6 @@ class _WebShell extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 18),
-
-                    // RIGHT: web-only
                     const Expanded(
                       flex: 4,
                       child: Column(
@@ -105,17 +93,13 @@ class _WebShell extends StatelessWidget {
             ),
           ),
         ),
-
-        // Footer (web-only)
         SliverToBoxAdapter(
-          child: Container(color: cs.surface, child: WebFooter()),
+          child: Container(color: cs.surface, child: const WebFooter()),
         ),
       ],
     );
   }
 }
-
-// ========================== SHARED CONTENT BUILDER ==========================
 
 class _AgentProfileContent {
   final AgentProfileController controller;
@@ -130,43 +114,73 @@ class _AgentProfileContent {
       Widget child, {
       EdgeInsets padding = const EdgeInsets.fromLTRB(18, 16, 18, 18),
     }) {
-      if (!web) return child; // mobile keeps raw layout (same as before)
+      if (!web) return child;
       return _WebCard(padding: padding, child: child);
     }
 
     return [
-      web ? const _TopBarWeb() : const _TopBarMobile(),
+      if (!web)
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: _TopBarMobile(),
+        )
+      else
+        const _TopBarWeb(),
       SizedBox(height: web ? 14 : 12),
 
-      // Profile (web card, mobile plain)
-      wrapWebCard(_ProfileHeaderCard(controller: controller, web: web)),
+      if (!web)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: _ProfileHeaderCard(controller: controller, web: false),
+        )
+      else
+        wrapWebCard(_ProfileHeaderCard(controller: controller, web: true)),
+
       SizedBox(height: web ? 18 : 14),
 
-      // Listings block
       if (!web) ...[
-        _ActiveListingsHeader(web: false),
-        const SizedBox(height: 10),
-        ...controller.listings.map(
-          (x) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: _AgentListingCard(item: x),
-          ),
-        ),
-        const SizedBox(height: 6),
-        OutlinedButton(
-          onPressed: () {},
-          style: OutlinedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-            side: BorderSide(color: cs.outlineVariant),
-          ),
-          child: Text(
-            "Load More Listings",
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: cs.onSurface.withOpacity(.75),
-            ),
+        Container(
+          width: double.infinity,
+          color: cs.surface,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 14),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: _ActiveListingsHeader(web: false),
+              ),
+              const SizedBox(height: 10),
+              ...controller.listings.map(
+                (x) => Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: _AgentListingCard(item: x),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () {},
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      side: BorderSide(color: cs.outlineVariant),
+                    ),
+                    child: Text(
+                      "Load More Listings",
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: cs.onSurface.withOpacity(.75),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ] else ...[
@@ -215,8 +229,6 @@ class _AgentProfileContent {
   }
 }
 
-// ========================== TOP BARS ==========================
-
 class _TopBarMobile extends StatelessWidget {
   const _TopBarMobile();
 
@@ -255,6 +267,7 @@ class _TopBarMobile extends StatelessWidget {
           onPressed: () {},
           icon: const Icon(Icons.share_outlined),
           color: cs.onSurface,
+          iconSize: 20,
         ),
         IconButton(
           onPressed: () {},
@@ -332,8 +345,6 @@ class _TopBarWeb extends StatelessWidget {
   }
 }
 
-// ========================== PROFILE + LISTINGS HEADER (UNCHANGED) ==========================
-
 class _ProfileHeaderCard extends StatelessWidget {
   final AgentProfileController controller;
   final bool web;
@@ -344,9 +355,10 @@ class _ProfileHeaderCard extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    final container = Column(
+    return Column(
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CircleAvatar(
               radius: web ? 34 : 30,
@@ -368,13 +380,12 @@ class _ProfileHeaderCard extends StatelessWidget {
                     children: [
                       Text(
                         "Rachel Morrison",
-                        style: theme.textTheme.bodyMedium?.copyWith(
+                        style: theme.textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.w900,
-                          color: cs.onSurface,
-                          fontSize: web ? 16 : null,
+                          fontSize: web ? 16 : 15,
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 30),
                       Obx(() {
                         if (!controller.isVerified.value) {
                           return const SizedBox.shrink();
@@ -394,7 +405,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.w800,
                               color: Colors.white,
-                              fontSize: 10.5,
+                              fontSize: 9,
                             ),
                           ),
                         );
@@ -429,7 +440,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                           (index) => const Padding(
                             padding: EdgeInsets.only(right: 2),
                             child: Icon(
-                              Icons.star_rounded,
+                              Icons.star_border_outlined,
                               size: 14,
                               color: Color(0xFFFFB020),
                             ),
@@ -442,7 +453,6 @@ class _ProfileHeaderCard extends StatelessWidget {
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: 12,
                           fontWeight: FontWeight.w900,
-                          color: cs.onSurface,
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -462,7 +472,6 @@ class _ProfileHeaderCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 14),
-
         Row(
           children: [
             Expanded(
@@ -488,7 +497,12 @@ class _ProfileHeaderCard extends StatelessWidget {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: () {},
-                icon: Icon(Icons.message_outlined, color: cs.primary),
+                icon: Image.asset(
+                  "assets/chat.png",
+                  width: 18,
+                  height: 18,
+                  color: cs.primary,
+                ),
                 label: Text(
                   "Message",
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -508,15 +522,12 @@ class _ProfileHeaderCard extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 12),
-
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
           decoration: BoxDecoration(
             color: cs.surface,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: cs.outlineVariant),
           ),
           child: const Row(
             children: [
@@ -542,9 +553,7 @@ class _ProfileHeaderCard extends StatelessWidget {
             ],
           ),
         ),
-
         const SizedBox(height: 12),
-
         Obx(() {
           return Container(
             decoration: const BoxDecoration(
@@ -585,8 +594,6 @@ class _ProfileHeaderCard extends StatelessWidget {
         }),
       ],
     );
-
-    return container;
   }
 }
 
@@ -606,10 +613,7 @@ class _ActiveListingsHeader extends StatelessWidget {
             "Active Listings",
             style:
                 (web ? theme.textTheme.titleMedium : theme.textTheme.titleSmall)
-                    ?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: cs.onSurface,
-                    ),
+                    ?.copyWith(fontWeight: FontWeight.w900),
           ),
         ),
         InkWell(
@@ -626,8 +630,6 @@ class _ActiveListingsHeader extends StatelessWidget {
     );
   }
 }
-
-// ========================== WEB-ONLY EXTRA (UNCHANGED) ==========================
 
 class _WebCard extends StatelessWidget {
   final Widget child;
@@ -704,7 +706,12 @@ class _WebSidebarContactCard extends StatelessWidget {
             width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: () {},
-              icon: Icon(Icons.message_outlined, color: cs.primary),
+              icon: Image.asset(
+                "assets/chat.png",
+                width: 18,
+                height: 18,
+                color: cs.primary,
+              ),
               label: Text(
                 "Message",
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -855,8 +862,6 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-// =================== Your existing widgets (UNCHANGED) ===================
-
 class _AgentListingCard extends StatelessWidget {
   final AgentListing item;
   const _AgentListingCard({required this.item});
@@ -865,21 +870,13 @@ class _AgentListingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-
     final bool forSale = item.tag.toLowerCase().contains("sale");
 
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: cs.background,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cs.outlineVariant),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.04),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1091,8 +1088,6 @@ class _TabItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return InkWell(
       onTap: onTap,
       child: Column(
@@ -1104,7 +1099,7 @@ class _TabItem extends StatelessWidget {
               children: [
                 Text(
                   text,
-                  style: theme.textTheme.bodyMedium?.copyWith(
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: active ? FontWeight.w600 : FontWeight.w500,
                     color: active ? kPrimaryColor : const Color(0xFF9CA3AF),
                   ),

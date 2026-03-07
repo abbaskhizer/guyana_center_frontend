@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/bottomNavbar/browse_controller.dart';
 import 'package:guyana_center_frontend/modal/browse_categoryVM.dart';
 import 'package:guyana_center_frontend/screens/listing_detail_screen.dart';
-import 'package:guyana_center_frontend/widgets/mobile_top_bar.dart';
+import 'package:guyana_center_frontend/widgets/mobile_header.dart';
 import 'package:guyana_center_frontend/widgets/web_footer.dart';
 
 class BrowseScreen extends StatelessWidget {
@@ -49,20 +49,34 @@ class _MobileLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return Container(
-      color: cs.surface,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
-        children: [
-          const MobileTopBar(),
-          const SizedBox(height: 12),
-          _BrowseSearchSection(controller: controller, web: false),
-          const SizedBox(height: 14),
-          _BrowseFilterSection(controller: controller, web: false),
-          const SizedBox(height: 14),
-          BrowseResults(controller: controller),
-        ],
-      ),
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 18),
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              MobileHeader(),
+              const SizedBox(height: 12),
+              _BrowseSearchSection(controller: controller, web: false),
+              const SizedBox(height: 14),
+              _BrowseFilterSection(controller: controller, web: false),
+              const SizedBox(height: 14),
+            ],
+          ),
+        ),
+
+        Container(
+          decoration: BoxDecoration(color: cs.surface),
+          width: double.infinity,
+
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            child: BrowseResults(controller: controller),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -172,10 +186,12 @@ class _BrowseSearchBar extends StatelessWidget {
               child: TextFormField(
                 initialValue: controller.searchText.value,
                 onChanged: controller.setSearch,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
                 decoration: InputDecoration(
                   hintText: controller.defaultSearchHint(web),
                   hintStyle: theme.textTheme.bodySmall?.copyWith(
-                    color: cs.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
                   filled: true,
@@ -408,21 +424,20 @@ class _SortButton extends StatelessWidget {
       borderRadius: BorderRadius.circular(10),
       child: Container(
         height: 38,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: cs.surface,
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: cs.outlineVariant),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.swap_vert_rounded, size: 16, color: cs.onSurfaceVariant),
-            const SizedBox(width: 8),
+            Icon(Icons.tune_rounded, size: 16, color: cs.onSurfaceVariant),
+            const SizedBox(width: 6),
             Text(
               label,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: cs.onSurface,
+                color: cs.onSurfaceVariant,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -455,11 +470,16 @@ class _ViewTypeButton extends StatelessWidget {
         height: 38,
         width: 38,
         decoration: BoxDecoration(
-          color: active ? cs.surfaceContainerHighest : cs.surface,
+          color: active ? cs.primary : cs.surface,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: cs.outlineVariant),
+          border: Border.all(color: active ? cs.primary : cs.outlineVariant),
         ),
-        child: Icon(icon, size: 18, color: cs.onSurface),
+        alignment: Alignment.center,
+        child: Icon(
+          icon,
+          size: 18,
+          color: active ? cs.onPrimary : cs.onSurfaceVariant,
+        ),
       ),
     );
   }
@@ -485,13 +505,17 @@ class BrowseResults extends StatelessWidget {
       child: Obx(() {
         final q = controller.searchText.value.trim();
 
-        if (controller.showEmptyState) {
-          return _EmptySearchState(
+      if (controller.showEmptyState) {
+        return Container(
+          width: double.infinity,
+          color: cs.surface,
+          child: _EmptySearchState(
             query: q,
             onTryDifferent: controller.clearSearch,
             onBrowseAll: controller.clearSearch,
-          );
-        }
+          ),
+        );
+      }
 
         return controller.isGrid.value
             ? LayoutBuilder(
@@ -548,9 +572,9 @@ class BrowseResults extends StatelessWidget {
                     );
                   },
                 ),
-              );
-      }),
-    );
+        ),
+      );
+    });
   }
 }
 
@@ -564,7 +588,7 @@ class _BrowseListingCardWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Get.to(ListingDetailScreen(), arguments: item);
+        Get.to(() => ListingDetailScreen(), arguments: item);
       },
       borderRadius: BorderRadius.circular(18),
       child: _ListingCard(item: item, listView: listView),
@@ -585,9 +609,9 @@ class _ListingCard extends StatelessWidget {
     if (listView) {
       return Container(
         decoration: BoxDecoration(
-          color: cs.surface,
+          color: cs.background,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: cs.outlineVariant),
+
           boxShadow: [
             BoxShadow(
               color: cs.shadow.withOpacity(.06),
@@ -864,7 +888,60 @@ class _ListingContent extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [...content.take(3), const Spacer(), ...content.skip(3)],
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          item.category,
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: 11,
+            color: cs.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          item.title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            fontSize: 13.5,
+            color: cs.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          item.price,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: cs.primary,
+            fontWeight: FontWeight.w900,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Icon(
+              Icons.location_on_outlined,
+              size: 14,
+              color: cs.onSurfaceVariant,
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                item.location,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontSize: 11,
+                  color: cs.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -1010,8 +1087,8 @@ class _EmptySearchState extends StatelessWidget {
                     return _PopularSearchChip(label: item, web: isWeb);
                   }).toList(),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1170,7 +1247,6 @@ class _PopularSearchChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
