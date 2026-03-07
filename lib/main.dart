@@ -5,8 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'screens/splash_screen.dart';
 import 'utils/size_config.dart';
 
-const Color kPrimaryColor = Color(0xFF109E4B);
-const Color kBackgroundColor = Color(0xFFF4F8F8);
+const Color kPrimaryColor = Color(0xFF10B981);
+const Color kBackgroundColor = Color(0xFFF8FAFC);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,18 +18,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final baseTextTheme = GoogleFonts.outfitTextTheme(
-      Theme.of(context).textTheme,
-    ).apply(fontFamilyFallback: const ['Noto Sans']);
+    final baseTextTheme =
+        GoogleFonts.outfitTextTheme(Theme.of(context).textTheme).apply(
+          fontFamilyFallback: const ['Noto Sans'],
+          bodyColor: const Color(0xFF111827),
+          displayColor: const Color(0xFF111827),
+        );
 
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Guyana Center',
-      themeMode: ThemeMode.system, // figma-like: follow system
+      themeMode: ThemeMode.system,
       theme: ThemeData(
         useMaterial3: true,
         textTheme: baseTextTheme,
-        scaffoldBackgroundColor: Colors.white, // figma light bg
+        scaffoldBackgroundColor: Colors.white,
+        canvasColor: Colors.white,
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
 
         colorScheme:
             ColorScheme.fromSeed(
@@ -37,38 +43,55 @@ class MyApp extends StatelessWidget {
               brightness: Brightness.light,
             ).copyWith(
               primary: kPrimaryColor,
+              onPrimary: Colors.white,
               background: Colors.white,
-              surface: Color(0xFFF5F5F5),
-              outlineVariant: const Color(0xFFD6DAE3), // figma border
-              onSurface: const Color(0xFF111827), // figma text
+              surface: const Color(0xFFF8FAFC),
+              outlineVariant: const Color(0xFFE5E7EB),
+              onSurface: const Color(0xFF111827),
+              onSurfaceVariant: const Color(0xFF9CA3AF),
             ),
 
         appBarTheme: const AppBarTheme(
-          backgroundColor: kBackgroundColor,
+          backgroundColor: Colors.white,
           foregroundColor: Color(0xFF111827),
           elevation: 0,
           scrolledUnderElevation: 0,
+          centerTitle: false,
         ),
+
+        dividerTheme: const DividerThemeData(
+          color: Color(0xFFE5E7EB),
+          thickness: 1,
+          space: 1,
+        ),
+
+        cardColor: Colors.white,
 
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: Colors.white,
+          fillColor: const Color(0xFFF9FAFB),
+          isDense: true,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 14,
           ),
           hintStyle: baseTextTheme.bodyMedium?.copyWith(
-            color: const Color(0xFFB6BAC5),
+            color: const Color(0xFF9CA3AF),
+            fontWeight: FontWeight.w500,
           ),
           prefixIconColor: const Color(0xFF9CA3AF),
           suffixIconColor: const Color(0xFF9CA3AF),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1),
+          ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: Color(0xFFD6DAE3), width: 1),
+            borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: kPrimaryColor, width: 1.5),
+            borderSide: const BorderSide(color: kPrimaryColor, width: 1.4),
           ),
         ),
 
@@ -77,22 +100,31 @@ class MyApp extends StatelessWidget {
             backgroundColor: kPrimaryColor,
             foregroundColor: Colors.white,
             elevation: 0,
-            shape: const StadiumBorder(), // figma pill button
+            minimumSize: const Size(0, 48),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.compact,
+            shape: const StadiumBorder(),
             padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
             textStyle: baseTextTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
             ),
           ),
         ),
 
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            shape: const StadiumBorder(),
-            side: const BorderSide(color: Color(0xFFD6DAE3)),
             foregroundColor: const Color(0xFF111827),
+            backgroundColor: Colors.white,
+            minimumSize: const Size(0, 46),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.compact,
+            shape: const StadiumBorder(),
+            side: const BorderSide(color: Color(0xFFE5E7EB)),
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
             textStyle: baseTextTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
             ),
           ),
         ),
@@ -101,10 +133,18 @@ class MyApp extends StatelessWidget {
           style: TextButton.styleFrom(
             foregroundColor: kPrimaryColor,
             textStyle: baseTextTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
             ),
           ),
         ),
+
+        checkboxTheme: CheckboxThemeData(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+          side: const BorderSide(color: Color(0xFFD1D5DB)),
+        ),
+
+        iconTheme: const IconThemeData(color: Color(0xFF6B7280), size: 22),
       ),
 
       darkTheme: ThemeData(
@@ -113,7 +153,10 @@ class MyApp extends StatelessWidget {
           bodyColor: Colors.white,
           displayColor: Colors.white,
         ),
-        scaffoldBackgroundColor: const Color(0xFF0B0B0C),
+        scaffoldBackgroundColor: const Color(0xFF050816),
+        canvasColor: const Color(0xFF050816),
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
 
         colorScheme:
             ColorScheme.fromSeed(
@@ -121,38 +164,55 @@ class MyApp extends StatelessWidget {
               brightness: Brightness.dark,
             ).copyWith(
               primary: kPrimaryColor,
-              background: const Color(0xFF0B0B0C),
-              surface: const Color(0xFF141416),
-              outlineVariant: const Color(0xFF2A2A2E),
+              onPrimary: Colors.white,
+              background: const Color(0xFF050816),
+              surface: const Color(0xFF111827),
+              outlineVariant: const Color(0xFF374151),
               onSurface: Colors.white,
+              onSurfaceVariant: const Color(0xFF9CA3AF),
             ),
 
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF0B0B0C),
+          backgroundColor: Color(0xFF050816),
           foregroundColor: Colors.white,
           elevation: 0,
           scrolledUnderElevation: 0,
+          centerTitle: false,
         ),
+
+        dividerTheme: const DividerThemeData(
+          color: Color(0xFF374151),
+          thickness: 1,
+          space: 1,
+        ),
+
+        cardColor: Color(0xFF9CA3AF),
 
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: const Color(0xFF141416),
+          fillColor: const Color(0xFF9CA3AF),
+          isDense: true,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 14,
           ),
           hintStyle: baseTextTheme.bodyMedium?.copyWith(
-            color: const Color(0xFF6C6C6C),
+            color: const Color(0xFF6B7280),
+            fontWeight: FontWeight.w500,
           ),
-          prefixIconColor: const Color(0xFF9CA3AF),
-          suffixIconColor: const Color(0xFF9CA3AF),
+          prefixIconColor: const Color(0xFF6B7280),
+          suffixIconColor: const Color(0xFF6B7280),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Color(0xFF9CA3AF), width: 0),
+          ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: Color(0xFF2A2A2E), width: 1),
+            borderSide: const BorderSide(color: Color(0xFF9CA3AF), width: 0),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: kPrimaryColor, width: 1.5),
+            borderSide: const BorderSide(color: kPrimaryColor, width: 1.4),
           ),
         ),
 
@@ -161,22 +221,33 @@ class MyApp extends StatelessWidget {
             backgroundColor: kPrimaryColor,
             foregroundColor: Colors.white,
             elevation: 0,
+            minimumSize: const Size(0, 48),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.compact,
             shape: const StadiumBorder(),
             padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
             textStyle: baseTextTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
+              color: Colors.white,
             ),
           ),
         ),
 
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            shape: const StadiumBorder(),
-            side: const BorderSide(color: Color(0xFF2A2A2E)),
             foregroundColor: Colors.white,
+            backgroundColor: const Color(0xFF9CA3AF),
+            minimumSize: const Size(0, 46),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.compact,
+            shape: const StadiumBorder(),
+            side: const BorderSide(color: Color(0xFF9CA3AF), width: 0),
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
             textStyle: baseTextTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+              color: Colors.white,
             ),
           ),
         ),
@@ -185,12 +256,18 @@ class MyApp extends StatelessWidget {
           style: TextButton.styleFrom(
             foregroundColor: kPrimaryColor,
             textStyle: baseTextTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
             ),
           ),
         ),
 
-        cardColor: const Color(0xFF141416),
+        checkboxTheme: CheckboxThemeData(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+          side: const BorderSide(color: Color(0xFF6B7280)),
+        ),
+
+        iconTheme: const IconThemeData(color: Color(0xFF9CA3AF), size: 22),
       ),
 
       builder: (context, child) {

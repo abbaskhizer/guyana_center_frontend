@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
-
 class AddCategory {
   final String title;
-  final IconData icon;
+  final String icon;
+
   const AddCategory(this.title, this.icon);
 }

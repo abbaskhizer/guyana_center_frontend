@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/bottomNavbar/browse_controller.dart';
 import 'package:guyana_center_frontend/modal/browse_categoryVM.dart';
 import 'package:guyana_center_frontend/screens/listing_detail_screen.dart';
-import 'package:guyana_center_frontend/widgets/mobile_top_bar.dart';
+import 'package:guyana_center_frontend/widgets/mobile_header.dart';
 import 'package:guyana_center_frontend/widgets/web_footer.dart';
 
 class BrowseScreen extends StatelessWidget {
@@ -40,20 +40,34 @@ class _MobileLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return Container(
-      color: cs.surface,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
-        children: [
-          const MobileTopBar(),
-          const SizedBox(height: 12),
-          _BrowseSearchSection(controller: controller, web: false),
-          const SizedBox(height: 14),
-          _BrowseFilterSection(controller: controller, web: false),
-          const SizedBox(height: 14),
-          BrowseResults(controller: controller),
-        ],
-      ),
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 18),
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              MobileHeader(),
+              const SizedBox(height: 12),
+              _BrowseSearchSection(controller: controller, web: false),
+              const SizedBox(height: 14),
+              _BrowseFilterSection(controller: controller, web: false),
+              const SizedBox(height: 14),
+            ],
+          ),
+        ),
+
+        Container(
+          decoration: BoxDecoration(color: cs.surface),
+          width: double.infinity,
+
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            child: BrowseResults(controller: controller),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -158,10 +172,12 @@ class _BrowseSearchBar extends StatelessWidget {
               child: TextFormField(
                 initialValue: controller.searchText.value,
                 onChanged: controller.setSearch,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
                 decoration: InputDecoration(
                   hintText: controller.defaultSearchHint(web),
                   hintStyle: theme.textTheme.bodySmall?.copyWith(
-                    color: cs.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
                   filled: true,
@@ -398,21 +414,20 @@ class _SortButton extends StatelessWidget {
       borderRadius: BorderRadius.circular(10),
       child: Container(
         height: 38,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: cs.surface,
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: cs.outlineVariant),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.swap_vert_rounded, size: 16, color: cs.onSurfaceVariant),
-            const SizedBox(width: 8),
+            Icon(Icons.tune_rounded, size: 16, color: cs.onSurfaceVariant),
+            const SizedBox(width: 6),
             Text(
               label,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: cs.onSurface,
+                color: cs.onSurfaceVariant,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -445,11 +460,16 @@ class _ViewTypeButton extends StatelessWidget {
         height: 38,
         width: 38,
         decoration: BoxDecoration(
-          color: active ? cs.surfaceContainerHighest : cs.surface,
+          color: active ? cs.primary : cs.surface,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: cs.outlineVariant),
+          border: Border.all(color: active ? cs.primary : cs.outlineVariant),
         ),
-        child: Icon(icon, size: 18, color: cs.onSurface),
+        alignment: Alignment.center,
+        child: Icon(
+          icon,
+          size: 18,
+          color: active ? cs.onPrimary : cs.onSurfaceVariant,
+        ),
       ),
     );
   }
@@ -464,47 +484,54 @@ class BrowseResults extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return Container(
-      width: double.infinity,
-      color: cs.surface,
-      child: Obx(() {
-        final q = controller.searchText.value.trim();
+    return Obx(() {
+      final q = controller.searchText.value.trim();
 
-        if (controller.showEmptyState) {
-          return _EmptySearchState(
+      if (controller.showEmptyState) {
+        return Container(
+          width: double.infinity,
+          color: cs.surface,
+          child: _EmptySearchState(
             query: q,
             onTryDifferent: controller.clearSearch,
             onBrowseAll: controller.clearSearch,
-          );
-        }
+          ),
+        );
+      }
 
-        return controller.isGrid.value
-            ? LayoutBuilder(
-                builder: (context, constraints) {
-                  final cardWidth = kIsWeb
-                      ? 210.0
-                      : (constraints.maxWidth - 14) / 2;
+      return Container(
+        width: double.infinity,
+        color: cs.surface,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 220),
+          child: controller.isGrid.value
+              ? LayoutBuilder(
+                  key: const ValueKey('grid_view'),
+                  builder: (context, constraints) {
+                    final isWeb =
+                        kIsWeb && MediaQuery.of(context).size.width >= 1000;
+                    final crossAxisCount = isWeb ? 4 : 2;
+                    final spacing = 14.0;
 
-                  return Container(
-                    width: double.infinity,
-                    color: cs.surface,
-                    child: Wrap(
-                      spacing: 14,
-                      runSpacing: 14,
-                      children: controller.filtered.map((item) {
-                        return SizedBox(
-                          width: cardWidth,
-                          child: _BrowseListingCardWrapper(item: item),
-                        );
-                      }).toList(),
-                    ),
-                  );
-                },
-              )
-            : Container(
-                width: double.infinity,
-                color: cs.surface,
-                child: ListView.separated(
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: controller.filtered.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: spacing,
+                        mainAxisSpacing: spacing,
+                        mainAxisExtent: isWeb ? 300 : 240,
+                      ),
+                      itemBuilder: (_, i) {
+                        final item = controller.filtered[i];
+                        return _BrowseListingCardWrapper(item: item);
+                      },
+                    );
+                  },
+                )
+              : ListView.separated(
+                  key: const ValueKey('list_view'),
                   itemCount: controller.filtered.length,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -517,9 +544,9 @@ class BrowseResults extends StatelessWidget {
                     );
                   },
                 ),
-              );
-      }),
-    );
+        ),
+      );
+    });
   }
 }
 
@@ -533,7 +560,7 @@ class _BrowseListingCardWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Get.to(ListingDetailScreen(), arguments: item);
+        Get.to(() => ListingDetailScreen(), arguments: item);
       },
       borderRadius: BorderRadius.circular(18),
       child: _ListingCard(item: item, listView: listView),
@@ -554,9 +581,9 @@ class _ListingCard extends StatelessWidget {
     if (listView) {
       return Container(
         decoration: BoxDecoration(
-          color: cs.surface,
+          color: cs.background,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: cs.outlineVariant),
+
           boxShadow: [
             BoxShadow(
               color: cs.shadow.withOpacity(.06),
@@ -601,7 +628,7 @@ class _ListingCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: cs.background,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: cs.outlineVariant),
         boxShadow: [
@@ -698,71 +725,62 @@ class _ListingContent extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    final content = <Widget>[
-      Text(
-        item.category,
-        style: theme.textTheme.bodySmall?.copyWith(
-          fontSize: 11,
-          color: cs.onSurfaceVariant,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      const SizedBox(height: 5),
-      Text(
-        item.title,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w800,
-          fontSize: 13.5,
-          color: cs.onSurface,
-        ),
-      ),
-      const SizedBox(height: 8),
-      Text(
-        item.price,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: cs.primary,
-          fontWeight: FontWeight.w900,
-          fontSize: 14,
-        ),
-      ),
-      const SizedBox(height: 10),
-      Row(
-        children: [
-          Icon(
-            Icons.location_on_outlined,
-            size: 14,
-            color: cs.onSurfaceVariant,
-          ),
-          const SizedBox(width: 4),
-          Expanded(
-            child: Text(
-              item.location,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 11,
-                color: cs.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    ];
-
-    if (compact) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: content,
-      );
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [...content.take(3), const Spacer(), ...content.skip(3)],
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          item.category,
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: 11,
+            color: cs.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          item.title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            fontSize: 13.5,
+            color: cs.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          item.price,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: cs.primary,
+            fontWeight: FontWeight.w900,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Icon(
+              Icons.location_on_outlined,
+              size: 14,
+              color: cs.onSurfaceVariant,
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                item.location,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontSize: 11,
+                  color: cs.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -795,216 +813,226 @@ class _EmptySearchState extends StatelessWidget {
       child: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: isWeb ? 760 : double.infinity),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              isWeb ? 24 : 8,
-              isWeb ? 34 : 24,
-              isWeb ? 24 : 8,
-              isWeb ? 36 : 18,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _EmptyStateIcon(web: isWeb),
-                SizedBox(height: isWeb ? 18 : 18),
-                _EmptyTitle(web: isWeb, query: displayQuery),
-                const SizedBox(height: 10),
-                Text(
-                  isWeb
-                      ? 'We could not find any listings matching your search. Try different\nkeywords or browse our categories.'
-                      : 'We couldn\'t find any listings matching your\nsearch. Try adjusting your keywords or\nbrowse our categories.',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: cs.onSurfaceVariant,
-                    height: 1.55,
-                    fontSize: isWeb ? 12 : 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                SizedBox(height: isWeb ? 18 : 20),
-                if (isWeb)
-                  Column(
-                    children: [
-                      SizedBox(
-                        width: 138,
-                        height: 40,
-                        child: ElevatedButton.icon(
-                          onPressed: onTryDifferent,
-                          icon: const Icon(Icons.search_rounded, size: 15),
-                          label: const Text('Try a New Search'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: cs.primary,
-                            foregroundColor: cs.onPrimary,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            textStyle: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(color: cs.background),
+                child: Column(
+                  children: [
+                    _EmptyStateIcon(web: isWeb),
+                    SizedBox(height: isWeb ? 18 : 18),
+                    _EmptyTitle(web: isWeb, query: displayQuery),
+                    const SizedBox(height: 10),
+                    Text(
+                      isWeb
+                          ? 'We could not find any listings matching your search. Try different\nkeywords or browse our categories.'
+                          : 'We couldn\'t find any listings matching your\nsearch. Try adjusting your keywords or\nbrowse our categories.',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        height: 1.55,
+                        fontSize: isWeb ? 12 : 12,
+                        fontWeight: FontWeight.w500,
                       ),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: onBrowseAll,
-                        style: TextButton.styleFrom(
-                          foregroundColor: cs.onSurfaceVariant,
-                        ),
-                        child: const Text(
-                          'Browse All Categories',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                else
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 42,
-                          child: ElevatedButton(
-                            onPressed: onTryDifferent,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: cs.primary,
-                              foregroundColor: cs.onPrimary,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                    ),
+                    SizedBox(height: isWeb ? 18 : 20),
+                    if (isWeb)
+                      Column(
+                        children: [
+                          SizedBox(
+                            width: 138,
+                            height: 40,
+                            child: ElevatedButton.icon(
+                              onPressed: onTryDifferent,
+                              icon: const Icon(Icons.search_rounded, size: 15),
+                              label: Center(
+                                child: const Text('Try a New Search'),
                               ),
-                              textStyle: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: cs.primary,
+                                foregroundColor: cs.onPrimary,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                textStyle: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
                             ),
-                            child: const Text('Try a Different Search'),
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: SizedBox(
-                          height: 42,
-                          child: TextButton(
+                          const SizedBox(height: 8),
+                          TextButton(
                             onPressed: onBrowseAll,
                             style: TextButton.styleFrom(
-                              foregroundColor: cs.onSurface,
-                              textStyle: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
+                              foregroundColor: cs.onSurfaceVariant,
+                            ),
+                            child: const Text(
+                              'Browse All Categories',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                            child: const Text('Browse All'),
                           ),
-                        ),
+                        ],
+                      )
+                    else
+                      Row(
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              height: 42,
+                              child: ElevatedButton(
+                                onPressed: onTryDifferent,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: cs.primary,
+                                  foregroundColor: cs.onPrimary,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  textStyle: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                child: const Text('Try a Different Search'),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: SizedBox(
+                              height: 42,
+                              child: TextButton(
+                                onPressed: onBrowseAll,
+                                style: TextButton.styleFrom(
+                                  foregroundColor: cs.onSurface,
+                                  textStyle: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                child: const Text('Browse All'),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                SizedBox(height: isWeb ? 28 : 18),
-                if (!isWeb)
-                  Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: cs.outlineVariant.withOpacity(.45),
-                  ),
-                SizedBox(height: isWeb ? 24 : 18),
-                Text(
-                  'Search Tips',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    fontSize: isWeb ? 12.5 : 15,
-                    color: cs.onSurface,
-                  ),
+                  ],
                 ),
-                SizedBox(height: isWeb ? 14 : 14),
-                if (isWeb)
-                  Row(
-                    children: const [
-                      Expanded(
-                        child: _EmptyTipCard(
-                          icon: Icons.search_rounded,
-                          iconColor: Color(0xFF22C55E),
-                          iconBg: Color(0xFFEAFBF0),
-                          text:
-                              'Try broader terms like "car"\ninstead of specific model\nnumbers',
-                        ),
+              ),
+              SizedBox(height: isWeb ? 28 : 5),
+              Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(color: cs.background),
+                child: Column(
+                  children: [
+                    SizedBox(height: isWeb ? 24 : 5),
+                    Text(
+                      'Search Tips',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: isWeb ? 12.5 : 15,
+                        color: cs.onSurface,
                       ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: _EmptyTipCard(
-                          icon: Icons.sell_outlined,
-                          iconColor: Color(0xFFEF4444),
-                          iconBg: Color(0xFFFDECEC),
-                          text:
-                              'Check your spelling or try\nalternate keywords',
-                        ),
+                    ),
+                    SizedBox(height: isWeb ? 14 : 14),
+                    if (isWeb)
+                      Row(
+                        children: const [
+                          Expanded(
+                            child: _EmptyTipCard(
+                              icon: Icons.search_rounded,
+                              iconColor: Color(0xFF22C55E),
+                              iconBg: Color(0xFFEAFBF0),
+                              text:
+                                  'Try broader terms like "car"\ninstead of specific model\nnumbers',
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: _EmptyTipCard(
+                              icon: Icons.sell_outlined,
+                              iconColor: Color(0xFFEF4444),
+                              iconBg: Color(0xFFFDECEC),
+                              text:
+                                  'Check your spelling or try\nalternate keywords',
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: _EmptyTipCard(
+                              icon: Icons.grid_view_rounded,
+                              iconColor: Color(0xFFEAB308),
+                              iconBg: Color(0xFFFFF7D6),
+                              text:
+                                  'Browse categories directly\nto discover listings',
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      const Column(
+                        children: [
+                          _EmptyTipTile(
+                            icon: Icons.spellcheck_rounded,
+                            title: 'Check Your Spelling',
+                            subtitle:
+                                'Make sure all words are spelled correctly\nand try again.',
+                          ),
+                          SizedBox(height: 12),
+                          _EmptyTipTile(
+                            icon: Icons.layers_rounded,
+                            title: 'Use Fewer Keywords',
+                            subtitle:
+                                'Try simplifying your search with broader or\nfewer terms.',
+                          ),
+                          SizedBox(height: 12),
+                          _EmptyTipTile(
+                            icon: Icons.autorenew_rounded,
+                            title: 'Try Different Words',
+                            subtitle:
+                                'Use synonyms or alternative phrases for\nbetter results.',
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: _EmptyTipCard(
-                          icon: Icons.grid_view_rounded,
-                          iconColor: Color(0xFFEAB308),
-                          iconBg: Color(0xFFFFF7D6),
-                          text:
-                              'Browse categories directly\nto discover listings',
-                        ),
-                      ),
-                    ],
-                  )
-                else
-                  const Column(
-                    children: [
-                      _EmptyTipTile(
-                        icon: Icons.spellcheck_rounded,
-                        title: 'Check Your Spelling',
-                        subtitle:
-                            'Make sure all words are spelled correctly\nand try again.',
-                      ),
-                      SizedBox(height: 12),
-                      _EmptyTipTile(
-                        icon: Icons.layers_rounded,
-                        title: 'Use Fewer Keywords',
-                        subtitle:
-                            'Try simplifying your search with broader or\nfewer terms.',
-                      ),
-                      SizedBox(height: 12),
-                      _EmptyTipTile(
-                        icon: Icons.autorenew_rounded,
-                        title: 'Try Different Words',
-                        subtitle:
-                            'Use synonyms or alternative phrases for\nbetter results.',
-                      ),
-                    ],
-                  ),
-                SizedBox(height: isWeb ? 28 : 28),
-                Text(
-                  isWeb ? 'Popular Right Now' : 'Popular Searches',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    fontSize: isWeb ? 12.5 : 15,
-                    color: cs.onSurface,
-                  ),
+                  ],
                 ),
-                SizedBox(height: isWeb ? 14 : 14),
-                Center(
-                  child: Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: controller.popularSearches.map((item) {
-                      return _PopularSearchChip(label: item, web: isWeb);
-                    }).toList(),
-                  ),
+              ),
+              SizedBox(height: isWeb ? 28 : 5),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+                decoration: BoxDecoration(color: cs.background),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Popular Searches',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF222222),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: controller.popularSearches.map((item) {
+                        return _PopularSearchChip(label: item, web: false);
+                      }).toList(),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1150,7 +1178,7 @@ class _EmptyTipTile extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerLowest,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -1160,7 +1188,7 @@ class _EmptyTipTile extends StatelessWidget {
             width: 34,
             height: 34,
             decoration: BoxDecoration(
-              color: const Color(0xFFEAFBF0),
+              color: cs.background,
               borderRadius: BorderRadius.circular(10),
             ),
             alignment: Alignment.center,
@@ -1210,36 +1238,28 @@ class _PopularSearchChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: web ? 12 : 10,
-        vertical: web ? 7 : 8,
-      ),
+      height: 40,
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
-        color: web ? cs.surface : cs.surfaceContainerLowest,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: web ? cs.outlineVariant.withOpacity(.8) : Colors.transparent,
-        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (!web) ...[
-            Icon(
-              Icons.trending_up_rounded,
-              size: 13,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: 6),
-          ],
+          Icon(
+            Icons.trending_up_rounded,
+            size: 12,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 6),
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontSize: web ? 10.5 : 11,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurfaceVariant,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF6B7280),
             ),
           ),
         ],

@@ -20,7 +20,8 @@ class BrowseController extends GetxController {
     'BMW 3 Series',
   ];
 
-  String defaultSearchHint(bool web) => web ? '2BR House POS' : 'JBB House FOE';
+  String defaultSearchHint(bool web) =>
+      web ? '2BR House POS' : 'JBB House FOEx';
 
   bool get hasQuery => searchText.value.trim().isNotEmpty;
 

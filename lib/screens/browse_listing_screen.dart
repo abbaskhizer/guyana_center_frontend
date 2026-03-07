@@ -71,56 +71,91 @@ class _MobileLayout extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return ListView(
-      // ✅ bottom nav overlap fix (pagination hide hoti thi)
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 90),
+      padding: const EdgeInsets.only(bottom: 90),
       children: [
-        _MobileTopBar(),
-        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _MobileTopBar(),
+              const SizedBox(height: 10),
 
-        _BreadcrumbRow(current: category.title),
-        const SizedBox(height: 10),
+              _BreadcrumbRow(current: category.title),
+              const SizedBox(height: 10),
 
-        _TitleRow(category: category),
-        const SizedBox(height: 14),
+              _TitleRow(category: category),
+              const SizedBox(height: 14),
 
-        Obx(
-          () => _StatsStrip(
-            listings: controller.listingsCount.value,
-            newCount: controller.updated.value,
-            rating: controller.rating.value,
+              Obx(
+                () => _StatsStrip(
+                  listings: controller.listingsCount.value,
+                  newCount: controller.updated.value,
+                  rating: controller.rating.value,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              _ChipRow(controller: controller),
+              const SizedBox(height: 12),
+
+              _SearchAndFilterRow(
+                controller: controller,
+                hint: "Search ${category.title.toLowerCase()}...",
+                isWeb: false,
+              ),
+              const SizedBox(height: 12),
+
+              _ResultsHeaderRow(controller: controller),
+              const SizedBox(height: 12),
+            ],
           ),
         ),
-        const SizedBox(height: 16),
 
-        _ChipRow(controller: controller),
-        const SizedBox(height: 12),
-
-        _SearchAndFilterRow(
-          controller: controller,
-          hint: "Search ${category.title.toLowerCase()}...",
-          isWeb: false,
-        ),
-        const SizedBox(height: 12),
-
-        _ResultsHeaderRow(controller: controller),
-        const SizedBox(height: 12),
-
-        _ListingsSection(controller: controller, isWeb: false),
-        const SizedBox(height: 14),
-
-        // ✅ screenshot wali pagination (mobile)
-        _PaginationBar(controller: controller),
-        const SizedBox(height: 18),
-
-        Text(
-          "Browse Other Categories",
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w900,
-            color: cs.onSurface,
+        /// Container WITHOUT padding
+        Container(
+          width: double.infinity,
+          color: Theme.of(context).colorScheme.surface,
+          child: Column(
+            children: [
+              Padding(
+                padding: EdgeInsetsGeometry.symmetric(
+                  vertical: 10,
+                  horizontal: 15,
+                ),
+                child: _ListingsSection(controller: controller, isWeb: false),
+              ),
+              const SizedBox(height: 14),
+              Padding(
+                padding: EdgeInsetsGeometry.symmetric(
+                  vertical: 10,
+                  horizontal: 15,
+                ),
+                child: _PaginationBar(controller: controller),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 12),
-        const _OtherCategoriesRow(),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 25),
+
+              Text(
+                "Browse Other Categories",
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w900),
+              ),
+
+              const SizedBox(height: 25),
+              const _OtherCategoriesRow(),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -283,7 +318,7 @@ class _BreadcrumbRow extends StatelessWidget {
           ),
         ),
         Text(
-          "All Categories  >  ",
+          "Categories  >  ",
           style: theme.textTheme.bodySmall?.copyWith(
             color: cs.onSurface.withOpacity(.35),
             fontWeight: FontWeight.w700,
@@ -307,12 +342,58 @@ class _TitleRow extends StatelessWidget {
   final BrowseCategoryVM category;
   const _TitleRow({required this.category});
 
-  IconData _iconForCategory(String title) {
+  String _imageForCategory(String title) {
     final t = title.toLowerCase();
-    if (t.contains("vehicle") || t.contains("car")) return Icons.directions_car;
-    if (t.contains("job")) return Icons.work_outline_rounded;
-    if (t.contains("real")) return Icons.home_work_outlined;
-    return Icons.category_rounded;
+
+    if (t.contains("vehicle") || t.contains("car")) {
+      return 'assets/vehicle.png';
+    }
+
+    if (t.contains("real")) {
+      return 'assets/realestate.png';
+    }
+
+    if (t.contains("job")) {
+      return 'assets/jobs.png';
+    }
+
+    if (t.contains("electronic")) {
+      return 'assets/electronics.png';
+    }
+
+    if (t.contains("fashion")) {
+      return 'assets/fashion.png';
+    }
+
+    if (t.contains("health") || t.contains("beauty")) {
+      return 'assets/health&beauty.png';
+    }
+
+    if (t.contains("home") || t.contains("garden")) {
+      return 'assets/home&gardan.png';
+    }
+
+    if (t.contains("kid")) {
+      return 'assets/kids.png';
+    }
+
+    if (t.contains("pet") || t.contains("animal")) {
+      return 'assets/pet&animals.png';
+    }
+
+    if (t.contains("sport") || t.contains("hobbies")) {
+      return 'assets/sports&hobbies.png';
+    }
+
+    if (t.contains("business")) {
+      return 'assets/bussiness.png';
+    }
+
+    if (t.contains("service")) {
+      return 'assets/service.png';
+    }
+
+    return 'assets/service.png';
   }
 
   @override
@@ -322,7 +403,22 @@ class _TitleRow extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(_iconForCategory(category.title), size: 18, color: cs.onSurface),
+        Container(
+          height: 40,
+          width: 40,
+          decoration: BoxDecoration(
+            color: cs.surface,
+            borderRadius: const BorderRadius.all(Radius.circular(14)),
+          ),
+          child: Center(
+            child: Image.asset(
+              _imageForCategory(category.title),
+              height: 22,
+              width: 22,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
         const SizedBox(width: 6),
         Expanded(
           child: Text(
@@ -631,7 +727,9 @@ class _ResultsHeaderRow extends StatelessWidget {
             ),
           );
         }),
+
         const Spacer(),
+
         Text(
           "Newest First",
           style: theme.textTheme.bodySmall?.copyWith(
@@ -639,26 +737,56 @@ class _ResultsHeaderRow extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(width: 10),
+
+        const SizedBox(width: 12),
+
         Obx(() {
           final grid = controller.isGrid.value;
-          return InkWell(
-            onTap: controller.toggleView,
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                borderRadius: BorderRadius.circular(12),
+
+          return Row(
+            children: [
+              /// GRID BUTTON
+              InkWell(
+                onTap: () => controller.isGrid.value = true,
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: grid ? cs.primary : cs.surface,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.grid_view_rounded,
+                    size: 18,
+                    color: grid ? cs.onPrimary : cs.onSurfaceVariant,
+                  ),
+                ),
               ),
-              alignment: Alignment.center,
-              child: Icon(
-                grid ? Icons.grid_view_rounded : Icons.view_agenda_rounded,
-                color: Theme.of(context).colorScheme.onPrimary,
-                size: 18,
+
+              const SizedBox(width: 6),
+
+              /// LIST BUTTON
+              InkWell(
+                onTap: () => controller.isGrid.value = false,
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: !grid ? cs.primary : cs.surface,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.view_list_rounded,
+                    size: 18,
+                    color: !grid ? cs.onPrimary : cs.onSurfaceVariant,
+                  ),
+                ),
               ),
-            ),
+            ],
           );
         }),
       ],
@@ -666,7 +794,6 @@ class _ResultsHeaderRow extends StatelessWidget {
   }
 }
 
-/// ✅ FIXED: grid card height (web + mobile)
 class _ListingsSection extends StatelessWidget {
   final BrowseListingController controller;
   final bool isWeb;
@@ -674,18 +801,22 @@ class _ListingsSection extends StatelessWidget {
 
   int _colsForWidth(double w) {
     if (!isWeb) return 2;
-    if (w >= 980) return 4;
-    if (w >= 760) return 3;
-    if (w >= 520) return 2;
+
+    if (w >= 1200) return 4;
+    if (w >= 900) return 3;
+    if (w >= 600) return 2;
+
     return 1;
   }
 
   double _extentForCols(int cols) {
-    if (!isWeb) return 280;
+    if (!isWeb) return 220;
+
     if (cols >= 4) return 305;
-    if (cols == 3) return 330;
-    if (cols == 2) return 350;
-    return 370;
+    if (cols == 3) return 320;
+    if (cols == 2) return 340;
+
+    return 360;
   }
 
   @override
@@ -786,7 +917,6 @@ class _TabPill extends StatelessWidget {
   }
 }
 
-/// ✅ Pagination bar (‹ 1 2 3 … 24 ›)
 class _PaginationBar extends StatelessWidget {
   final BrowseListingController controller;
   const _PaginationBar({required this.controller});
@@ -953,13 +1083,10 @@ class _OtherCategoriesRow extends StatelessWidget {
     return const Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        OtherCategoryIcon(icon: Icons.home_work_outlined, text: "Real Estate"),
-        OtherCategoryIcon(icon: Icons.work_outline_rounded, text: "Jobs"),
-        OtherCategoryIcon(
-          icon: Icons.electrical_services_outlined,
-          text: "Electronics",
-        ),
-        OtherCategoryIcon(icon: Icons.chair_outlined, text: "Furniture"),
+        OtherCategoryIcon(image: 'assets/re.png', text: "Real Estate"),
+        OtherCategoryIcon(image: 'assets/j.png', text: "Jobs"),
+        OtherCategoryIcon(image: 'assets/e.png', text: "Electronics"),
+        OtherCategoryIcon(image: 'assets/f.png', text: "Furniture"),
       ],
     );
   }
@@ -1017,26 +1144,34 @@ class OtherCategoryIcon extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
+    final isWebDesktop = kIsWeb && MediaQuery.of(context).size.width >= 900;
+
+    Widget iconWidget = image != null
+        ? Image.asset(image!, width: 28, height: 28, fit: BoxFit.contain)
+        : Icon(icon ?? Icons.category, color: cs.onSurfaceVariant);
+
     return Column(
       children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: cs.surface,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: cs.outlineVariant),
-          ),
-          alignment: Alignment.center,
-          child: image != null
-              ? Image.asset(image!, width: 24, height: 24, fit: BoxFit.contain)
-              : Icon(icon ?? Icons.category, color: cs.onSurfaceVariant),
-        ),
+        isWebDesktop
+            ? Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: cs.surface,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: cs.outlineVariant),
+                ),
+                alignment: Alignment.center,
+                child: iconWidget,
+              )
+            : iconWidget,
+
         const SizedBox(height: 6),
+
         Text(
           text,
           style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: FontWeight.w700,
             color: cs.onSurface.withOpacity(.65),
           ),
@@ -1064,9 +1199,9 @@ class ListingCardGrid extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: cs.background,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: cs.outlineVariant),
+
         boxShadow: [
           BoxShadow(
             color: cs.onSurface.withOpacity(0.06),

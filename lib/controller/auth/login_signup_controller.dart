@@ -86,7 +86,6 @@ class LoginSignupController extends GetxController {
       }
     }
 
-    // DEMO actions (replace with your API calls)
     if (isLogin.value) {
       Get.snackbar("Success", "Logged in (demo)");
     } else {

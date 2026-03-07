@@ -20,6 +20,7 @@ class AllCategoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(AllCategoryController(), permanent: true);
+    final theme = Theme.of(context);
 
     if (controller.categories.isEmpty) {
       controller.setCategories(
@@ -27,11 +28,9 @@ class AllCategoryScreen extends StatelessWidget {
       );
     }
 
-    final theme = Theme.of(context);
-
     return Scaffold(
       backgroundColor: _isWebDesktop(context)
-          ? Colors.white
+          ? theme.colorScheme.background
           : theme.scaffoldBackgroundColor,
       bottomNavigationBar: _isWebDesktop(context) ? null : CustomBottomNavBar(),
       body: SafeArea(
@@ -49,42 +48,34 @@ class _MobileLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: 15),
-
       children: [
-        Padding(
-          padding: EdgeInsetsGeometry.symmetric(horizontal: 20),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
           child: MobileTopBar(),
         ),
         const SizedBox(height: 10),
-
-        Padding(
-          padding: EdgeInsetsGeometry.symmetric(horizontal: 20),
-          child: const _BreadcrumbTitleBlock(isWeb: false),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: _BreadcrumbTitleBlock(isWeb: false),
         ),
         const SizedBox(height: 14),
-
-        Padding(
-          padding: EdgeInsetsGeometry.symmetric(horizontal: 20),
-          child: const _CollageSection(isWeb: false),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: _CollageSection(isWeb: false),
         ),
         const SizedBox(height: 12),
-
-        Padding(
-          padding: EdgeInsetsGeometry.symmetric(horizontal: 20),
-          child: const _StatsRow(isWeb: false),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: _StatsRow(isWeb: false),
         ),
         const SizedBox(height: 14),
-
         Padding(
-          padding: EdgeInsetsGeometry.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: _ListHeaderRow(controller: controller),
         ),
         const SizedBox(height: 10),
-
         _CategoryListMobile(controller: controller),
         const SizedBox(height: 8),
       ],
@@ -97,23 +88,16 @@ class _WebLayout extends StatelessWidget {
   const _WebLayout({required this.controller});
 
   double _contentMaxWidth(double w) {
-    // HomeTab jaisa canvas width
     if (w >= 1440) return 1120;
     if (w >= 1200) return 1120;
     if (w >= 1000) return 980;
     return w - 32;
   }
 
-  Color _surfaceWhite(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Theme.of(context).brightness == Brightness.dark
-        ? cs.surface
-        : Colors.white;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -133,15 +117,13 @@ class _WebLayout extends StatelessWidget {
 
         return CustomScrollView(
           slivers: [
-            // ✅ Header full-width, content centered
             SliverToBoxAdapter(
               child: Column(
                 children: [
                   const WebHeader(),
-
                   Container(
                     width: double.infinity,
-                    color: _surfaceWhite(context),
+                    color: theme.colorScheme.background,
                     child: centered(
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 14, 0, 12),
@@ -159,30 +141,23 @@ class _WebLayout extends StatelessWidget {
                 ],
               ),
             ),
-
-            // ✅ Body full-width FAFAFA, content centered (HomeTab jaisa)
             SliverToBoxAdapter(
               child: Container(
                 width: double.infinity,
-                color: const Color(0xFFFAFAFA),
+                color: cs.surface,
                 child: centered(
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 18),
-
                       const _WebMostPopularLabel(),
                       const SizedBox(height: 10),
-
                       const _CollageSection(isWeb: true),
                       const SizedBox(height: 14),
-
                       const _StatsRow(isWeb: true),
                       const SizedBox(height: 18),
-
                       _WebCategoriesContainer(controller: controller),
                       const SizedBox(height: 22),
-
                       const _NeedHelpCta(),
                       const SizedBox(height: 28),
                     ],
@@ -191,8 +166,6 @@ class _WebLayout extends StatelessWidget {
                 ),
               ),
             ),
-
-            // ✅ Footer full-width
             SliverToBoxAdapter(
               child: Container(color: cs.surface, child: WebFooter()),
             ),
@@ -322,13 +295,14 @@ class _WebIconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Container(
       height: 44,
       width: 44,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: cs.outlineVariant),
       ),
@@ -519,7 +493,12 @@ class _WebCollageCard extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.network(imageUrl, fit: BoxFit.cover),
+          Image.network(
+            imageUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) =>
+                Container(color: theme.colorScheme.surface),
+          ),
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -545,7 +524,11 @@ class _WebCollageCard extends StatelessWidget {
                     color: Colors.white.withOpacity(.92),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(icon, size: 18, color: Colors.black87),
+                  child: const Icon(
+                    Icons.category_rounded,
+                    size: 18,
+                    color: Colors.black87,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -589,7 +572,7 @@ class _StatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const mobileColor = Color(0xFFDC2626); // red for mobile
+    const mobileColor = Color(0xFFDC2626);
 
     return Row(
       children: [
@@ -649,7 +632,7 @@ class _StatCard extends StatelessWidget {
       height: 70,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: cs.outlineVariant),
       ),
@@ -684,6 +667,7 @@ class _SearchField extends StatelessWidget {
   final String hint;
   final ValueChanged<String> onChanged;
   final double height;
+
   const _SearchField({
     required this.hint,
     required this.onChanged,
@@ -692,7 +676,8 @@ class _SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return SizedBox(
       height: height,
@@ -702,7 +687,7 @@ class _SearchField extends StatelessWidget {
           hintText: hint,
           prefixIcon: Icon(Icons.search_rounded, color: cs.onSurfaceVariant),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: theme.cardColor,
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(color: cs.outlineVariant),
@@ -757,7 +742,8 @@ class _CategoryListMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Obx(() {
       final list = controller.filtered;
@@ -792,28 +778,21 @@ class _WebCategoriesContainer extends StatelessWidget {
   const _WebCategoriesContainer({required this.controller});
 
   int _columnsForWidth(double w) {
-    // ✅ Figma desktop layout
     if (w >= 1200) return 3;
     if (w >= 900) return 2;
     return 1;
   }
 
-  Color _surfaceWhite(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Theme.of(context).brightness == Brightness.dark
-        ? cs.surface
-        : Colors.white;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     const spacing = 16.0;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _surfaceWhite(context),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: cs.outlineVariant),
       ),
@@ -822,8 +801,6 @@ class _WebCategoriesContainer extends StatelessWidget {
         children: [
           _ListHeaderRow(controller: controller),
           const SizedBox(height: 14),
-
-          // ✅ Grid
           Obx(() {
             final list = controller.filtered;
 
@@ -840,7 +817,6 @@ class _WebCategoriesContainer extends StatelessWidget {
                     final item = list[i];
                     return SizedBox(
                       width: itemW,
-                      // ✅ Figma cards same height
                       height: 172,
                       child: _WebCategoryCard(
                         item: item,
@@ -865,45 +841,11 @@ class _WebCategoryCard extends StatelessWidget {
   final VoidCallback onTap;
   const _WebCategoryCard({required this.item, required this.onTap});
 
-  Color _cardBg(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Theme.of(context).brightness == Brightness.dark
-        ? cs.surface
-        : Colors.white; // ✅ figma white
-  }
-
-  Color _chipBg(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Theme.of(context).brightness == Brightness.dark
-        ? cs.surfaceVariant
-        : const Color(0xFFF3F4F6);
-  }
-
-  Color _chipBorder(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Theme.of(context).brightness == Brightness.dark
-        ? cs.outlineVariant
-        : const Color(0xFFE5E7EB);
-  }
-
-  Color _chipText(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Theme.of(context).brightness == Brightness.dark
-        ? cs.onSurface.withOpacity(.75)
-        : const Color(0xFF6B7280);
-  }
-
-  Color _mutedText(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return cs.onSurface.withOpacity(.55);
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    // ✅ you can replace these with item.subcategories if you have them
     final chips = <String>[
       "Cars for Sale",
       "Trucks & Vans",
@@ -919,14 +861,13 @@ class _WebCategoryCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: _cardBg(context),
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: cs.outlineVariant),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ✅ Header Row (icon + title + arrow)
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -934,7 +875,7 @@ class _WebCategoryCard extends StatelessWidget {
                   height: 42,
                   width: 42,
                   decoration: BoxDecoration(
-                    color: item.tint ?? cs.surfaceVariant,
+                    color: item.tint ?? cs.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: const EdgeInsets.all(8),
@@ -949,7 +890,6 @@ class _WebCategoryCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 1),
@@ -969,10 +909,10 @@ class _WebCategoryCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           item.subtitle,
-                          maxLines: 2, // ✅ figma like (wrap allowed)
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: _mutedText(context),
+                            color: cs.onSurface.withOpacity(.55),
                             fontWeight: FontWeight.w600,
                             fontSize: 11,
                             height: 1.25,
@@ -982,17 +922,12 @@ class _WebCategoryCard extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 const SizedBox(width: 8),
-
-                // ✅ Right arrow (figma)
                 Container(
                   width: 28,
                   height: 28,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? cs.surfaceVariant
-                        : const Color(0xFFF9FAFB),
+                    color: cs.surface,
                     shape: BoxShape.circle,
                     border: Border.all(color: cs.outlineVariant),
                   ),
@@ -1005,10 +940,7 @@ class _WebCategoryCard extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 12),
-
-            // ✅ Chips (wrap like figma)
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -1019,16 +951,16 @@ class _WebCategoryCard extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: _chipBg(context),
+                    color: cs.surface,
                     borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: _chipBorder(context)),
+                    border: Border.all(color: cs.outlineVariant),
                   ),
                   child: Text(
                     t,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: _chipText(context),
+                      color: cs.onSurface.withOpacity(.7),
                       fontWeight: FontWeight.w600,
                       fontSize: 10.5,
                       height: 1.1,
@@ -1069,8 +1001,9 @@ class _CategoryTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         child: Container(
           decoration: BoxDecoration(
-            color: cs.onSurface.withOpacity(.03),
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: cs.outlineVariant),
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
@@ -1082,7 +1015,7 @@ class _CategoryTile extends StatelessWidget {
                       height: 42,
                       width: 42,
                       decoration: BoxDecoration(
-                        color: item.tint ?? cs.surfaceVariant,
+                        color: item.tint ?? cs.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       padding: const EdgeInsets.all(8),
@@ -1192,7 +1125,7 @@ class _NeedHelpCta extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF16A34A),
+        color: cs.primary,
         borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
@@ -1205,14 +1138,14 @@ class _NeedHelpCta extends StatelessWidget {
                   "Can't find what you need?",
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w900,
-                    color: Colors.white,
+                    color: cs.onPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   "Post a free ad and reach buyers fast.",
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.white.withOpacity(.85),
+                    color: cs.onPrimary.withOpacity(.85),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -1223,7 +1156,7 @@ class _NeedHelpCta extends StatelessWidget {
           ElevatedButton.icon(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
+              backgroundColor: theme.cardColor,
               foregroundColor: cs.onSurface,
               elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),

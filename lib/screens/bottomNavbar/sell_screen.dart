@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/bottomNavbar/sell_controller.dart';
-import 'package:guyana_center_frontend/widgets/mobile_top_bar.dart';
+import 'package:guyana_center_frontend/widgets/mobile_header.dart';
 
 class SellScreen extends StatelessWidget {
   const SellScreen({super.key});
@@ -17,97 +17,95 @@ class SellScreen extends StatelessWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           children: [
-            // Custom header - hidden on web
-            if (!kIsWeb)
-              Row(
-                children: [
-                  InkWell(
-                    onTap: () {},
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: Icon(
-                        Icons.menu_rounded,
-                        color: cs.onSurface,
-                        size: 22,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Expanded(child: GuyanaCentralLogo()),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.notifications_none_rounded,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  const ProfileDot(),
-                ],
-              ),
+            if (!kIsWeb) MobileHeader(),
 
             if (!kIsWeb) const SizedBox(height: 10),
 
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 InkWell(
                   onTap: controller.goBack,
                   borderRadius: BorderRadius.circular(12),
                   child: Padding(
                     padding: const EdgeInsets.all(6),
-                    child: Icon(
-                      Icons.chevron_left_rounded,
-                      color: cs.onSurface,
-                      size: 26,
+                    child: Container(
+                      height: 35,
+                      width: 35,
+                      decoration: BoxDecoration(
+                        color: cs.surface,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      alignment: Alignment.center,
+                      child: Icon(
+                        Icons.chevron_left_rounded,
+                        color: cs.onSurface,
+                        size: 26,
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 6),
                 Expanded(
-                  child: Text(
-                    "Post a Free Ad",
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: cs.onSurface,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Post a Free Ad",
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            color: cs.onSurface,
+                            fontSize: 20,
+                            height: 1.1,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Reach thousands of buyers across Trinidad & Tobago",
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: cs.onSurface.withOpacity(.55),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 10,
+                            height: 1.35,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
-
-            const SizedBox(height: 4),
-
-            Text(
-              "Reach thousands of buyers across Trinidad & Tobago",
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: cs.onSurface.withOpacity(.55),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-
             const SizedBox(height: 14),
 
             Obx(
-              () => _StepStrip(
-                step: controller.step.value,
-                onTap: controller.setStep,
+              () => Padding(
+                padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
+                child: _StepStrip(
+                  step: controller.step.value,
+                  onTap: controller.setStep,
+                ),
               ),
             ),
+            const SizedBox(height: 10),
+            Divider(color: cs.surface),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
 
             Obx(() {
-              return IndexedStack(
-                index: controller.step.value - 1,
-                children: const [
-                  _Step1Details(),
-                  _Step2PhotosPrice(),
-                  _Step3Contact(),
-                ],
-              );
+              switch (controller.step.value) {
+                case 1:
+                  return const _Step1Details();
+                case 2:
+                  return const _Step2PhotosPrice();
+                case 3:
+                  return const _Step3Contact();
+                default:
+                  return const _Step1Details();
+              }
             }),
           ],
         ),
@@ -130,7 +128,7 @@ class _Step1Details extends StatelessWidget {
       children: [
         Text(
           "Ad Details",
-          style: theme.textTheme.bodyMedium?.copyWith(
+          style: theme.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -139,7 +137,7 @@ class _Step1Details extends StatelessWidget {
 
         Text(
           "Category",
-          style: theme.textTheme.bodySmall?.copyWith(
+          style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w800,
             color: cs.onSurface.withOpacity(.7),
           ),
@@ -158,9 +156,9 @@ class _Step1Details extends StatelessWidget {
 
         Text(
           "Ad Title",
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: cs.onSurface.withOpacity(.7),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w900,
+            color: cs.onSurface.withOpacity(.45),
           ),
         ),
         const SizedBox(height: 8),
@@ -170,7 +168,7 @@ class _Step1Details extends StatelessWidget {
           decoration: InputDecoration(
             hintText: "e.g. Toyota Hilux 2022 Super GL...",
             filled: true,
-            fillColor: cs.surface,
+            fillColor: cs.background,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 14,
@@ -192,7 +190,7 @@ class _Step1Details extends StatelessWidget {
           "Be specific, include brand, model and key details",
           style: theme.textTheme.bodySmall?.copyWith(
             color: cs.onSurface.withOpacity(.45),
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
 
@@ -200,9 +198,9 @@ class _Step1Details extends StatelessWidget {
 
         Text(
           "Description",
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: cs.onSurface.withOpacity(.7),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w900,
+            color: cs.onSurface.withOpacity(.45),
           ),
         ),
         const SizedBox(height: 8),
@@ -213,7 +211,7 @@ class _Step1Details extends StatelessWidget {
           decoration: InputDecoration(
             hintText: "Describe your item in detail - condition, features...",
             filled: true,
-            fillColor: cs.surface,
+            fillColor: cs.background,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 14,
@@ -248,9 +246,9 @@ class _Step1Details extends StatelessWidget {
 
         Text(
           "Condition",
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: cs.onSurface.withOpacity(.7),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w900,
+            color: cs.onSurface.withOpacity(.45),
           ),
         ),
         const SizedBox(height: 10),
@@ -286,7 +284,7 @@ class _Step1Details extends StatelessWidget {
           );
         }),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 25),
 
         SizedBox(
           height: 52,
@@ -336,7 +334,7 @@ class _Step2PhotosPrice extends StatelessWidget {
       children: [
         Text(
           "Photos",
-          style: theme.textTheme.bodyMedium?.copyWith(
+          style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -352,20 +350,62 @@ class _Step2PhotosPrice extends StatelessWidget {
 
         Obx(() {
           final imgs = controller.images;
-          return Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              ...List.generate(imgs.length, (i) {
+
+          return AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            child: GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: imgs.length < 10 ? imgs.length + 1 : imgs.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 12,
+                childAspectRatio: 110 / 86,
+              ),
+              itemBuilder: (_, i) {
+                if (i == imgs.length && imgs.length < 10) {
+                  return InkWell(
+                    onTap: controller.addMockPhoto,
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: cs.outlineVariant),
+                      ),
+                      alignment: Alignment.center,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.add_photo_alternate_outlined,
+                            color: cs.onSurfaceVariant,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            "Add Photo",
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: cs.onSurface.withOpacity(.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
                 final url = imgs[i];
+
                 return Stack(
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(14),
                       child: Image.network(
                         url,
-                        width: 110,
-                        height: 86,
+                        width: double.infinity,
+                        height: double.infinity,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -377,9 +417,9 @@ class _Step2PhotosPrice extends StatelessWidget {
                         child: Container(
                           width: 22,
                           height: 22,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.black54,
+                            color: cs.onSurface.withOpacity(.7),
                           ),
                           alignment: Alignment.center,
                           child: const Icon(
@@ -400,58 +440,32 @@ class _Step2PhotosPrice extends StatelessWidget {
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.black87,
+                            color: cs.primary,
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Text(
+                          child: Text(
                             "Cover",
-                            style: TextStyle(color: Colors.white, fontSize: 10),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: Colors.white),
                           ),
                         ),
                       ),
                   ],
                 );
-              }),
-              if (imgs.length < 10)
-                InkWell(
-                  onTap: controller.addMockPhoto,
-                  borderRadius: BorderRadius.circular(14),
-                  child: Container(
-                    width: 110,
-                    height: 86,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: cs.outlineVariant),
-                    ),
-                    alignment: Alignment.center,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.add_photo_alternate_outlined,
-                          color: cs.onSurfaceVariant,
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          "Add Photo",
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: cs.onSurface.withOpacity(.7),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
+              },
+            ),
           );
         }),
 
         const SizedBox(height: 18),
 
+        Divider(color: cs.surface),
+
+        const SizedBox(height: 18),
+
         Text(
           "Pricing",
-          style: theme.textTheme.bodyMedium?.copyWith(
+          style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -461,6 +475,7 @@ class _Step2PhotosPrice extends StatelessWidget {
           "Price (TTD)",
           style: theme.textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w800,
+            fontSize: 12,
             color: cs.onSurface.withOpacity(.7),
           ),
         ),
@@ -470,10 +485,10 @@ class _Step2PhotosPrice extends StatelessWidget {
           controller: controller.priceCtrl,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
-            hintText: "0.00",
-            prefixText: "\$ ",
+            hintText: '\$' + '0.00',
+
             filled: true,
-            fillColor: cs.surface,
+            fillColor: cs.background,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 14,
@@ -499,7 +514,7 @@ class _Step2PhotosPrice extends StatelessWidget {
             controlAffinity: ListTileControlAffinity.leading,
             title: Text(
               "Price is negotiable",
-              style: theme.textTheme.bodySmall?.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: cs.onSurface.withOpacity(.7),
               ),
@@ -509,12 +524,38 @@ class _Step2PhotosPrice extends StatelessWidget {
 
         const SizedBox(height: 12),
 
+        Divider(color: cs.surface),
+
+        const SizedBox(height: 12),
+
         Row(
           children: [
-            TextButton(onPressed: controller.goBack, child: const Text("Back")),
+            InkWell(
+              onTap: controller.goBack,
+              borderRadius: BorderRadius.circular(10),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.arrow_back_ios_new,
+                    size: 16,
+                    color: cs.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    "Back",
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurface.withOpacity(.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
             const Spacer(),
+
             SizedBox(
-              height: 46,
+              height: 55,
               child: ElevatedButton(
                 onPressed: controller.continueNext,
                 style: ElevatedButton.styleFrom(
@@ -523,8 +564,14 @@ class _Step2PhotosPrice extends StatelessWidget {
                   ),
                 ),
                 child: Row(
-                  children: const [
-                    Text("Continue"),
+                  children: [
+                    Text(
+                      "Continue",
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
                     SizedBox(width: 8),
                     Icon(Icons.arrow_forward_rounded, size: 18),
                   ],
@@ -533,6 +580,7 @@ class _Step2PhotosPrice extends StatelessWidget {
             ),
           ],
         ),
+        SizedBox(height: 10),
       ],
     );
   }
@@ -552,15 +600,16 @@ class _Step3Contact extends StatelessWidget {
       children: [
         Text(
           "Contact & Location",
-          style: theme.textTheme.bodyMedium?.copyWith(
+          style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w900,
+            fontSize: 20,
           ),
         ),
         const SizedBox(height: 12),
 
         Text(
           "Location",
-          style: theme.textTheme.bodySmall?.copyWith(
+          style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w800,
             color: cs.onSurface.withOpacity(.7),
           ),
@@ -569,6 +618,7 @@ class _Step3Contact extends StatelessWidget {
 
         Obx(() {
           final current = controller.selectedArea.value;
+
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
@@ -579,7 +629,17 @@ class _Step3Contact extends StatelessWidget {
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 isExpanded: true,
+
+                icon: Padding(
+                  padding: EdgeInsetsGeometry.only(right: 25),
+                  child: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+
                 value: current == "Select your area" ? null : current,
+
                 hint: Row(
                   children: [
                     Icon(
@@ -588,18 +648,30 @@ class _Step3Contact extends StatelessWidget {
                       size: 18,
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      "Select your area",
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.onSurface.withOpacity(.55),
-                        fontWeight: FontWeight.w700,
+
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          "Select your area",
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: cs.onSurface.withOpacity(.55),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
+
                 items: controller.areas
-                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .map(
+                      (e) => DropdownMenuItem(
+                        value: e,
+                        child: Center(child: Text(e)),
+                      ),
+                    )
                     .toList(),
+
                 onChanged: (v) {
                   if (v != null) controller.setArea(v);
                 },
@@ -608,11 +680,11 @@ class _Step3Contact extends StatelessWidget {
           );
         }),
 
-        const SizedBox(height: 14),
+        const SizedBox(height: 35),
 
         Text(
           "Phone Number",
-          style: theme.textTheme.bodySmall?.copyWith(
+          style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w800,
             color: cs.onSurface.withOpacity(.7),
           ),
@@ -641,99 +713,186 @@ class _Step3Contact extends StatelessWidget {
             ),
           ),
         ),
-
-        const SizedBox(height: 16),
-
+        SizedBox(height: 5),
         Text(
-          "Preferred Contact Method",
-          style: theme.textTheme.bodySmall?.copyWith(
+          "Buyers will contact you in this number",
+          style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w800,
+            fontSize: 12,
             color: cs.onSurface.withOpacity(.7),
+          ),
+        ),
+
+        const SizedBox(height: 35),
+
+        Padding(
+          padding: EdgeInsetsGeometry.symmetric(horizontal: 35),
+          child: Text(
+            "Preferred Contact Method",
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              fontSize: 12,
+              color: cs.onSurfaceVariant,
+            ),
           ),
         ),
         const SizedBox(height: 10),
 
-        Obx(() {
-          final m = controller.contactMethod.value;
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Obx(() {
+            final m = controller.contactMethod.value;
 
-          Widget tile({
-            required ContactMethod value,
-            required IconData icon,
-            required String label,
-            required bool danger,
-          }) {
-            final active = m == value;
+            Widget tile({
+              String? image,
+              required ContactMethod value,
+              IconData? icon,
+              required String label,
+              required bool danger,
+            }) {
+              final active = m == value;
 
-            final borderColor = danger
-                ? (active ? const Color(0xFFD32F2F) : const Color(0xFFEF9A9A))
-                : (active ? cs.primary : cs.outlineVariant);
+              const red = Color(0xFFE53935);
+              const lightRed = Color(0xFFFFEBEE);
 
-            final bg = danger
-                ? (active ? const Color(0xFFFFEBEE) : cs.surface)
-                : (active ? cs.primary.withOpacity(.08) : cs.surface);
+              final borderColor = active ? red : cs.outlineVariant;
+              final bg = active ? lightRed : cs.surface;
+              final txt = active ? red : cs.onSurfaceVariant;
 
-            final txt = danger
-                ? (active
-                      ? const Color(0xFFD32F2F)
-                      : cs.onSurface.withOpacity(.75))
-                : (active ? cs.primary : cs.onSurface.withOpacity(.75));
+              return InkWell(
+                onTap: () => controller.setContactMethod(value),
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  height: 46,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: bg,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: borderColor,
+                      width: active ? 1.4 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // icon OR image
+                      if (image != null)
+                        Image.asset(image, width: 18, height: 18, color: txt)
+                      else if (icon != null)
+                        Icon(icon, size: 18, color: txt),
 
-            return InkWell(
-              onTap: () => controller.setContactMethod(value),
-              borderRadius: BorderRadius.circular(14),
-              child: Container(
-                height: 46,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  color: bg,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: borderColor,
-                    width: active ? 1.4 : 1,
+                      const SizedBox(width: 10),
+
+                      Text(
+                        label,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: txt,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: Row(
+              );
+            }
+
+            return Column(
+              children: [
+                tile(
+                  value: ContactMethod.chat,
+                  image: 'assets/chat.png',
+                  label: "In-app Chat",
+                  danger: false,
+                ),
+
+                const SizedBox(height: 12),
+
+                tile(
+                  value: ContactMethod.call,
+                  icon: Icons.call_rounded,
+                  label: "Phone Call",
+                  danger: true,
+                ),
+              ],
+            );
+          }),
+        ),
+        const SizedBox(height: 14),
+
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFEBEE).withOpacity(0.5),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE53935).withOpacity(.35)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.check_circle_outline,
+                size: 25,
+                color: Color(0xFFE53935),
+              ),
+
+              const SizedBox(width: 12),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(icon, size: 18, color: txt),
-                    const SizedBox(width: 10),
                     Text(
-                      label,
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      "Ready to Publish",
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: txt,
+                        color: const Color(0xFFB71C1C),
+                      ),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    Text(
+                      "Your ad will be live immediately and visible to\n"
+                      "thousands of buyers across Trinidad & Tobago.\n"
+                      "You can edit or remove it anytime.",
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontSize: 11,
+                        color: cs.onSurfaceVariant,
+                        height: 1.8,
                       ),
                     ),
                   ],
                 ),
               ),
-            );
-          }
-
-          return Column(
-            children: [
-              tile(
-                value: ContactMethod.chat,
-                icon: Icons.chat_bubble_outline_rounded,
-                label: "In-app Chat",
-                danger: false,
-              ),
-              const SizedBox(height: 10),
-              tile(
-                value: ContactMethod.call,
-                icon: Icons.call_rounded,
-                label: "Phone Call",
-                danger: true,
-              ),
             ],
-          );
-        }),
-
+          ),
+        ),
+        const SizedBox(height: 14),
+        Divider(color: cs.surface),
         const SizedBox(height: 14),
 
         Row(
           children: [
-            TextButton(onPressed: controller.goBack, child: const Text("Back")),
+            TextButton.icon(
+              onPressed: controller.goBack,
+              icon: Icon(
+                Icons.arrow_back_ios_new,
+                size: 16,
+                color: cs.onSurfaceVariant,
+              ),
+              label: Text(
+                "Back",
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: cs.onSurface.withOpacity(.7),
+                ),
+              ),
+            ),
+
             const Spacer(),
+
             SizedBox(
               height: 46,
               child: ElevatedButton.icon(
@@ -754,8 +913,6 @@ class _Step3Contact extends StatelessWidget {
   }
 }
 
-/* ==================== SMALL WIDGETS ==================== */
-
 class _CategoryGrid extends StatelessWidget {
   final int selected;
   final void Function(int) onTap;
@@ -771,67 +928,57 @@ class _CategoryGrid extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cs.outlineVariant),
+    return GridView.builder(
+      itemCount: categories.length,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 0.95,
       ),
-      child: GridView.builder(
-        itemCount: categories.length,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 0.95,
-        ),
-        itemBuilder: (_, i) {
-          final cat = categories[i];
-          final active = i == selected;
+      itemBuilder: (_, i) {
+        final cat = categories[i];
+        final active = i == selected;
 
-          return InkWell(
-            onTap: () => onTap(i),
-            borderRadius: BorderRadius.circular(14),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-              decoration: BoxDecoration(
-                color: active ? cs.primary.withOpacity(.10) : cs.surface,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: active ? cs.primary : cs.outlineVariant,
-                  width: active ? 1.4 : 1,
-                ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    cat.icon,
-                    size: 20,
-                    color: active ? cs.primary : cs.onSurfaceVariant,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    cat.title,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w800,
-                      color: cs.onSurface.withOpacity(.75),
-                      height: 1.1,
-                    ),
-                  ),
-                ],
-              ),
+        return InkWell(
+          onTap: () => onTap(i),
+          borderRadius: BorderRadius.circular(14),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+            decoration: BoxDecoration(
+              color: active ? cs.primary.withOpacity(.10) : cs.surface,
+              borderRadius: BorderRadius.circular(14),
             ),
-          );
-        },
-      ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  height: 22,
+                  width: 22,
+                  cat.icon,
+
+                  color: active ? cs.primary : cs.onSurfaceVariant,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  cat.title,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                    color: cs.onSurface.withOpacity(.75),
+                    height: 1.1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -880,8 +1027,8 @@ class _StepStrip extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              width: 30,
-              height: 30,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
                 color: fill,
                 shape: BoxShape.circle,
@@ -963,7 +1110,7 @@ class _PillChoice extends StatelessWidget {
         height: 40,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: active ? cs.primary.withOpacity(.10) : cs.surface,
+          color: active ? cs.primary.withOpacity(.10) : cs.background,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
             color: active ? cs.primary : cs.outlineVariant,
@@ -978,21 +1125,6 @@ class _PillChoice extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class ProfileDot extends StatelessWidget {
-  const ProfileDot({super.key});
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: BoxDecoration(color: cs.primary, shape: BoxShape.circle),
-      alignment: Alignment.center,
-      child: Icon(Icons.person_rounded, color: cs.onPrimary, size: 16),
     );
   }
 }
