@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'screens/splash_screen.dart';
 import 'utils/size_config.dart';
 
-const Color kPrimaryColor = Color(0xFF10B981);
+const Color kPrimaryColor = Color(0xFF16A34A);
 const Color kBackgroundColor = Color(0xFFF8FAFC);
 
 Future<void> main() async {
@@ -153,8 +153,8 @@ class MyApp extends StatelessWidget {
           bodyColor: Colors.white,
           displayColor: Colors.white,
         ),
-        scaffoldBackgroundColor: const Color(0xFF050816),
-        canvasColor: const Color(0xFF050816),
+        scaffoldBackgroundColor: Colors.black,
+        canvasColor: Colors.black,
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
 
@@ -165,15 +165,15 @@ class MyApp extends StatelessWidget {
             ).copyWith(
               primary: kPrimaryColor,
               onPrimary: Colors.white,
-              background: const Color(0xFF050816),
-              surface: const Color(0xFF111827),
+              background: Colors.black,
+              surface: Colors.black,
               outlineVariant: const Color(0xFF374151),
               onSurface: Colors.white,
               onSurfaceVariant: const Color(0xFF9CA3AF),
             ),
 
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF050816),
+          backgroundColor: Colors.black,
           foregroundColor: Colors.white,
           elevation: 0,
           scrolledUnderElevation: 0,
@@ -186,29 +186,29 @@ class MyApp extends StatelessWidget {
           space: 1,
         ),
 
-        cardColor: Color(0xFF9CA3AF),
+        cardColor: Colors.black,
 
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: const Color(0xFF9CA3AF),
+          fillColor: const Color(0xFF6B7280),
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 14,
           ),
           hintStyle: baseTextTheme.bodyMedium?.copyWith(
-            color: const Color(0xFF6B7280),
+            color: Colors.white.withOpacity(0.6),
             fontWeight: FontWeight.w500,
           ),
           prefixIconColor: const Color(0xFF6B7280),
           suffixIconColor: const Color(0xFF6B7280),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: Color(0xFF9CA3AF), width: 0),
+            borderSide: const BorderSide(color: Colors.transparent, width: 0),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: Color(0xFF9CA3AF), width: 0),
+            borderSide: const BorderSide(color: Colors.transparent, width: 0),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
@@ -237,12 +237,12 @@ class MyApp extends StatelessWidget {
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
             foregroundColor: Colors.white,
-            backgroundColor: const Color(0xFF9CA3AF),
+            backgroundColor: const Color(0xFF121212),
             minimumSize: const Size(0, 46),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             visualDensity: VisualDensity.compact,
             shape: const StadiumBorder(),
-            side: const BorderSide(color: Color(0xFF9CA3AF), width: 0),
+            side: const BorderSide(color: Color(0xFF374151), width: 0),
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
             textStyle: baseTextTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w700,

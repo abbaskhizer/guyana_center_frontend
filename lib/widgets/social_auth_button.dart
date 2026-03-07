@@ -24,9 +24,13 @@ class SocialAuthButton extends StatelessWidget {
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
           backgroundColor: theme.brightness == Brightness.dark
-              ? cs.surface
+              ? const Color(0xFF6B7280)
               : Colors.white,
-          side: BorderSide(color: cs.outlineVariant),
+          side: BorderSide(
+            color: theme.brightness == Brightness.dark
+                ? Colors.transparent
+                : cs.outlineVariant,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
@@ -66,10 +70,12 @@ class _BrandCircle extends StatelessWidget {
       height: 26,
       decoration: BoxDecoration(
         color: theme.brightness == Brightness.dark
-            ? Colors.white.withOpacity(.06)
+            ? Colors.white.withOpacity(.12)
             : const Color(0xFFF9FAFB),
         shape: BoxShape.circle,
-        border: Border.all(color: cs.outlineVariant),
+        border: theme.brightness == Brightness.dark
+            ? null
+            : Border.all(color: cs.outlineVariant),
       ),
       alignment: Alignment.center,
       child: child,

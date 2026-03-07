@@ -197,9 +197,8 @@ class _WebLayout extends StatelessWidget {
               child: Container(
                 width: double.infinity,
                 color: Theme.of(context).brightness == Brightness.dark
-                    ? const Color(
-                        0xFF161616,
-                      ) // Match Figma Dark header specifically like All categories
+                    ? Colors
+                          .black // Match Figma Dark header specifically like All categories
                     : Colors.white,
                 child: centered(
                   Padding(

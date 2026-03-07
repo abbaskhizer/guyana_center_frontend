@@ -93,7 +93,7 @@ class _WebLayout extends StatelessWidget {
         SliverToBoxAdapter(
           child: Container(
             color: Theme.of(context).brightness == Brightness.dark
-                ? const Color(0xFF161616)
+                ? Colors.black
                 : Colors.white,
             width: double.infinity,
             child: Center(
@@ -505,17 +505,17 @@ class BrowseResults extends StatelessWidget {
       child: Obx(() {
         final q = controller.searchText.value.trim();
 
-      if (controller.showEmptyState) {
-        return Container(
-          width: double.infinity,
-          color: cs.surface,
-          child: _EmptySearchState(
-            query: q,
-            onTryDifferent: controller.clearSearch,
-            onBrowseAll: controller.clearSearch,
-          ),
-        );
-      }
+        if (controller.showEmptyState) {
+          return Container(
+            width: double.infinity,
+            color: cs.surface,
+            child: _EmptySearchState(
+              query: q,
+              onTryDifferent: controller.clearSearch,
+              onBrowseAll: controller.clearSearch,
+            ),
+          );
+        }
 
         return controller.isGrid.value
             ? LayoutBuilder(
@@ -572,9 +572,9 @@ class BrowseResults extends StatelessWidget {
                     );
                   },
                 ),
-        ),
-      );
-    });
+              );
+      }),
+    );
   }
 }
 
@@ -1087,8 +1087,8 @@ class _EmptySearchState extends StatelessWidget {
                     return _PopularSearchChip(label: item, web: isWeb);
                   }).toList(),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/screens/auth/login_signup_screen.dart';
-import 'package:guyana_center_frontend/widgets/app_drawar.dart';
 
 class MobileTopBar extends StatelessWidget {
   const MobileTopBar({super.key});
@@ -9,39 +8,56 @@ class MobileTopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
-    return Row(
-      children: [
-        InkWell(
-          onTap: () => Get.back(),
-          borderRadius: BorderRadius.circular(12),
-          child: IconButton(
-            onPressed: () => AppDrawer(),
-            icon: Icon(Icons.menu_rounded, color: cs.onSurface, size: 22),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(child: GuyanaCentralLogo()),
-        SizedBox(
-          height: 34,
-          child: ElevatedButton(
-            onPressed: () => Get.to(LoginSignupScreen()),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              shape: const StadiumBorder(),
-              elevation: 0,
-            ),
-            child: Text(
-              "Login",
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w900,
-                color: cs.onPrimary,
+    return Container(
+      height: 60,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Row(
+        children: [
+          Builder(
+            builder: (ctx) => InkWell(
+              onTap: () => Scaffold.of(ctx).openDrawer(),
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(
+                  Icons.menu_rounded,
+                  color: isDark ? Colors.white : const Color(0xFF111827),
+                  size: 24,
+                ),
               ),
             ),
           ),
-        ),
-      ],
+          const SizedBox(width: 4),
+          const Expanded(child: GuyanaCentralLogo()),
+          const SizedBox(width: 8),
+          SizedBox(
+            height: 38,
+            child: ElevatedButton(
+              onPressed: () => Get.to(const LoginSignupScreen()),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF16A34A),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                "Login",
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
     );
   }
 }
@@ -52,21 +68,23 @@ class GuyanaCentralLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return RichText(
       text: TextSpan(
-        style: theme.textTheme.titleSmall?.copyWith(
+        style: theme.textTheme.titleMedium?.copyWith(
           fontWeight: FontWeight.w900,
-          letterSpacing: 0.2,
-          color: cs.onSurface,
+          letterSpacing: 0.8,
+          color: isDark ? Colors.white : const Color(0xFF111827),
+          fontSize: 17,
         ),
         children: [
           const TextSpan(text: "GUYANA"),
-          TextSpan(
+          const TextSpan(
             text: "CENTRAL",
-            style: theme.textTheme.titleSmall?.copyWith(
+            style: TextStyle(
               fontWeight: FontWeight.w900,
-              color: const Color(0xFFFF8A00),
+              color: Color(0xFFFFA43A),
             ),
           ),
         ],

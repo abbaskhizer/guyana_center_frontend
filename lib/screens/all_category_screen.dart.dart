@@ -124,7 +124,7 @@ class _WebLayout extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     color: Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFF161616)
+                        ? Colors.black
                         : Colors.white,
                     child: centered(
                       Padding(
@@ -1095,9 +1095,15 @@ class _WebCategoryCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: theme.cardColor,
+          color: theme.brightness == Brightness.dark
+              ? const Color(0xFF6B7280)
+              : theme.cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: cs.outlineVariant),
+          border: Border.all(
+            color: theme.brightness == Brightness.dark
+                ? Colors.transparent
+                : cs.outlineVariant,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1109,7 +1115,9 @@ class _WebCategoryCard extends StatelessWidget {
                   height: 48,
                   width: 48,
                   decoration: BoxDecoration(
-                    color: item.tint ?? cs.surfaceContainerHighest,
+                    color: theme.brightness == Brightness.dark
+                        ? Colors.white.withOpacity(0.9)
+                        : (item.tint ?? cs.surfaceContainerHighest),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: const EdgeInsets.all(10),
@@ -1147,8 +1155,10 @@ class _WebCategoryCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: _mutedText(context),
-                            fontWeight: FontWeight.w500,
+                            color: theme.brightness == Brightness.dark
+                                ? Colors.white.withOpacity(0.85)
+                                : _mutedText(context),
+                            fontWeight: FontWeight.w600,
                             fontSize: 12,
                             height: 1.25,
                           ),
@@ -1232,9 +1242,15 @@ class _CategoryTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         child: Container(
           decoration: BoxDecoration(
-            color: theme.cardColor,
+            color: theme.brightness == Brightness.dark
+                ? const Color(0xFF6B7280)
+                : theme.cardColor,
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: cs.outlineVariant),
+            border: Border.all(
+              color: theme.brightness == Brightness.dark
+                  ? Colors.transparent
+                  : cs.outlineVariant,
+            ),
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
@@ -1246,7 +1262,9 @@ class _CategoryTile extends StatelessWidget {
                       height: 42,
                       width: 42,
                       decoration: BoxDecoration(
-                        color: item.tint ?? cs.surfaceContainerHighest,
+                        color: theme.brightness == Brightness.dark
+                            ? Colors.white.withOpacity(0.9)
+                            : (item.tint ?? cs.surfaceContainerHighest),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       padding: const EdgeInsets.all(8),
@@ -1293,9 +1311,15 @@ class _CategoryTile extends StatelessWidget {
                         width: 34,
                         height: 34,
                         decoration: BoxDecoration(
-                          color: cs.surface,
+                          color: theme.brightness == Brightness.dark
+                              ? Colors.white.withOpacity(0.12)
+                              : cs.surface,
                           shape: BoxShape.circle,
-                          border: Border.all(color: cs.outlineVariant),
+                          border: Border.all(
+                            color: theme.brightness == Brightness.dark
+                                ? Colors.transparent
+                                : cs.outlineVariant,
+                          ),
                         ),
                         alignment: Alignment.center,
                         child: AnimatedRotation(
@@ -1303,7 +1327,9 @@ class _CategoryTile extends StatelessWidget {
                           turns: expanded ? 0.5 : 0,
                           child: Icon(
                             Icons.keyboard_arrow_down_rounded,
-                            color: cs.onSurface.withOpacity(.45),
+                            color: theme.brightness == Brightness.dark
+                                ? Colors.white
+                                : cs.onSurface.withOpacity(.45),
                           ),
                         ),
                       ),
@@ -1351,6 +1377,7 @@ class _NeedHelpCta extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final isWeb = kIsWeb && MediaQuery.of(context).size.width >= 1000;
 
     return Container(

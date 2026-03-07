@@ -209,15 +209,19 @@ class _AuthForm extends StatelessWidget {
                 text: "Continue with Google",
                 leading: const FaIcon(
                   FontAwesomeIcons.google,
-                  color: Colors.red,
-                  size: 18,
+                  color: Color(0xFFDB4437), // Official Google Red
+                  size: 16,
                 ),
                 onPressed: c.continueWithGoogle,
               ),
               const SizedBox(height: 10),
               SocialAuthButton(
                 text: "Continue with Facebook",
-                leading: const Icon(Icons.facebook, color: Color(0xFF1877F2)),
+                leading: const FaIcon(
+                  FontAwesomeIcons.facebookF,
+                  color: Color(0xFF1877F2), // Official Facebook Blue
+                  size: 16,
+                ),
                 onPressed: c.continueWithFacebook,
               ),
             ],
@@ -275,7 +279,7 @@ class _AuthForm extends StatelessWidget {
                     child: const Text(
                       "Forgot password?",
                       style: TextStyle(
-                        color: Color(0xFF10B981),
+                        color: Color(0xFF16A34A),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -454,9 +458,15 @@ class _AuthToggle extends StatelessWidget {
             height: 44,
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: cs.surface,
+              color: theme.brightness == Brightness.dark
+                  ? const Color(0xFF6B7280)
+                  : cs.surface,
               borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: cs.outlineVariant),
+              border: Border.all(
+                color: theme.brightness == Brightness.dark
+                    ? Colors.transparent
+                    : cs.outlineVariant,
+              ),
             ),
             child: Stack(
               children: [
@@ -470,9 +480,7 @@ class _AuthToggle extends StatelessWidget {
                     width: tabWidth,
                     height: double.infinity,
                     decoration: BoxDecoration(
-                      color: theme.brightness == Brightness.dark
-                          ? Colors.white.withOpacity(0.08)
-                          : Colors.white,
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(999),
                       boxShadow: [
                         if (theme.brightness == Brightness.light)
@@ -497,8 +505,12 @@ class _AuthToggle extends StatelessWidget {
                             style: theme.textTheme.labelLarge?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: isLogin
-                                  ? cs.onSurface
-                                  : cs.onSurfaceVariant,
+                                  ? (theme.brightness == Brightness.dark
+                                        ? Colors.black
+                                        : cs.onSurface)
+                                  : (theme.brightness == Brightness.dark
+                                        ? Colors.white.withOpacity(0.9)
+                                        : cs.onSurfaceVariant),
                             ),
                           ),
                         ),
@@ -514,8 +526,12 @@ class _AuthToggle extends StatelessWidget {
                             style: theme.textTheme.labelLarge?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: !isLogin
-                                  ? cs.onSurface
-                                  : cs.onSurfaceVariant,
+                                  ? (theme.brightness == Brightness.dark
+                                        ? Colors.black
+                                        : cs.onSurface)
+                                  : (theme.brightness == Brightness.dark
+                                        ? Colors.white.withOpacity(0.9)
+                                        : cs.onSurfaceVariant),
                             ),
                           ),
                         ),
