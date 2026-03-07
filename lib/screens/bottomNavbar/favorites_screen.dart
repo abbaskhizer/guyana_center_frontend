@@ -5,9 +5,15 @@ import 'package:guyana_center_frontend/controller/bottomNavbar/favorites_control
 import 'package:guyana_center_frontend/modal/favItem.dart';
 import 'package:guyana_center_frontend/widgets/app_drawar.dart';
 import 'package:guyana_center_frontend/widgets/mobile_header.dart';
+import 'package:guyana_center_frontend/widgets/web_header.dart';
+import 'package:guyana_center_frontend/widgets/web_footer.dart';
+import 'package:guyana_center_frontend/screens/custom_bottom_navbar.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
+
+  bool _isWebDesktop(BuildContext context) =>
+      kIsWeb && MediaQuery.of(context).size.width >= 1000;
 
   @override
   Widget build(BuildContext context) {
@@ -16,30 +22,82 @@ class FavoritesScreen extends StatelessWidget {
         : Get.put(FavoritesController());
 
     final theme = Theme.of(context);
+    final isWeb = _isWebDesktop(context);
 
     return Scaffold(
+      bottomNavigationBar: isWeb ? null : CustomBottomNavBar(),
       backgroundColor: theme.scaffoldBackgroundColor,
-      drawer: const AppDrawer(),
+      drawer: isWeb ? null : const AppDrawer(),
       body: SafeArea(
-        child: Column(
-          children: [
-            if (!kIsWeb)
-              const Padding(
-                padding: EdgeInsets.fromLTRB(16, 10, 16, 8),
-                child: MobileHeader(),
-              ),
-            _FavTabs(c: c),
-            Expanded(
-              child: PageView(
-                controller: c.pageController,
-                onPageChanged: c.onPageChanged,
-                physics: const BouncingScrollPhysics(),
-                children: const [_EmptyFavoriteAds(), _EmptyFavoriteSearches()],
-              ),
-            ),
-          ],
-        ),
+        child: isWeb ? _WebFavoritesShell(c: c) : _MobileFavoritesShell(c: c),
       ),
+    );
+  }
+}
+
+class _MobileFavoritesShell extends StatelessWidget {
+  final FavoritesController c;
+  const _MobileFavoritesShell({required this.c});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const Padding(
+          padding: EdgeInsets.fromLTRB(16, 10, 16, 8),
+          child: MobileHeader(),
+        ),
+        _FavTabs(c: c),
+        Expanded(
+          child: PageView(
+            controller: c.pageController,
+            onPageChanged: c.onPageChanged,
+            physics: const BouncingScrollPhysics(),
+            children: const [_EmptyFavoriteAds(), _EmptyFavoriteSearches()],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _WebFavoritesShell extends StatelessWidget {
+  final FavoritesController c;
+  const _WebFavoritesShell({required this.c});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const WebHeader(),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1100),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 40),
+                    child: Column(
+                      children: [
+                        _FavTabs(c: c),
+                        const SizedBox(height: 60),
+                        Obx(
+                          () => c.tab.value == FavTab.ads
+                              ? const _EmptyFavoriteAds()
+                              : const _EmptyFavoriteSearches(),
+                        ),
+                        const SizedBox(height: 120),
+                      ],
+                    ),
+                  ),
+                ),
+                const WebFooter(),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

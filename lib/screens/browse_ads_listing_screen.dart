@@ -257,7 +257,7 @@ class BrowseAdsListingScreen extends StatelessWidget {
                             crossAxisCount: 1,
                             mainAxisSpacing: 12,
                             crossAxisSpacing: 10,
-                            childAspectRatio: 1.05,
+                            childAspectRatio: 0.95, // Increased from 1.05
                           ),
                       itemBuilder: (_, index) {
                         final item = controller.filteredItems[index];

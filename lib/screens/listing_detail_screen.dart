@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/listing_detail_controller.dart';
 import 'package:guyana_center_frontend/screens/custom_bottom_navbar.dart';
 import 'package:guyana_center_frontend/widgets/mobile_header.dart';
-
+import 'package:guyana_center_frontend/widgets/web_header.dart';
 import 'package:guyana_center_frontend/widgets/web_footer.dart';
 
 class ListingDetailScreen extends StatelessWidget {
@@ -19,7 +19,7 @@ class ListingDetailScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      bottomNavigationBar: CustomBottomNavBar(),
+      bottomNavigationBar: _isWebDesktop(context) ? null : CustomBottomNavBar(),
       backgroundColor: _isWebDesktop(context)
           ? theme.scaffoldBackgroundColor
           : theme.scaffoldBackgroundColor,
@@ -185,6 +185,7 @@ class _WebLayout extends StatelessWidget {
 
       return CustomScrollView(
         slivers: [
+          const SliverToBoxAdapter(child: WebHeader()),
           SliverToBoxAdapter(
             child: Center(
               child: ConstrainedBox(
@@ -851,121 +852,251 @@ class _WebMainDetailsCard extends StatelessWidget {
     final cs = theme.colorScheme;
     final c = Get.find<ListingDetailController>();
 
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: cs.outlineVariant),
+        color: isDark ? const Color(0xFF1E2124) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark
+              ? Colors.transparent
+              : cs.outlineVariant.withOpacity(0.5),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: Text(
                   item.title,
-                  style: theme.textTheme.titleSmall?.copyWith(
+                  style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: cs.onSurface,
+                    fontSize: 28,
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 16),
               Obx(() {
                 final fav = c.isFav.value;
-                return InkWell(
-                  onTap: c.toggleFav,
-                  borderRadius: BorderRadius.circular(20),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
+                return Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: cs.outlineVariant.withOpacity(0.5),
+                    ),
+                  ),
+                  child: InkWell(
+                    onTap: c.toggleFav,
+                    customBorder: const CircleBorder(),
                     child: Icon(
                       fav
                           ? Icons.favorite_rounded
                           : Icons.favorite_border_rounded,
-                      size: 18,
-                      color: fav ? cs.primary : cs.onSurfaceVariant,
+                      size: 20,
+                      color: fav
+                          ? cs.primary
+                          : cs.onSurfaceVariant.withOpacity(0.8),
                     ),
                   ),
                 );
               }),
-              const SizedBox(width: 8),
-              Icon(Icons.share_outlined, size: 18, color: cs.onSurfaceVariant),
+              const SizedBox(width: 12),
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: cs.outlineVariant.withOpacity(0.5)),
+                ),
+                child: InkWell(
+                  onTap: () {},
+                  customBorder: const CircleBorder(),
+                  child: Icon(
+                    Icons.share_outlined,
+                    size: 20,
+                    color: cs.onSurfaceVariant.withOpacity(0.8),
+                  ),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 12),
           Row(
             children: [
               Icon(
                 Icons.location_on_outlined,
-                size: 14,
-                color: cs.onSurfaceVariant,
+                size: 16,
+                color: cs.onSurfaceVariant.withOpacity(0.8),
               ),
-              const SizedBox(width: 4),
-              Expanded(
+              const SizedBox(width: 6),
+              Text(
+                item.location,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurfaceVariant.withOpacity(0.9),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Icon(
+                Icons.calendar_today_outlined,
+                size: 14,
+                color: cs.onSurfaceVariant.withOpacity(0.8),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Posted 3 days ago',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurfaceVariant.withOpacity(0.9),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Icon(
+                Icons.remove_red_eye_outlined,
+                size: 16,
+                color: cs.onSurfaceVariant.withOpacity(0.8),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '847 views',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurfaceVariant.withOpacity(0.9),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                item.price,
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF16A34A),
+                  fontSize: 36,
+                  height: 1,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
                 child: Text(
-                  item.location,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: cs.onSurfaceVariant,
-                    fontWeight: FontWeight.w700,
+                  'with music system',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: cs.onSurfaceVariant.withOpacity(0.8),
+                    fontWeight: FontWeight.w500,
+                    fontSize: 15,
                   ),
                 ),
               ),
-              Text(
-                'Posted 2 days ago',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(width: 10),
-              const _MiniTag(text: 'ID 87'),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Text(
-            item.price,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: cs.primary,
-              fontSize: 26,
+            '\$160,000 without music system',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: cs.onSurfaceVariant.withOpacity(0.9),
+              fontWeight: FontWeight.w500,
+              fontSize: 18,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            item.condition,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: cs.onSurface.withOpacity(.55),
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 24),
+          Divider(color: cs.outlineVariant.withOpacity(0.4)),
+          const SizedBox(height: 24),
           Row(
             children: [
               Expanded(
-                child: _SpecIconTile(
-                  icon: Icons.directions_car_filled_outlined,
-                  value: item.trim,
-                  label: 'Trim',
+                child: _WebSpecCard(
+                  icon: Icons.directions_car_outlined,
+                  title: 'Super GL',
+                  subtitle: 'Model',
                 ),
               ),
+              const SizedBox(width: 16),
               Expanded(
-                child: _SpecIconTile(
-                  icon: Icons.local_gas_station_outlined,
-                  value: item.fuel,
-                  label: 'Fuel',
+                child: _WebSpecCard(
+                  icon: Icons.local_offer_outlined,
+                  title: 'Gas',
+                  subtitle: 'Fuel Type',
                 ),
               ),
+              const SizedBox(width: 16),
               Expanded(
-                child: _SpecIconTile(
-                  icon: Icons.settings_outlined,
-                  value: item.transmission,
-                  label: 'Trans',
+                child: _WebSpecCard(
+                  icon: Icons.shield_outlined,
+                  title: 'Automatic',
+                  subtitle: 'Transmission',
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WebSpecCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  const _WebSpecCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+      decoration: BoxDecoration(
+        color: isDark
+            ? cs.surfaceContainerHighest.withOpacity(0.3)
+            : const Color(0xFFF9FAFB),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 24, color: cs.onSurfaceVariant.withOpacity(0.7)),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: cs.onSurface,
+              fontSize: 14,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: cs.onSurfaceVariant.withOpacity(0.8),
+              fontWeight: FontWeight.w500,
+              fontSize: 12,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -1197,6 +1328,71 @@ class _SafetyTipsCard extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
+    if (web) {
+      final isDark = theme.brightness == Brightness.dark;
+      return Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(28, 28, 28, 36),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF2A2114) : const Color(0xFFFFFBEB),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: isDark
+                    ? const Color(0xFF452B10)
+                    : const Color(0xFFFDE68A),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Safety Tips',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFFB45309), // Darker orange-brown
+                    fontSize: 18,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _webBullet(theme, 'Meet in a safe, public location'),
+                const SizedBox(height: 16),
+                _webBullet(theme, 'Inspect the item before payment'),
+                const SizedBox(height: 16),
+                _webBullet(theme, 'Never send money in advance'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Center(
+            child: TextButton.icon(
+              onPressed: () {},
+              icon: Icon(
+                Icons.outlined_flag,
+                size: 20,
+                color: cs.onSurfaceVariant.withOpacity(0.6),
+              ),
+              label: Text(
+                'Report this ad',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurfaceVariant.withOpacity(0.6),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 15,
+                ),
+              ),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
@@ -1229,6 +1425,26 @@ class _SafetyTipsCard extends StatelessWidget {
           _bullet(theme, cs, 'Never send money in advance'),
         ],
       ),
+    );
+  }
+
+  static Widget _webBullet(ThemeData theme, String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const Icon(Icons.circle, size: 6, color: Color(0xFFD97706)),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFFB45309),
+              fontSize: 15,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1322,7 +1538,9 @@ class _DescriptionSection extends StatelessWidget {
 
           style: theme.textTheme.bodyMedium?.copyWith(
             height: 1.7,
-            color: const Color(0xFF5F6B7A),
+            color: theme.brightness == Brightness.dark
+                ? cs.onSurface.withOpacity(0.8)
+                : const Color(0xFF5F6B7A),
             fontWeight: FontWeight.w600,
             fontSize: 14,
           ),
@@ -1376,11 +1594,13 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 22,
         fontWeight: FontWeight.w800,
         height: 1.2,
-        color: Color(0xFF1F2937),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white
+            : const Color(0xFF1F2937),
       ),
     );
   }
@@ -1431,11 +1651,13 @@ class _GreenBullet extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 height: 1.55,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF5F6B7A),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Theme.of(context).colorScheme.onSurface.withOpacity(0.85)
+                    : const Color(0xFF5F6B7A),
               ),
             ),
           ),
@@ -1474,11 +1696,13 @@ class _GreyBullet extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 height: 1.6,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF6B7280),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Theme.of(context).colorScheme.onSurface.withOpacity(0.7)
+                    : const Color(0xFF6B7280),
               ),
             ),
           ),
@@ -1677,35 +1901,6 @@ class _SpecIconTile extends StatelessWidget {
   }
 }
 
-class _MiniTag extends StatelessWidget {
-  final String text;
-
-  const _MiniTag({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: cs.outlineVariant),
-      ),
-      child: Text(
-        text,
-        style: theme.textTheme.bodySmall?.copyWith(
-          fontWeight: FontWeight.w900,
-          color: cs.onSurface.withOpacity(.7),
-          fontSize: 10.5,
-        ),
-      ),
-    );
-  }
-}
-
 class _ArrowCircle extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
@@ -1752,7 +1947,7 @@ class _SimilarCard extends StatelessWidget {
     return Container(
       width: web ? 160 : 150,
       decoration: BoxDecoration(
-        color: cs.background,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(

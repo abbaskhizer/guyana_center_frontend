@@ -9,6 +9,7 @@ import 'package:guyana_center_frontend/screens/setting/preferences_screen.dart';
 import 'package:guyana_center_frontend/screens/setting/privacy_screen.dart';
 import 'package:guyana_center_frontend/screens/setting/security_screen.dart';
 import 'package:guyana_center_frontend/widgets/web_footer.dart';
+import 'package:guyana_center_frontend/widgets/web_header.dart';
 
 class SettingScreen extends StatelessWidget {
   const SettingScreen({super.key});
@@ -20,10 +21,11 @@ class SettingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Get.put(SettingController());
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: _isWebDesktop(context)
-          ? const Color(0xFFF3F4F6)
+          ? (isDark ? theme.scaffoldBackgroundColor : const Color(0xFFF3F4F6))
           : theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: _isWebDesktop(context)
@@ -50,39 +52,47 @@ class _WebSettingsLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 27),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1280),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const _WebSettingsPageHeader(),
-                  const SizedBox(height: 16),
-
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _SettingsSidebar(controller: controller),
-                      const SizedBox(width: 18),
-
-                      Expanded(child: _WebContentPanel(controller: controller)),
-                    ],
+    return Column(
+      children: [
+        const WebHeader(),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 27),
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1280),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const _WebSettingsPageHeader(),
+                          const SizedBox(height: 16),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _SettingsSidebar(controller: controller),
+                              const SizedBox(width: 18),
+                              Expanded(
+                                child: _WebContentPanel(controller: controller),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 45),
+                const WebFooter(),
+              ],
             ),
           ),
-          SizedBox(height: 45),
-
-          const WebFooter(),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

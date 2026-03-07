@@ -176,6 +176,8 @@ class WebFooter extends StatelessWidget {
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Colors.white54, width: 1.2),
               foregroundColor: Colors.white,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(6),
               ),

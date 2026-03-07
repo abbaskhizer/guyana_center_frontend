@@ -1016,13 +1016,13 @@ class _ListingsSection extends StatelessWidget {
   }
 
   double _extentForCols(int cols) {
-    if (!isWeb) return 220;
+    if (!isWeb) return 300; // Increased from 260
 
-    if (cols >= 4) return 305;
-    if (cols == 3) return 320;
-    if (cols == 2) return 340;
+    if (cols >= 4) return 350; // Increased from 335
+    if (cols == 3) return 370; // Increased from 350
+    if (cols == 2) return 390; // Increased from 370
 
-    return 360;
+    return 410; // Increased from 390
   }
 
   @override

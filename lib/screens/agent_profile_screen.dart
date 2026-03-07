@@ -6,6 +6,7 @@ import 'package:guyana_center_frontend/main.dart';
 import 'package:guyana_center_frontend/modal/agent_listing.dart';
 import 'package:guyana_center_frontend/screens/custom_bottom_navbar.dart';
 import 'package:guyana_center_frontend/widgets/web_footer.dart';
+import 'package:guyana_center_frontend/widgets/web_header.dart';
 
 class AgentProfileScreen extends StatelessWidget {
   const AgentProfileScreen({super.key});
@@ -23,8 +24,8 @@ class AgentProfileScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      bottomNavigationBar: CustomBottomNavBar(),
-      backgroundColor: isWeb ? Colors.white : theme.scaffoldBackgroundColor,
+      bottomNavigationBar: isWeb ? null : CustomBottomNavBar(),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: isWeb ? _WebShell(controller: c) : _MobileShell(controller: c),
       ),
@@ -53,50 +54,943 @@ class _WebShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final content = _AgentProfileContent(controller: controller, web: true);
-
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: Container(
-            color: const Color(0xFFFAFAFA),
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1200),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 8,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: content.children(context),
-                      ),
-                    ),
-                    const SizedBox(width: 18),
-                    const Expanded(
-                      flex: 4,
-                      child: Column(
-                        children: [
-                          _WebSidebarContactCard(),
-                          SizedBox(height: 14),
-                          _WebSidebarQuickInfo(),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+    return Column(
+      children: [
+        const WebHeader(),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                _WebProfileContent(controller: controller),
+                const WebFooter(),
+              ],
             ),
           ),
         ),
-        SliverToBoxAdapter(
-          child: Container(color: cs.surface, child: const WebFooter()),
+      ],
+    );
+  }
+}
+
+class _WebProfileContent extends StatelessWidget {
+  final AgentProfileController controller;
+  const _WebProfileContent({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cs = theme.colorScheme;
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1100),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _WebHeaderBlock(controller: controller),
+              const SizedBox(height: 48),
+              const _WebStatsRow(),
+              const SizedBox(height: 48),
+              _WebTabsBlock(controller: controller),
+              const SizedBox(height: 24),
+              const _WebListingsController(),
+              const SizedBox(height: 24),
+              _WebListingsGrid(controller: controller),
+              const SizedBox(height: 48),
+              Center(
+                child: OutlinedButton(
+                  onPressed: () {},
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 18,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    side: BorderSide(
+                      color: isDark
+                          ? cs.outlineVariant
+                          : const Color(0xFFD1D5DB),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Text(
+                    "Load More Listings",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? cs.onSurface : const Color(0xFF4B5563),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WebHeaderBlock extends StatelessWidget {
+  final AgentProfileController controller;
+  const _WebHeaderBlock({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cs = theme.colorScheme;
+    final textCol = isDark ? cs.onSurface : const Color(0xFF111827);
+    final subTextCol = isDark ? cs.onSurfaceVariant : const Color(0xFF6B7280);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? const Color(0xFF169038).withOpacity(0.2)
+                    : const Color(0xFFEAF5EF),
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: Text(
+                  "R",
+                  style: TextStyle(
+                    color: Color(0xFF169038),
+                    fontSize: 40,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 4,
+              right: 4,
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: isDark ? cs.surface : Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check_circle,
+                  color: Color(0xFF169038),
+                  size: 22,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(width: 32),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    "Rachel Morrison",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: textCol,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF169038).withOpacity(0.1)
+                          : const Color(0xFFEAF5EF),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0xFF169038).withOpacity(0.2),
+                      ),
+                    ),
+                    child: Row(
+                      children: const [
+                        Icon(
+                          Icons.verified_user_outlined,
+                          color: Color(0xFF169038),
+                          size: 14,
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          "Verified Agent",
+                          style: TextStyle(
+                            color: Color(0xFF169038),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "Licensed Real Estate Agent · DRE #01945832",
+                style: TextStyle(
+                  color: subTextCol,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Icon(Icons.location_on_outlined, size: 16, color: subTextCol),
+                  const SizedBox(width: 6),
+                  Text(
+                    "Los Angeles, CA",
+                    style: TextStyle(
+                      color: subTextCol,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(width: 24),
+                  Icon(
+                    Icons.calendar_month_outlined,
+                    size: 16,
+                    color: subTextCol,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    "Member since Aug 2019",
+                    style: TextStyle(
+                      color: subTextCol,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(width: 24),
+                  Icon(Icons.access_time_outlined, size: 16, color: subTextCol),
+                  const SizedBox(width: 6),
+                  Text(
+                    "Responds in ~2hrs",
+                    style: TextStyle(
+                      color: subTextCol,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Row(
+                    children: List.generate(
+                      5,
+                      (_) => const Icon(
+                        Icons.star_border,
+                        color: Color(0xFFFBAF16),
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "4.9",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                      color: textCol,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "(127 reviews)",
+                    style: TextStyle(
+                      color: subTextCol,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF169038),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 18,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                minimumSize: const Size(200, 48),
+              ),
+              child: const Text(
+                "Follow Agent",
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+              ),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.chat_bubble_outline, size: 18),
+              label: const Text(
+                "Message",
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF169038),
+                side: const BorderSide(color: Color(0xFF169038), width: 1.5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                minimumSize: const Size(200, 48),
+              ),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.phone_outlined, size: 18),
+              label: const Text(
+                "(310) 555-0147",
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: isDark
+                    ? cs.onSurface
+                    : const Color(0xFF4B5563),
+                side: BorderSide(
+                  color: isDark ? cs.outlineVariant : const Color(0xFFD1D5DB),
+                  width: 1.5,
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                minimumSize: const Size(200, 48),
+              ),
+            ),
+          ],
         ),
       ],
+    );
+  }
+}
+
+class _WebStatsRow extends StatelessWidget {
+  const _WebStatsRow();
+
+  Widget _stat(String top, String bottom, {Color? color}) {
+    return Builder(
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final cs = Theme.of(context).colorScheme;
+        final defaultColor = isDark ? cs.onSurface : const Color(0xFF111827);
+        final defaultBottomColor = isDark
+            ? cs.onSurfaceVariant
+            : const Color(0xFF9CA3AF);
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              top,
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.w900,
+                color: color ?? defaultColor,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              bottom,
+              style: TextStyle(
+                fontSize: 13,
+                color: defaultBottomColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dividerColor = isDark
+        ? Theme.of(context).colorScheme.outlineVariant
+        : const Color(0xFFF3F4F6);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _stat("24", "Active Listings"),
+        Container(height: 48, width: 1, color: dividerColor),
+        _stat("127", "Reviews"),
+        Container(height: 48, width: 1, color: dividerColor),
+        _stat("89", "Properties Sold"),
+        Container(height: 48, width: 1, color: dividerColor),
+        _stat("98%", "Response Rate", color: const Color(0xFF169038)),
+        Container(height: 48, width: 1, color: dividerColor),
+        _stat("\$42M+", "Total Sales Volume"),
+      ],
+    );
+  }
+}
+
+class _WebTabsBlock extends StatelessWidget {
+  final AgentProfileController controller;
+  const _WebTabsBlock({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Stack(
+      children: [
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: Container(
+            height: 2,
+            color: isDark
+                ? Theme.of(context).colorScheme.outlineVariant
+                : const Color(0xFFF3F4F6),
+          ),
+        ),
+        Obx(() {
+          return Row(
+            children: [
+              _WebTabItem(
+                text: "Active Listings",
+                count: "24",
+                active: controller.tabIndex.value == 0,
+                icon: Icons.view_in_ar_outlined,
+                onTap: () => controller.tabIndex.value = 0,
+              ),
+              const SizedBox(width: 32),
+              _WebTabItem(
+                text: "Reviews",
+                count: "127",
+                active: controller.tabIndex.value == 1,
+                icon: Icons.chat_bubble_outline,
+                onTap: () => controller.tabIndex.value = 1,
+              ),
+              const SizedBox(width: 32),
+              _WebTabItem(
+                text: "About",
+                active: controller.tabIndex.value == 2,
+                icon: Icons.person_outline,
+                onTap: () => controller.tabIndex.value = 2,
+              ),
+            ],
+          );
+        }),
+      ],
+    );
+  }
+}
+
+class _WebTabItem extends StatelessWidget {
+  final String text;
+  final String? count;
+  final bool active;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _WebTabItem({
+    required this.text,
+    this.count,
+    required this.active,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+
+    final inactiveText = isDark ? cs.onSurfaceVariant : const Color(0xFF6B7280);
+    final inactiveIcon = isDark ? cs.onSurfaceVariant : const Color(0xFF9CA3AF);
+    final activeColor = const Color(0xFF169038);
+
+    return InkWell(
+      onTap: onTap,
+      hoverColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
+            child: Row(
+              children: [
+                Icon(
+                  icon,
+                  size: 18,
+                  color: active ? activeColor : inactiveIcon,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  text,
+                  style: TextStyle(
+                    fontWeight: active ? FontWeight.w800 : FontWeight.w600,
+                    color: active ? activeColor : inactiveText,
+                    fontSize: 14,
+                  ),
+                ),
+                if (count != null) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: active
+                          ? activeColor.withOpacity(0.1)
+                          : (isDark
+                                ? cs.surfaceVariant
+                                : const Color(0xFFF3F4F6)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      count!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: active ? activeColor : inactiveText,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          Container(
+            height: 3,
+            width: text.length * 9.0 + (count != null ? 30 : 0),
+            decoration: BoxDecoration(
+              color: active ? activeColor : Colors.transparent,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(3),
+                topRight: Radius.circular(3),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WebListingsController extends StatelessWidget {
+  const _WebListingsController();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final textCol = isDark ? cs.onSurface : const Color(0xFF111827);
+    final subCol = isDark ? cs.onSurfaceVariant : const Color(0xFF9CA3AF);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Showing 6 of 24 listings",
+          style: TextStyle(
+            color: subCol,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        Row(
+          children: [
+            Text(
+              "Sort by: ",
+              style: TextStyle(
+                color: subCol,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Text(
+              "Most Recent",
+              style: TextStyle(
+                color: textCol,
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _WebListingsGrid extends StatelessWidget {
+  final AgentProfileController controller;
+  const _WebListingsGrid({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final listings = [
+      {
+        "title": "Greenwood Estate, 4 BHK Villa",
+        "price": "\$1,450,000",
+        "tag": "For Sale",
+        "beds": "4",
+        "baths": "3",
+        "sqft": "3,200 sqft",
+        "time": "23d",
+        "views": "284",
+        "location": "Los Angeles, CA",
+        "img":
+            "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      },
+      {
+        "title": "Sunrise Penthouse, 3 BHK",
+        "price": "\$2,800/mo",
+        "tag": "For Rent",
+        "beds": "3",
+        "baths": "2",
+        "sqft": "1,850 sqft",
+        "time": "5d",
+        "views": "156",
+        "location": "Santa Monica, CA",
+        "img":
+            "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      },
+      {
+        "title": "Hillcrest Cottage",
+        "price": "\$725,000",
+        "tag": "For Sale",
+        "beds": "3",
+        "baths": "2",
+        "sqft": "1,600 sqft",
+        "time": "12d",
+        "views": "412",
+        "location": "Pasadena, CA",
+        "img":
+            "https://images.unsplash.com/photo-1510798831971-661eb04b3739?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      },
+      {
+        "title": "Downtown Loft Studio",
+        "price": "\$1,950/mo",
+        "tag": "For Rent",
+        "beds": "1",
+        "baths": "1",
+        "sqft": "780 sqft",
+        "time": "2d",
+        "views": "89",
+        "location": "DTLA, CA",
+        "img":
+            "https://images.unsplash.com/photo-1493809842364-78817add7ffb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      },
+      {
+        "title": "Oceanview Residential Land",
+        "price": "\$890,000",
+        "tag": "Land",
+        "beds": "-",
+        "baths": "-",
+        "sqft": "5,000 sqft lot",
+        "time": "31d",
+        "views": "203",
+        "location": "Malibu, CA",
+        "img":
+            "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      },
+      {
+        "title": "Willow Park Family Home",
+        "price": "\$980,000",
+        "tag": "For Sale",
+        "beds": "4",
+        "baths": "3",
+        "sqft": "2,700 sqft",
+        "time": "8d",
+        "views": "167",
+        "location": "Glendale, CA",
+        "img":
+            "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      },
+    ];
+
+    return GridView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: 6,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 24,
+        mainAxisSpacing: 24,
+        childAspectRatio: 0.9,
+      ),
+      itemBuilder: (context, index) {
+        return _WebListingCard(data: listings[index]);
+      },
+    );
+  }
+}
+
+class _WebListingCard extends StatelessWidget {
+  final Map<String, dynamic> data;
+  const _WebListingCard({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+
+    final bgColor = isDark ? cs.surface : Colors.white;
+    final borderColor = isDark ? cs.outlineVariant : const Color(0xFFF3F4F6);
+    final titleColor = isDark ? cs.onSurface : const Color(0xFF111827);
+    final subTextCol = isDark ? cs.onSurfaceVariant : const Color(0xFF6B7280);
+    final iconColor = isDark ? cs.onSurfaceVariant : const Color(0xFF9CA3AF);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.015),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 12,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(data['img'], fit: BoxFit.cover),
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        data['tag'],
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.favorite_border,
+                        size: 16,
+                        color: Color(0xFF6B7280),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.remove_red_eye_outlined,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            data['views'],
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 10,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        data['price'],
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: titleColor,
+                        ),
+                      ),
+                      Text(
+                        data['time'],
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: iconColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    data['title'],
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: titleColor,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 14,
+                        color: iconColor,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        data['location'],
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: subTextCol,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  Container(
+                    height: 1,
+                    color: borderColor,
+                    margin: const EdgeInsets.only(bottom: 10),
+                  ),
+                  Row(
+                    children: [
+                      Icon(Icons.bed_outlined, size: 16, color: iconColor),
+                      const SizedBox(width: 6),
+                      Text(
+                        data['beds'],
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: subTextCol,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Icon(Icons.bathtub_outlined, size: 16, color: iconColor),
+                      const SizedBox(width: 6),
+                      Text(
+                        data['baths'],
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: subTextCol,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Icon(
+                        Icons.square_foot_outlined,
+                        size: 16,
+                        color: iconColor,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        data['sqft'],
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: subTextCol,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -657,207 +1551,6 @@ class _WebCard extends StatelessWidget {
         ],
       ),
       child: child,
-    );
-  }
-}
-
-class _WebSidebarContactCard extends StatelessWidget {
-  const _WebSidebarContactCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
-    return _WebCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Contact Agent",
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: cs.onSurface,
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.call_rounded, size: 18),
-              label: Text(
-                "Call",
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {},
-              icon: Image.asset(
-                "assets/chat.png",
-                width: 18,
-                height: 18,
-                color: cs.primary,
-              ),
-              label: Text(
-                "Message",
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  color: cs.primary,
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                side: BorderSide(color: cs.outlineVariant),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.verified_outlined,
-                  size: 18,
-                  color: Color(0xFF16A34A),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    "Verified agent profile (web-only info box).",
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: const Color(0xFF475569),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _WebSidebarQuickInfo extends StatelessWidget {
-  const _WebSidebarQuickInfo();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
-    return _WebCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Quick Info",
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: cs.onSurface,
-            ),
-          ),
-          const SizedBox(height: 12),
-          _InfoRow(
-            icon: Icons.location_on_outlined,
-            label: "Location",
-            value: "Los Angeles, CA",
-          ),
-          const SizedBox(height: 10),
-          _InfoRow(
-            icon: Icons.badge_outlined,
-            label: "License",
-            value: "#01945832",
-          ),
-          const SizedBox(height: 10),
-          _InfoRow(
-            icon: Icons.star_border_rounded,
-            label: "Rating",
-            value: "4.9 (277)",
-          ),
-          const SizedBox(height: 14),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: cs.surface,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: cs.outlineVariant),
-            ),
-            child: Text(
-              "Add any extra web-only content here (tips, profile summary, etc.).",
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: cs.onSurface.withOpacity(.65),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  const _InfoRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: cs.onSurfaceVariant),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            label,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: cs.onSurface.withOpacity(.7),
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-        Text(
-          value,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: cs.onSurface,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-      ],
     );
   }
 }

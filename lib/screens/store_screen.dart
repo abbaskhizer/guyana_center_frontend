@@ -5,70 +5,466 @@ import 'package:guyana_center_frontend/modal/storeVm.dart';
 import 'package:guyana_center_frontend/screens/custom_bottom_navbar.dart';
 import 'package:guyana_center_frontend/widgets/app_drawar.dart';
 import 'package:guyana_center_frontend/widgets/mobile_header.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:guyana_center_frontend/widgets/web_header.dart';
+import 'package:guyana_center_frontend/widgets/web_footer.dart';
 
 class StoresScreen extends StatelessWidget {
   const StoresScreen({super.key});
+
+  bool _isWebDesktop(BuildContext context) =>
+      kIsWeb && MediaQuery.of(context).size.width >= 1000;
 
   @override
   Widget build(BuildContext context) {
     final c = Get.put(StoresController());
     final theme = Theme.of(context);
+    final isWeb = _isWebDesktop(context);
 
     return Scaffold(
-      bottomNavigationBar: CustomBottomNavBar(),
+      bottomNavigationBar: isWeb ? null : CustomBottomNavBar(),
       backgroundColor: theme.scaffoldBackgroundColor,
-      drawer: const AppDrawer(),
+      drawer: isWeb ? null : const AppDrawer(),
       body: SafeArea(
-        child: ListView(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-              child: Column(
-                children: [
-                  MobileHeader(),
-                  const SizedBox(height: 14),
-                  _SearchRow(controller: c),
-                  const SizedBox(height: 18),
-                ],
-              ),
-            ),
+        child: isWeb
+            ? _WebStoreShell(controller: c)
+            : _MobileShell(controller: c),
+      ),
+    );
+  }
+}
 
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              width: double.infinity,
+class _MobileShell extends StatelessWidget {
+  final StoresController controller;
+  const _MobileShell({required this.controller});
 
-              color: theme.colorScheme.surface,
-              child: Column(
-                children: [
-                  _HeaderRow(controller: c),
-                  const SizedBox(height: 12),
-                  Obx(
-                    () => _FiltersWrap(
-                      controller: c,
-                      selectedKey: c.selectedFilter.value,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Obx(
-                    () => ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: c.visibleStores.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 10),
-                      itemBuilder: (_, i) =>
-                          StoreTile(store: c.visibleStores[i]),
-                    ),
-                  ),
-                ],
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final c = controller;
+
+    return ListView(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+          child: Column(
+            children: [
+              MobileHeader(),
+              const SizedBox(height: 14),
+              _SearchRow(controller: c),
+              const SizedBox(height: 18),
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          width: double.infinity,
+          color: theme.colorScheme.surface,
+          child: Column(
+            children: [
+              _HeaderRow(controller: c),
+              const SizedBox(height: 12),
+              Obx(
+                () => _FiltersWrap(
+                  controller: c,
+                  selectedKey: c.selectedFilter.value,
+                ),
               ),
+              const SizedBox(height: 14),
+              Obx(
+                () => ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: c.visibleStores.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (_, i) => StoreTile(store: c.visibleStores[i]),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _WebStoreShell extends StatelessWidget {
+  final StoresController controller;
+  const _WebStoreShell({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const WebHeader(),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                _WebStoreContent(controller: controller),
+                const WebFooter(),
+              ],
             ),
-          ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _WebStoreContent extends StatelessWidget {
+  final StoresController controller;
+  const _WebStoreContent({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cs = theme.colorScheme;
+    final bgColor = isDark
+        ? theme.scaffoldBackgroundColor
+        : const Color(0xFFFAFAFA);
+
+    return Container(
+      width: double.infinity,
+      color: bgColor,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1100),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _WebSearchBar(controller: controller),
+                const SizedBox(height: 32),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Guyanacentral stores",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        color: isDark ? cs.onSurface : const Color(0xFF111827),
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF16A34A),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 14,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                      ),
+                      child: const Text(
+                        "Open new store",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _WebFilters(controller: controller),
+                const SizedBox(height: 24),
+                Obx(
+                  () => ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: controller.visibleStores.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 0),
+                    itemBuilder: (_, i) =>
+                        _WebStoreCard(store: controller.visibleStores[i]),
+                  ),
+                ),
+                const SizedBox(height: 64),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 }
 
+class _WebSearchBar extends StatelessWidget {
+  final StoresController controller;
+  const _WebSearchBar({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isDark ? cs.outlineVariant : const Color(0xFFE5E7EB),
+          width: 1.5,
+        ),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 16),
+          Icon(
+            Icons.search,
+            color: isDark ? cs.onSurfaceVariant : const Color(0xFF9CA3AF),
+            size: 22,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: TextField(
+              controller: controller.searchCtrl,
+              onChanged: controller.onSearchChanged,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: isDark ? cs.onSurface : const Color(0xFF111827),
+              ),
+              decoration: InputDecoration(
+                hintText: "Search stores...",
+                hintStyle: TextStyle(
+                  color: isDark ? cs.onSurfaceVariant : const Color(0xFF9CA3AF),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+                border: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                isDense: true,
+                filled: false,
+                fillColor: Colors.transparent,
+                contentPadding: const EdgeInsets.symmetric(vertical: 20),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              height: 44,
+              child: ElevatedButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.search, size: 18),
+                label: const Text(
+                  "Search",
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF16A34A),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WebFilters extends StatelessWidget {
+  final StoresController controller;
+  const _WebFilters({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final selectedKey = controller.selectedFilter.value;
+      return Wrap(
+        spacing: 24,
+        runSpacing: 16,
+        children: controller.filters.map((f) {
+          final isSelected = selectedKey == f.key;
+          return InkWell(
+            onTap: () => controller.setFilter(f.key),
+            hoverColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: f.label,
+                    style: TextStyle(
+                      color: isSelected
+                          ? const Color(0xFF16A34A)
+                          : const Color(0xFF16A34A).withOpacity(0.8),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                  if (f.count != null)
+                    TextSpan(
+                      text: " ${f.count}",
+                      style: TextStyle(
+                        color: const Color(0xFF86EFAC),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      );
+    });
+  }
+}
+
+class _WebStoreCard extends StatelessWidget {
+  final StoreVM store;
+  const _WebStoreCard({required this.store});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cs = theme.colorScheme;
+
+    final bgColor = isDark ? cs.surface : Colors.white;
+    final borderColor = isDark ? cs.outlineVariant : const Color(0xFFF3F4F6);
+
+    return Container(
+      padding: const EdgeInsets.all(28),
+      margin: const EdgeInsets.only(bottom: 24),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.015),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.network(
+              store.avatarUrl,
+              width: 170,
+              height: 170,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(width: 40),
+          Expanded(
+            flex: 3,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        store.name,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: isDark
+                              ? cs.onSurface
+                              : const Color(0xFF111827),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    if (store.verified)
+                      const Icon(
+                        Icons.check_circle_outline,
+                        color: Color(0xFF16A34A),
+                        size: 18,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  store.subtitle,
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.7,
+                    fontWeight: FontWeight.w500,
+                    color: isDark
+                        ? cs.onSurfaceVariant
+                        : const Color(0xFF6B7280),
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 28),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      color: isDark
+                          ? cs.onSurfaceVariant
+                          : const Color(0xFF9CA3AF),
+                      size: 16,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      store.location,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: isDark
+                            ? cs.onSurfaceVariant
+                            : const Color(0xFF9CA3AF),
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    const Icon(
+                      Icons.insert_drive_file,
+                      color: Color(0xFF16A34A),
+                      size: 16,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      store.ads.isNotEmpty ? store.ads : "0 ads",
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF16A34A),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const Spacer(),
+        ],
+      ),
+    );
+  }
+}
+
+// Mobile components retained below
 class _SearchRow extends StatelessWidget {
   final StoresController controller;
   const _SearchRow({required this.controller});

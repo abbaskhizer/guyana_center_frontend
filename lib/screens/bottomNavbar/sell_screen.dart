@@ -3,9 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/bottomNavbar/sell_controller.dart';
 import 'package:guyana_center_frontend/widgets/mobile_header.dart';
+import 'package:guyana_center_frontend/widgets/web_header.dart';
 
 class SellScreen extends StatelessWidget {
   const SellScreen({super.key});
+
+  bool _isWebDesktop(BuildContext context) =>
+      kIsWeb && MediaQuery.of(context).size.width >= 1000;
 
   @override
   Widget build(BuildContext context) {
@@ -14,100 +18,590 @@ class SellScreen extends StatelessWidget {
     final controller = Get.put(SellController(), permanent: true);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: _isWebDesktop(context)
+          ? (theme.brightness == Brightness.dark
+                ? theme.scaffoldBackgroundColor
+                : const Color(0xFFF9FAFB))
+          : theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          children: [
-            if (!kIsWeb) MobileHeader(),
+        child: _isWebDesktop(context)
+            ? _buildWebLayout(context, theme, cs, controller)
+            : _buildMobileLayout(theme, cs, controller),
+      ),
+    );
+  }
 
-            if (!kIsWeb) const SizedBox(height: 10),
-
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                InkWell(
-                  onTap: controller.goBack,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: Container(
-                      height: 35,
-                      width: 35,
-                      decoration: BoxDecoration(
-                        color: cs.surface,
-                        borderRadius: BorderRadius.circular(14),
+  Widget _buildWebLayout(
+    BuildContext context,
+    ThemeData theme,
+    ColorScheme cs,
+    SellController controller,
+  ) {
+    return Column(
+      children: [
+        const WebHeader(),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+            children: [
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 800),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Post a Free Ad",
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: theme.brightness == Brightness.dark
+                              ? Colors.white
+                              : const Color(0xFF1E2432),
+                          fontSize: 28,
+                        ),
                       ),
-                      alignment: Alignment.center,
-                      child: Icon(
-                        Icons.chevron_left_rounded,
-                        color: cs.onSurface,
-                        size: 26,
+                      const SizedBox(height: 8),
+                      Text(
+                        "Reach thousands of buyers across Trinidad & Tobago",
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: cs.onSurfaceVariant.withOpacity(0.8),
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 32),
+                      Obx(
+                        () => _WebStepStrip(
+                          step: controller.step.value,
+                          onTap: controller.setStep,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(40),
+                        decoration: BoxDecoration(
+                          color: theme.brightness == Brightness.dark
+                              ? cs.surface
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: theme.brightness == Brightness.dark
+                              ? []
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.04),
+                                    blurRadius: 24,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                        ),
+                        child: Obx(() {
+                          switch (controller.step.value) {
+                            case 1:
+                              return const _WebStep1Details();
+                            case 2:
+                              return const _Step2PhotosPrice();
+                            case 3:
+                              return const _Step3Contact();
+                            default:
+                              return const _WebStep1Details();
+                          }
+                        }),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Post a Free Ad",
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w900,
-                            color: cs.onSurface,
-                            fontSize: 20,
-                            height: 1.1,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "Reach thousands of buyers across Trinidad & Tobago",
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: cs.onSurface.withOpacity(.55),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 10,
-                            height: 1.35,
-                          ),
-                        ),
-                      ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout(
+    ThemeData theme,
+    ColorScheme cs,
+    SellController controller,
+  ) {
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      children: [
+        if (!kIsWeb) MobileHeader(),
+
+        if (!kIsWeb) const SizedBox(height: 10),
+
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            InkWell(
+              onTap: controller.goBack,
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: Container(
+                  height: 35,
+                  width: 35,
+                  decoration: BoxDecoration(
+                    color: cs.surface,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.chevron_left_rounded,
+                    color: cs.onSurface,
+                    size: 26,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Post a Free Ad",
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: cs.onSurface,
+                        fontSize: 20,
+                        height: 1.1,
+                      ),
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "Reach thousands of buyers across Trinidad & Tobago",
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurface.withOpacity(.55),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 10,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+
+        Obx(
+          () => Padding(
+            padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
+            child: _StepStrip(
+              step: controller.step.value,
+              onTap: controller.setStep,
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Divider(color: cs.surface),
+
+        const SizedBox(height: 10),
+
+        Obx(() {
+          switch (controller.step.value) {
+            case 1:
+              return const _Step1Details();
+            case 2:
+              return const _Step2PhotosPrice();
+            case 3:
+              return const _Step3Contact();
+            default:
+              return const _Step1Details();
+          }
+        }),
+      ],
+    );
+  }
+}
+
+class _WebStepStrip extends StatelessWidget {
+  final int step;
+  final void Function(int) onTap;
+
+  const _WebStepStrip({required this.step, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    const yellow = Color(0xFFFBBF24);
+
+    Widget node(int n, String label) {
+      final active = n == step;
+      final done = n < step;
+
+      final bgColor = active
+          ? yellow
+          : (done
+                ? const Color(0xFFE5E7EB)
+                : (isDark
+                      ? cs.surfaceContainerHighest
+                      : const Color(0xFFE5E7EB)));
+      final textColor = active
+          ? Colors.white
+          : (done
+                ? const Color(0xFF4B5563)
+                : (isDark ? cs.onSurfaceVariant : const Color(0xFF9CA3AF)));
+
+      return InkWell(
+        onTap: () => onTap(n),
+        borderRadius: BorderRadius.circular(16),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
+              alignment: Alignment.center,
+              child: done
+                  ? const Icon(Icons.check, size: 16, color: Color(0xFF4B5563))
+                  : Text(
+                      '$n',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: textColor,
+                      ),
+                    ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: active ? FontWeight.w800 : FontWeight.w600,
+                color: active
+                    ? (isDark ? Colors.white : const Color(0xFF1E2432))
+                    : (isDark ? cs.onSurfaceVariant : const Color(0xFF9CA3AF)),
+                fontSize: 15,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    Widget line() {
+      return Expanded(
+        child: Container(
+          height: 2,
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          color: isDark ? cs.outlineVariant : const Color(0xFFE5E7EB),
+        ),
+      );
+    }
+
+    return Row(
+      children: [
+        node(1, 'Details'),
+        line(),
+        node(2, 'Photos & Price'),
+        line(),
+        node(3, 'Contact'),
+      ],
+    );
+  }
+}
+
+class _WebStep1Details extends StatelessWidget {
+  const _WebStep1Details();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final controller = Get.put(SellController());
+    final isDark = theme.brightness == Brightness.dark;
+
+    final labelStyle = theme.textTheme.bodyMedium?.copyWith(
+      fontWeight: FontWeight.w700,
+      color: isDark ? cs.onSurfaceVariant : const Color(0xFF4B5563),
+    );
+
+    final inputDecoration = InputDecoration(
+      filled: true,
+      fillColor: isDark
+          ? cs.surfaceContainerHighest.withOpacity(0.3)
+          : const Color(0xFFF9FAFB),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      hintStyle: TextStyle(
+        color: isDark
+            ? cs.onSurfaceVariant.withOpacity(0.5)
+            : const Color(0xFF9CA3AF),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: isDark ? cs.outlineVariant : const Color(0xFFE5E7EB),
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFF10B981), width: 1.5),
+      ),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Ad Details",
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+            fontSize: 22,
+          ),
+        ),
+        const SizedBox(height: 32),
+
+        Text("Category", style: labelStyle),
+        const SizedBox(height: 12),
+        Obx(
+          () => _WebCategoryGrid(
+            selected: controller.selectedCategory.value,
+            onTap: controller.selectCategoryIndex,
+            categories: controller.categories,
+          ),
+        ),
+        const SizedBox(height: 32),
+
+        Text("Ad Title", style: labelStyle),
+        const SizedBox(height: 12),
+        TextField(
+          controller: controller.titleCtrl,
+          decoration: inputDecoration.copyWith(
+            hintText: "e.g. Toyota Hiace 2014 Super GL",
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          "Be specific — include brand, model, year, or key details",
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: isDark
+                ? cs.onSurfaceVariant.withOpacity(0.7)
+                : const Color(0xFF9CA3AF),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 32),
+
+        Text("Description", style: labelStyle),
+        const SizedBox(height: 12),
+        TextField(
+          controller: controller.descCtrl,
+          maxLines: 6,
+          decoration: inputDecoration.copyWith(
+            hintText:
+                "Describe your item in detail — condition, features, reason for selling...",
+          ),
+        ),
+        const SizedBox(height: 10),
+        Obx(
+          () => Text(
+            "${controller.descCount.value}/2000 characters",
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: isDark
+                  ? cs.onSurfaceVariant.withOpacity(0.7)
+                  : const Color(0xFF9CA3AF),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        const SizedBox(height: 32),
+
+        Text("Condition", style: labelStyle),
+        const SizedBox(height: 12),
+        Obx(() {
+          final active = controller.conditionIndex.value;
+          return Row(
+            children: [
+              _WebPillChoice(
+                text: "Brand New",
+                active: active == 0,
+                onTap: () => controller.setCondition(0),
+              ),
+              const SizedBox(width: 12),
+              _WebPillChoice(
+                text: "Like New",
+                active: active == 1,
+                onTap: () => controller.setCondition(1),
+              ),
+              const SizedBox(width: 12),
+              _WebPillChoice(
+                text: "Used",
+                active: active == 2,
+                onTap: () => controller.setCondition(2),
+              ),
+              const SizedBox(width: 12),
+              _WebPillChoice(
+                text: "For Parts",
+                active: active == 3,
+                onTap: () => controller.setCondition(3),
+              ),
+            ],
+          );
+        }),
+        const SizedBox(height: 48),
+
+        Align(
+          alignment: Alignment.centerRight,
+          child: ElevatedButton(
+            onPressed: controller.continueNext,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF10B981),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "Continue",
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.arrow_forward_rounded, size: 20),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _WebCategoryGrid extends StatelessWidget {
+  final int selected;
+  final void Function(int) onTap;
+  final List categories;
+
+  const _WebCategoryGrid({
+    required this.selected,
+    required this.onTap,
+    required this.categories,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    return GridView.builder(
+      itemCount: categories.length,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+        childAspectRatio: 2.5,
+      ),
+      itemBuilder: (_, i) {
+        final cat = categories[i];
+        final active = i == selected;
+
+        return InkWell(
+          onTap: () => onTap(i),
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            decoration: BoxDecoration(
+              color: active
+                  ? (isDark
+                        ? cs.primary.withOpacity(0.15)
+                        : const Color(0xFFF0FDF4))
+                  : (isDark
+                        ? cs.surfaceContainerHighest.withOpacity(0.3)
+                        : Colors.white),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: active
+                    ? const Color(0xFF10B981)
+                    : (isDark ? cs.outlineVariant : const Color(0xFFE5E7EB)),
+                width: active ? 1.5 : 1,
+              ),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(height: 24, width: 24, cat.icon),
+                const SizedBox(height: 8),
+                Text(
+                  cat.title,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: active
+                        ? const Color(0xFF10B981)
+                        : (isDark
+                              ? cs.onSurfaceVariant
+                              : const Color(0xFF4B5563)),
+                    fontSize: 13,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 14),
+          ),
+        );
+      },
+    );
+  }
+}
 
-            Obx(
-              () => Padding(
-                padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
-                child: _StepStrip(
-                  step: controller.step.value,
-                  onTap: controller.setStep,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Divider(color: cs.surface),
+class _WebPillChoice extends StatelessWidget {
+  final String text;
+  final bool active;
+  final VoidCallback onTap;
 
-            const SizedBox(height: 10),
+  const _WebPillChoice({
+    required this.text,
+    required this.active,
+    required this.onTap,
+  });
 
-            Obx(() {
-              switch (controller.step.value) {
-                case 1:
-                  return const _Step1Details();
-                case 2:
-                  return const _Step2PhotosPrice();
-                case 3:
-                  return const _Step3Contact();
-                default:
-                  return const _Step1Details();
-              }
-            }),
-          ],
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(30),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          color: active
+              ? (isDark
+                    ? cs.primary.withOpacity(0.15)
+                    : const Color(0xFFF0FDF4))
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(
+            color: active
+                ? const Color(0xFF10B981)
+                : (isDark ? cs.outlineVariant : const Color(0xFFE5E7EB)),
+            width: active ? 1.5 : 1,
+          ),
+        ),
+        child: Text(
+          text,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: active
+                ? const Color(0xFF10B981)
+                : (isDark ? cs.onSurfaceVariant : const Color(0xFF4B5563)),
+          ),
         ),
       ),
     );

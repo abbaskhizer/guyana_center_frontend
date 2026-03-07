@@ -78,7 +78,7 @@ class SellController extends GetxController {
   }
 
   void selectCategoryIndex(int i) => selectedCategory.value = i;
-  void setCondition(int i) => conditionIndex.value = i.clamp(0, 2);
+  void setCondition(int i) => conditionIndex.value = i.clamp(0, 3);
 
   void addMockPhoto() {
     if (images.length >= 10) return;
