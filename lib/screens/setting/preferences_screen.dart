@@ -9,7 +9,9 @@ class PreferencesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(PreferencesController());
+    if (!Get.isRegistered<PreferencesController>()) {
+      Get.put(PreferencesController());
+    }
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -32,7 +34,8 @@ class PreferencesContent extends StatelessWidget {
         ? Get.find<PreferencesController>()
         : Get.put(PreferencesController());
 
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     final content = Column(
       children: [
@@ -49,23 +52,19 @@ class PreferencesContent extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 16),
-
         SectionCard(
           title: "Language & Region",
           children: [
             const SizedBox(height: 6),
-
             Text(
               "Language",
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              style: theme.textTheme.bodySmall?.copyWith(
                 color: cs.onSurfaceVariant,
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 8),
-
             InkWell(
               borderRadius: BorderRadius.circular(12),
               onTap: () {},
@@ -75,7 +74,7 @@ class PreferencesContent extends StatelessWidget {
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: cs.surface,
+                  color: theme.cardColor,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: cs.outlineVariant),
                 ),
@@ -84,7 +83,7 @@ class PreferencesContent extends StatelessWidget {
                     Expanded(
                       child: Text(
                         "English (US)",
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w800,
                           color: cs.onSurface,
                         ),
@@ -98,12 +97,10 @@ class PreferencesContent extends StatelessWidget {
                 ),
               ),
             ),
-
             const SizedBox(height: 16),
-
             Text(
               "Timezone",
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              style: theme.textTheme.bodySmall?.copyWith(
                 color: cs.onSurfaceVariant,
                 fontWeight: FontWeight.w600,
               ),
@@ -111,7 +108,7 @@ class PreferencesContent extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               "PST (UTC-8)",
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w800,
                 color: cs.onSurface,
               ),
@@ -131,12 +128,16 @@ class PreferencesContent extends StatelessWidget {
               children: [
                 IconButton(
                   onPressed: c.back,
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+                  icon: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 18,
+                    color: cs.onSurface,
+                  ),
                 ),
                 const SizedBox(width: 4),
                 Text(
                   "Preferences",
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: cs.onSurface,
                   ),
@@ -144,7 +145,6 @@ class PreferencesContent extends StatelessWidget {
               ],
             ),
           ),
-
         if (!kIsWeb)
           ColoredBox(
             color: cs.surface,
@@ -154,7 +154,10 @@ class PreferencesContent extends StatelessWidget {
             ),
           )
         else
-          content,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
+            child: content,
+          ),
       ],
     );
   }
@@ -173,7 +176,7 @@ class _ThemeSegment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final inactiveBg = cs.surface;
+    final inactiveBg = Theme.of(context).cardColor;
 
     return Row(
       children: [

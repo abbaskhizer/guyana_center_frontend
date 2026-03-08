@@ -38,15 +38,15 @@ class BrowseSearchesListingScreen extends StatelessWidget {
                           child: Container(
                             width: 34,
                             height: 34,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFF3F4F6),
+                            decoration: BoxDecoration(
+                              color: cs.surfaceVariant,
                               shape: BoxShape.circle,
                             ),
                             alignment: Alignment.center,
-                            child: const Icon(
+                            child: Icon(
                               Icons.arrow_back_ios_new_rounded,
                               size: 16,
-                              color: Color(0xFF6B7280),
+                              color: cs.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -57,15 +57,15 @@ class BrowseSearchesListingScreen extends StatelessWidget {
                             Container(
                               width: 34,
                               height: 34,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFF3F4F6),
+                              decoration: BoxDecoration(
+                                color: cs.surfaceVariant,
                                 shape: BoxShape.circle,
                               ),
                               alignment: Alignment.center,
-                              child: const Icon(
+                              child: Icon(
                                 Icons.notifications_none_rounded,
                                 size: 18,
-                                color: Color(0xFF6B7280),
+                                color: cs.onSurfaceVariant,
                               ),
                             ),
                             Positioned(
@@ -93,7 +93,7 @@ class BrowseSearchesListingScreen extends StatelessWidget {
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
                           fontSize: 18,
-                          color: const Color(0xFF1F2937),
+                          color: cs.onSurface,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -103,7 +103,7 @@ class BrowseSearchesListingScreen extends StatelessWidget {
                           style: theme.textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w500,
                             fontSize: 11,
-                            color: const Color(0xFF9CA3AF),
+                            color: cs.onSurfaceVariant,
                           ),
                         ),
                       ),
@@ -262,7 +262,7 @@ class _Mini extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
       decoration: BoxDecoration(
-        color: active ? const Color(0xFF179C2E) : cs.surface,
+        color: active ? const Color(0xFF179C2E) : Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -271,7 +271,7 @@ class _Mini extends StatelessWidget {
           Icon(
             icon,
             size: 13,
-            color: active ? Colors.white : const Color(0xFF6B7280),
+            color: active ? Colors.white : cs.onSurfaceVariant,
           ),
           const SizedBox(width: 6),
           Text(
@@ -279,7 +279,7 @@ class _Mini extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: active ? Colors.white : const Color(0xFF4B5563),
+              color: active ? Colors.white : cs.onSurface,
             ),
           ),
         ],
@@ -312,7 +312,7 @@ class _SavedSearchCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.background,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
@@ -347,6 +347,7 @@ class _SavedSearchCard extends StatelessWidget {
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
+                        color: cs.onSurface,
                       ),
                     ),
                   ),
@@ -377,7 +378,7 @@ class _SavedSearchCard extends StatelessWidget {
                         width: 34,
                         height: 34,
                         decoration: BoxDecoration(
-                          color: cs.surface,
+                          color: theme.cardColor,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         alignment: Alignment.center,
@@ -396,7 +397,7 @@ class _SavedSearchCard extends StatelessWidget {
           const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: Divider(color: cs.surface),
+            child: Divider(color: cs.outlineVariant),
           ),
           const SizedBox(height: 10),
           Padding(
@@ -456,7 +457,7 @@ class _SavedSearchCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       color: alertsOn
                           ? const Color(0xFF2E7D32)
-                          : const Color(0xFF6B7280),
+                          : cs.onSurfaceVariant,
                     ),
                   ),
                 ),

@@ -25,8 +25,8 @@ class BrowseAdsListingScreen extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
               child: MobileHeader(),
             ),
 
@@ -77,18 +77,18 @@ class BrowseAdsListingScreen extends StatelessWidget {
                   controller: controller.searchCtrl,
                   decoration: InputDecoration(
                     hintText: "Search by name or keyword...",
-                    hintStyle: TextStyle(
+                    hintStyle: theme.textTheme.bodySmall?.copyWith(
                       fontSize: 12,
-                      color: cs.onSurface.withOpacity(.35),
+                      color: cs.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
                     ),
                     prefixIcon: Icon(
                       Icons.search_rounded,
                       size: 18,
-                      color: cs.onSurface.withOpacity(.35),
+                      color: cs.onSurfaceVariant,
                     ),
                     filled: true,
-                    fillColor: const Color(0xFFF7F7F7),
+                    fillColor: theme.cardColor,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 0,
@@ -118,7 +118,7 @@ class BrowseAdsListingScreen extends StatelessWidget {
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Divider(color: cs.surface),
+              child: Divider(color: cs.outlineVariant),
             ),
 
             const SizedBox(height: 10),
@@ -166,24 +166,26 @@ class BrowseAdsListingScreen extends StatelessWidget {
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: cs.background,
+                            color: theme.cardColor,
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xFFE5E7EB)),
+                            border: Border.all(
+                              color: cs.outlineVariant.withOpacity(.7),
+                            ),
                           ),
-                          child: const Row(
+                          child: Row(
                             children: [
                               Icon(
                                 Icons.filter_alt_outlined,
                                 size: 16,
-                                color: Color(0xFF6B7280),
+                                color: cs.onSurfaceVariant,
                               ),
-                              SizedBox(width: 6),
+                              const SizedBox(width: 6),
                               Text(
                                 "Filters",
-                                style: TextStyle(
+                                style: theme.textTheme.bodySmall?.copyWith(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF374151),
+                                  color: cs.onSurface,
                                 ),
                               ),
                             ],
@@ -198,9 +200,11 @@ class BrowseAdsListingScreen extends StatelessWidget {
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: cs.background,
+                            color: theme.cardColor,
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xFFE5E7EB)),
+                            border: Border.all(
+                              color: cs.outlineVariant.withOpacity(.7),
+                            ),
                           ),
                           child: Row(
                             children: [
@@ -210,19 +214,19 @@ class BrowseAdsListingScreen extends StatelessWidget {
                                 color: cs.onSurfaceVariant,
                               ),
                               const SizedBox(width: 6),
-                              const Text(
+                              Text(
                                 "Recently Added",
-                                style: TextStyle(
+                                style: theme.textTheme.bodySmall?.copyWith(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF374151),
+                                  color: cs.onSurface,
                                 ),
                               ),
                               const SizedBox(width: 4),
-                              const Icon(
+                              Icon(
                                 Icons.keyboard_arrow_down,
                                 size: 16,
-                                color: Color(0xFF6B7280),
+                                color: cs.onSurfaceVariant,
                               ),
                             ],
                           ),
@@ -233,9 +237,9 @@ class BrowseAdsListingScreen extends StatelessWidget {
                         Obx(
                           () => Text(
                             "${controller.filteredItems.length} items",
-                            style: const TextStyle(
+                            style: theme.textTheme.bodySmall?.copyWith(
                               fontSize: 12,
-                              color: Color(0xFF9CA3AF),
+                              color: cs.onSurfaceVariant,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -266,10 +270,10 @@ class BrowseAdsListingScreen extends StatelessWidget {
                     ),
                   ),
 
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
                     child: Row(
-                      children: const [
+                      children: [
                         Expanded(
                           child: _BottomStatPill(
                             icon: Icons.favorite_border_rounded,
@@ -334,7 +338,7 @@ class _FilterChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
-          color: active ? cs.primary : cs.surface,
+          color: active ? cs.primary : theme.cardColor,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(color: active ? cs.primary : cs.outlineVariant),
         ),
@@ -366,8 +370,9 @@ class _AdCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.background,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: cs.outlineVariant.withOpacity(.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -384,7 +389,7 @@ class _AdCard extends StatelessWidget {
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
                       return Container(
-                        color: const Color(0xFFF3F4F6),
+                        color: cs.surfaceContainerHighest,
                         alignment: Alignment.center,
                         child: const SizedBox(
                           width: 22,
@@ -395,12 +400,12 @@ class _AdCard extends StatelessWidget {
                     },
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        color: const Color(0xFFF3F4F6),
+                        color: cs.surfaceContainerHighest,
                         alignment: Alignment.center,
-                        child: const Icon(
+                        child: Icon(
                           Icons.broken_image_outlined,
                           size: 34,
-                          color: Color(0xFF9CA3AF),
+                          color: cs.onSurfaceVariant,
                         ),
                       );
                     },
@@ -415,29 +420,12 @@ class _AdCard extends StatelessWidget {
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF374151),
+                      color: cs.onSurface,
                     ),
                   ),
                 ),
 
-                Positioned(
-                  top: 10,
-                  right: 10,
-                  child: Container(
-                    width: 26,
-                    height: 26,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: const Icon(
-                      Icons.favorite_rounded,
-                      size: 15,
-                      color: Color(0xFFFF5A6E),
-                    ),
-                  ),
-                ),
+                const Positioned(top: 10, right: 10, child: _FavCircle()),
 
                 if (item.rating != null)
                   Positioned(
@@ -493,6 +481,7 @@ class _AdCard extends StatelessWidget {
                           fontSize: 14,
                           height: 1.2,
                           fontWeight: FontWeight.w800,
+                          color: cs.onSurface,
                         ),
                       ),
                     ),
@@ -511,15 +500,15 @@ class _AdCard extends StatelessWidget {
                 Wrap(
                   spacing: 6,
                   runSpacing: 6,
-                  children: tags.map((e) => _buildTag(e)).toList(),
+                  children: tags.map((e) => _buildTag(context, e)).toList(),
                 ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.location_on_outlined,
                       size: 13,
-                      color: Color(0xFF9CA3AF),
+                      color: cs.onSurfaceVariant,
                     ),
                     const SizedBox(width: 3),
                     Expanded(
@@ -530,13 +519,14 @@ class _AdCard extends StatelessWidget {
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w500,
+                          color: cs.onSurface,
                         ),
                       ),
                     ),
-                    const Icon(
+                    Icon(
                       Icons.access_time_rounded,
                       size: 13,
-                      color: Color(0xFF9CA3AF),
+                      color: cs.onSurfaceVariant,
                     ),
                     const SizedBox(width: 3),
                     Text(
@@ -544,6 +534,7 @@ class _AdCard extends StatelessWidget {
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w500,
+                        color: cs.onSurface,
                       ),
                     ),
                   ],
@@ -569,20 +560,45 @@ class _AdCard extends StatelessWidget {
     }
   }
 
-  Widget _buildTag(String label) {
+  Widget _buildTag(BuildContext context, String label) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
+        color: cs.surfaceVariant,
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         label,
-        style: const TextStyle(
+        style: theme.textTheme.bodySmall?.copyWith(
           fontSize: 9.5,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF9CA3AF),
+          color: cs.onSurfaceVariant,
         ),
+      ),
+    );
+  }
+}
+
+class _FavCircle extends StatelessWidget {
+  const _FavCircle();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 26,
+      height: 26,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: const Icon(
+        Icons.favorite_rounded,
+        size: 15,
+        color: Color(0xFFFF5A6E),
       ),
     );
   }
@@ -606,13 +622,15 @@ class _BottomStatPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Container(
       height: 80,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.background,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outlineVariant.withOpacity(.4)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -638,7 +656,7 @@ class _BottomStatPill extends StatelessWidget {
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFF111827),
+                  color: cs.onSurface,
                 ),
               ),
               Text(
@@ -646,7 +664,7 @@ class _BottomStatPill extends StatelessWidget {
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF6B7280),
+                  color: cs.onSurfaceVariant,
                 ),
               ),
             ],

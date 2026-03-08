@@ -10,7 +10,9 @@ class NotificationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(NotificationController());
+    if (!Get.isRegistered<NotificationController>()) {
+      Get.put(NotificationController());
+    }
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -33,7 +35,8 @@ class NotificationsContent extends StatelessWidget {
         ? Get.find<NotificationController>()
         : Get.put(NotificationController());
 
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     final content = Column(
       children: [
@@ -72,9 +75,7 @@ class NotificationsContent extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 16),
-
         SectionCard(
           icon: Icons.smartphone_rounded,
           title: "Push Notification",
@@ -110,9 +111,7 @@ class NotificationsContent extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 16),
-
         SectionCard(
           icon: Icons.notifications_active_outlined,
           title: "In-App Notification",
@@ -147,12 +146,16 @@ class NotificationsContent extends StatelessWidget {
               children: [
                 IconButton(
                   onPressed: () => Get.back(),
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+                  icon: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 18,
+                    color: cs.onSurface,
+                  ),
                 ),
                 const SizedBox(width: 4),
                 Text(
                   "Notifications",
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: cs.onSurface,
                   ),
@@ -160,7 +163,6 @@ class NotificationsContent extends StatelessWidget {
               ],
             ),
           ),
-
         if (!kIsWeb)
           Container(
             padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
@@ -169,7 +171,10 @@ class NotificationsContent extends StatelessWidget {
             child: content,
           )
         else
-          content,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
+            child: content,
+          ),
       ],
     );
   }

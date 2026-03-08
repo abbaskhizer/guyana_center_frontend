@@ -11,7 +11,9 @@ class BillingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(BillingController());
+    if (!Get.isRegistered<BillingController>()) {
+      Get.put(BillingController());
+    }
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -32,7 +34,8 @@ class BillingContent extends StatelessWidget {
         ? Get.find<BillingController>()
         : Get.put(BillingController());
 
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     final content = Column(
       children: [
@@ -46,15 +49,11 @@ class BillingContent extends StatelessWidget {
                 onChangePlan: c.changePlan,
               ),
             ),
-
             const SizedBox(height: 14),
-
             _UpgradeTile(onTap: c.upgradeEnterprise),
           ],
         ),
-
         const SizedBox(height: 16),
-
         SectionCard(
           title: "Payment Methods",
           children: [
@@ -77,9 +76,7 @@ class BillingContent extends StatelessWidget {
             _AddPaymentButton(onTap: c.addPaymentMethod),
           ],
         ),
-
         const SizedBox(height: 16),
-
         SectionCard(
           title: "History",
           children: [
@@ -90,16 +87,16 @@ class BillingContent extends StatelessWidget {
                   for (int i = 0; i < c.history.length; i++) ...[
                     _HistoryTile(item: c.history[i]),
                     if (i != c.history.length - 1)
-                      Divider(color: cs.outlineVariant.withOpacity(.7)),
+                      Divider(
+                        color: theme.dividerTheme.color ?? cs.outlineVariant,
+                      ),
                   ],
                 ],
               ),
             ),
           ],
         ),
-
         const SizedBox(height: 16),
-
         SectionCard(
           title: "Billing Address",
           children: [
@@ -107,7 +104,7 @@ class BillingContent extends StatelessWidget {
             Obx(
               () => Text(
                 c.billingName.value,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w900,
                   color: cs.onSurface,
                 ),
@@ -117,7 +114,7 @@ class BillingContent extends StatelessWidget {
             Obx(
               () => Text(
                 c.billingLine1.value,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   color: cs.onSurfaceVariant,
                   fontWeight: FontWeight.w600,
                 ),
@@ -127,7 +124,7 @@ class BillingContent extends StatelessWidget {
             Obx(
               () => Text(
                 c.billingLine2.value,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   color: cs.onSurfaceVariant,
                   fontWeight: FontWeight.w600,
                 ),
@@ -157,7 +154,7 @@ class BillingContent extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   "Billing",
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: cs.onSurface,
                   ),
@@ -165,7 +162,6 @@ class BillingContent extends StatelessWidget {
               ],
             ),
           ),
-
         if (!kIsWeb)
           ColoredBox(
             color: cs.surface,
@@ -175,7 +171,10 @@ class BillingContent extends StatelessWidget {
             ),
           )
         else
-          content,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
+            child: content,
+          ),
       ],
     );
   }
@@ -196,7 +195,7 @@ class _CurrentPlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -228,7 +227,7 @@ class _CurrentPlanCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             planName,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            style: theme.textTheme.titleLarge?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w900,
             ),
@@ -247,7 +246,7 @@ class _CurrentPlanCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   planPrice,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  style: theme.textTheme.headlineSmall?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w900,
                   ),
@@ -265,7 +264,7 @@ class _CurrentPlanCard extends StatelessWidget {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text(
+                  child: const Text(
                     "Change Plan",
                     style: TextStyle(
                       color: Color(0xFFF97316),
@@ -288,7 +287,8 @@ class _UpgradeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return InkWell(
       onTap: onTap,
@@ -296,7 +296,7 @@ class _UpgradeTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Color(0xFFE9E2D0),
+          color: const Color(0xFFE9E2D0),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
@@ -309,7 +309,7 @@ class _UpgradeTile extends StatelessWidget {
                 children: [
                   Text(
                     "Upgrade to Enterprise",
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w900,
                       color: cs.onSurface,
                     ),
@@ -317,7 +317,7 @@ class _UpgradeTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     "Team tools, API & analytics",
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: cs.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
                     ),
@@ -340,7 +340,8 @@ class _PaymentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return InkWell(
       onTap: onTap,
@@ -350,6 +351,7 @@ class _PaymentTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: cs.surfaceContainerHighest.withOpacity(.45),
           borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: cs.outlineVariant.withOpacity(.4)),
         ),
         child: Row(
           children: [
@@ -377,7 +379,7 @@ class _PaymentTile extends StatelessWidget {
                 children: [
                   Text(
                     method.number,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w900,
                       color: cs.onSurface,
                     ),
@@ -385,7 +387,7 @@ class _PaymentTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     method.expiry,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: cs.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
                     ),
@@ -425,7 +427,8 @@ class _AddPaymentButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Material(
       color: Colors.transparent,
@@ -447,7 +450,7 @@ class _AddPaymentButton extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 "Add Payment Method",
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   color: cs.error,
                   fontWeight: FontWeight.w900,
                 ),
@@ -466,7 +469,8 @@ class _HistoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final isPaid = item.status.toUpperCase() == "PAID";
 
     final chipBg = isPaid
@@ -485,7 +489,7 @@ class _HistoryTile extends StatelessWidget {
               children: [
                 Text(
                   item.title,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: cs.onSurface,
                   ),
@@ -493,7 +497,7 @@ class _HistoryTile extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   item.date,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  style: theme.textTheme.bodySmall?.copyWith(
                     color: cs.onSurfaceVariant,
                     fontWeight: FontWeight.w600,
                   ),
@@ -503,7 +507,7 @@ class _HistoryTile extends StatelessWidget {
           ),
           Text(
             item.amount,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w900,
               color: cs.onSurface,
             ),

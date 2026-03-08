@@ -24,7 +24,9 @@ class AgentProfileScreen extends StatelessWidget {
 
     return Scaffold(
       bottomNavigationBar: CustomBottomNavBar(),
-      backgroundColor: isWeb ? Colors.white : theme.scaffoldBackgroundColor,
+      backgroundColor: isWeb
+          ? theme.colorScheme.surface
+          : theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: isWeb ? _WebShell(controller: c) : _MobileShell(controller: c),
       ),
@@ -53,14 +55,15 @@ class _WebShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final content = _AgentProfileContent(controller: controller, web: true);
 
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
           child: Container(
-            color: const Color(0xFFFAFAFA),
+            color: theme.colorScheme.surface,
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
             child: Center(
@@ -127,7 +130,6 @@ class _AgentProfileContent {
       else
         const _TopBarWeb(),
       SizedBox(height: web ? 14 : 12),
-
       if (!web)
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -135,9 +137,7 @@ class _AgentProfileContent {
         )
       else
         wrapWebCard(_ProfileHeaderCard(controller: controller, web: true)),
-
       SizedBox(height: web ? 18 : 14),
-
       if (!web) ...[
         Container(
           width: double.infinity,
@@ -188,7 +188,7 @@ class _AgentProfileContent {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _ActiveListingsHeader(web: true),
+              const _ActiveListingsHeader(web: true),
               const SizedBox(height: 14),
               ...controller.listings.map(
                 (x) => Padding(
@@ -354,6 +354,7 @@ class _ProfileHeaderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final dividerColor = theme.dividerTheme.color ?? cs.outlineVariant;
 
     return Column(
       children: [
@@ -383,6 +384,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                         style: theme.textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.w900,
                           fontSize: web ? 16 : 15,
+                          color: cs.onSurface,
                         ),
                       ),
                       const SizedBox(width: 30),
@@ -453,6 +455,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: 12,
                           fontWeight: FontWeight.w900,
+                          color: cs.onSurface,
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -526,8 +529,9 @@ class _ProfileHeaderCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
           decoration: BoxDecoration(
-            color: cs.surface,
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: cs.outlineVariant.withOpacity(.55)),
           ),
           child: const Row(
             children: [
@@ -556,10 +560,8 @@ class _ProfileHeaderCard extends StatelessWidget {
         const SizedBox(height: 12),
         Obx(() {
           return Container(
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Color(0xFFE5E7EB), width: 1),
-              ),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: dividerColor, width: 1)),
             ),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -613,7 +615,10 @@ class _ActiveListingsHeader extends StatelessWidget {
             "Active Listings",
             style:
                 (web ? theme.textTheme.titleMedium : theme.textTheme.titleSmall)
-                    ?.copyWith(fontWeight: FontWeight.w900),
+                    ?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: cs.onSurface,
+                    ),
           ),
         ),
         InkWell(
@@ -641,11 +646,12 @@ class _WebCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: cs.outlineVariant),
         boxShadow: [
@@ -732,9 +738,9 @@ class _WebSidebarContactCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(color: cs.outlineVariant),
             ),
             child: Row(
               children: [
@@ -748,7 +754,7 @@ class _WebSidebarContactCard extends StatelessWidget {
                   child: Text(
                     "Verified agent profile (web-only info box).",
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: const Color(0xFF475569),
+                      color: cs.onSurface.withOpacity(.7),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -782,19 +788,19 @@ class _WebSidebarQuickInfo extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          _InfoRow(
+          const _InfoRow(
             icon: Icons.location_on_outlined,
             label: "Location",
             value: "Los Angeles, CA",
           ),
           const SizedBox(height: 10),
-          _InfoRow(
+          const _InfoRow(
             icon: Icons.badge_outlined,
             label: "License",
             value: "#01945832",
           ),
           const SizedBox(height: 10),
-          _InfoRow(
+          const _InfoRow(
             icon: Icons.star_border_rounded,
             label: "Rating",
             value: "4.9 (277)",
@@ -804,7 +810,7 @@ class _WebSidebarQuickInfo extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: cs.surface,
+              color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: cs.outlineVariant),
             ),
@@ -875,8 +881,9 @@ class _AgentListingCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: cs.background,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: cs.outlineVariant.withOpacity(.6)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -892,7 +899,7 @@ class _AgentListingCard extends StatelessWidget {
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
                     height: 150,
-                    color: cs.surfaceVariant,
+                    color: cs.surfaceContainerHighest,
                     alignment: Alignment.center,
                     child: Icon(
                       Icons.broken_image_outlined,
@@ -929,7 +936,7 @@ class _AgentListingCard extends StatelessWidget {
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(.95),
+                      color: theme.cardColor.withOpacity(.95),
                       shape: BoxShape.circle,
                       border: Border.all(color: cs.outlineVariant),
                     ),
@@ -1088,6 +1095,9 @@ class _TabItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     return InkWell(
       onTap: onTap,
       child: Column(
@@ -1099,9 +1109,9 @@ class _TabItem extends StatelessWidget {
               children: [
                 Text(
                   text,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: active ? FontWeight.w600 : FontWeight.w500,
-                    color: active ? kPrimaryColor : const Color(0xFF9CA3AF),
+                    color: active ? kPrimaryColor : cs.onSurfaceVariant,
                   ),
                 ),
                 if (count != null) ...[
@@ -1114,15 +1124,18 @@ class _TabItem extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: active
                           ? kPrimaryColor.withOpacity(0.1)
-                          : const Color(0xFFF3F4F6),
+                          : theme.cardColor,
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: cs.outlineVariant.withOpacity(.5),
+                      ),
                     ),
                     child: Text(
                       count!,
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: active ? kPrimaryColor : const Color(0xFF6B7280),
+                        color: active ? kPrimaryColor : cs.onSurfaceVariant,
                       ),
                     ),
                   ),

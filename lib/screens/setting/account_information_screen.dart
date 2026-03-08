@@ -8,7 +8,9 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(AccountController());
+    if (!Get.isRegistered<AccountController>()) {
+      Get.put(AccountController());
+    }
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -29,7 +31,8 @@ class AccountContent extends StatelessWidget {
         ? Get.find<AccountController>()
         : Get.put(AccountController());
 
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     final content = Column(
       children: [
@@ -93,16 +96,14 @@ class AccountContent extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 16),
-
         _SectionCard(
           title: "Connected Accounts",
           children: [
             const SizedBox(height: 6),
             Obx(
               () => _ConnectedRow(
-                iconBg: cs.surface,
+                iconBg: theme.cardColor,
                 iconColor: cs.onSurfaceVariant,
                 icon: Icons.g_mobiledata_rounded,
                 title: "Google",
@@ -115,7 +116,7 @@ class AccountContent extends StatelessWidget {
             _divider(context),
             Obx(
               () => _ConnectedRow(
-                iconBg: cs.surface,
+                iconBg: theme.cardColor,
                 iconColor: cs.onSurfaceVariant,
                 icon: Icons.facebook,
                 title: "Facebook",
@@ -129,9 +130,7 @@ class AccountContent extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 16),
-
         _SectionCard(
           title: "Membership",
           children: [
@@ -143,7 +142,7 @@ class AccountContent extends StatelessWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: Color(0xFFD08A00),
+                      color: const Color(0xFFD08A00),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     alignment: Alignment.center,
@@ -151,7 +150,7 @@ class AccountContent extends StatelessWidget {
                       'assets/crown.png',
                       height: 20,
                       width: 20,
-                      color: cs.onTertiary,
+                      color: cs.onPrimary,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -161,29 +160,27 @@ class AccountContent extends StatelessWidget {
                       children: [
                         Text(
                           c.planName.value,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.w900,
-                                color: cs.onSurface,
-                              ),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            color: cs.onSurface,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           c.planDesc.value,
                           maxLines: 2,
                           softWrap: true,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: cs.onSurfaceVariant,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ],
                     ),
                   ),
                   Text(
                     c.planPrice.value,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w900,
                       color: cs.onSurface,
                     ),
@@ -193,14 +190,13 @@ class AccountContent extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 16),
-
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: cs.errorContainer.withOpacity(.55),
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: cs.outlineVariant.withOpacity(.5)),
           ),
           child: Column(
             children: [
@@ -211,7 +207,7 @@ class AccountContent extends StatelessWidget {
                   Expanded(
                     child: Text(
                       "Once deleted, all your data will be permanently lost.",
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      style: theme.textTheme.bodySmall?.copyWith(
                         color: cs.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
                       ),
@@ -228,7 +224,7 @@ class AccountContent extends StatelessWidget {
                   icon: Icon(Icons.delete_outline, color: cs.error),
                   label: Text(
                     "Delete Account",
-                    style: TextStyle(
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       color: cs.error,
                       fontWeight: FontWeight.w900,
                     ),
@@ -238,7 +234,7 @@ class AccountContent extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    backgroundColor: cs.surface,
+                    backgroundColor: theme.cardColor,
                   ),
                 ),
               ),
@@ -267,7 +263,7 @@ class AccountContent extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   "Account",
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: cs.onSurface,
                   ),
@@ -275,7 +271,6 @@ class AccountContent extends StatelessWidget {
               ],
             ),
           ),
-
         if (!kIsWeb)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
@@ -284,16 +279,20 @@ class AccountContent extends StatelessWidget {
             child: content,
           )
         else
-          content,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: content,
+          ),
       ],
     );
   }
 
   static Widget _divider(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Divider(color: cs.outlineVariant.withOpacity(.8)),
+      child: Divider(color: theme.dividerTheme.color ?? cs.outlineVariant),
     );
   }
 }
@@ -306,20 +305,22 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: cs.background,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: cs.outlineVariant.withOpacity(.6)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w900,
               color: cs.onSurface,
             ),
@@ -349,7 +350,8 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -360,7 +362,7 @@ class _InfoRow extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                style: theme.textTheme.bodySmall?.copyWith(
                   color: cs.onSurfaceVariant,
                   fontWeight: FontWeight.w600,
                 ),
@@ -368,7 +370,7 @@ class _InfoRow extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 value,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: cs.onSurface,
                 ),
@@ -383,7 +385,7 @@ class _InfoRow extends StatelessWidget {
             onTap: onTapTrailing,
             child: Text(
               trailingText!,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              style: theme.textTheme.bodySmall?.copyWith(
                 color: cs.onSurfaceVariant,
                 fontWeight: FontWeight.w800,
               ),
@@ -447,7 +449,8 @@ class _ConnectedRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Row(
       children: [
@@ -457,6 +460,7 @@ class _ConnectedRow extends StatelessWidget {
           decoration: BoxDecoration(
             color: iconBg,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: cs.outlineVariant.withOpacity(.5)),
           ),
           child: Icon(icon, size: 18, color: iconColor),
         ),
@@ -467,7 +471,7 @@ class _ConnectedRow extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                   color: cs.onSurface,
                 ),
@@ -475,7 +479,7 @@ class _ConnectedRow extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                style: theme.textTheme.bodySmall?.copyWith(
                   color: cs.onSurfaceVariant,
                   fontWeight: FontWeight.w600,
                 ),
@@ -502,10 +506,11 @@ class _ConnectedRow extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 14),
+                    backgroundColor: theme.cardColor,
                   ),
                   child: Text(
                     "Connect",
-                    style: TextStyle(
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: cs.onSurfaceVariant,
                       fontWeight: FontWeight.w800,
                       fontSize: 12,

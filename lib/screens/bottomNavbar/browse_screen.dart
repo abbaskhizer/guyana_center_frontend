@@ -529,7 +529,8 @@ class BrowseResults extends StatelessWidget {
                             ? 2
                             : 1)
                       : 2;
-                  double extent = isWeb
+                  double extent =
+                      isWeb // padding: const EdgeInsets.symmetric(horizontal: 2),
                       ? (cols >= 4
                             ? 305
                             : cols == 3
@@ -789,7 +790,7 @@ class _ListingContent extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: const Color(0xFFF0FDF4),
+              color: cs.surfaceContainerHighest.withOpacity(0.5),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
@@ -826,11 +827,11 @@ class _ListingContent extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: theme.textTheme.titleMedium?.copyWith(
           fontWeight: FontWeight.w900,
-          fontSize: 15,
+          fontSize: 13,
           color: cs.onSurface,
         ),
       ),
-      const SizedBox(height: 12),
+      const SizedBox(height: 6),
       Text(
         item.price,
         style: TextStyle(

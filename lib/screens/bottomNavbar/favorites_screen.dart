@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/bottomNavbar/favorites_controller.dart';
 import 'package:guyana_center_frontend/modal/favItem.dart';
-import 'package:guyana_center_frontend/widgets/app_drawar.dart';
 import 'package:guyana_center_frontend/widgets/mobile_header.dart';
 
 class FavoritesScreen extends StatelessWidget {
@@ -19,7 +18,6 @@ class FavoritesScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      drawer: const AppDrawer(),
       body: SafeArea(
         child: Column(
           children: [
@@ -52,6 +50,7 @@ class _FavTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final dividerColor = theme.dividerTheme.color ?? cs.outlineVariant;
 
     Widget tab(String text, FavTab t) {
       return InkWell(
@@ -66,7 +65,7 @@ class _FavTabs extends StatelessWidget {
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: active ? cs.primary : const Color(0xFFE5E7EB),
+                  color: active ? cs.primary : dividerColor,
                   width: active ? 2 : 1,
                 ),
               ),
@@ -76,7 +75,7 @@ class _FavTabs extends StatelessWidget {
               style: theme.textTheme.bodySmall?.copyWith(
                 fontSize: 12,
                 fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                color: active ? cs.primary : const Color(0xFFB0B7C3),
+                color: active ? cs.primary : cs.onSurfaceVariant,
               ),
             ),
           );
@@ -127,7 +126,7 @@ class _EmptyFavoriteAds extends StatelessWidget {
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
                 fontSize: 16,
-                color: const Color(0xFF1F2937),
+                color: cs.onSurface,
               ),
               textAlign: TextAlign.center,
             ),
@@ -188,7 +187,7 @@ class _EmptyFavoriteSearches extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final controller = Get.put(FavoritesController());
+    final controller = Get.find<FavoritesController>();
 
     return Center(
       child: Padding(
@@ -203,7 +202,7 @@ class _EmptyFavoriteSearches extends StatelessWidget {
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
                 fontSize: 16,
-                color: const Color(0xFF1F2937),
+                color: cs.onSurface,
               ),
               textAlign: TextAlign.center,
             ),
@@ -262,17 +261,22 @@ class _FavoriteSearchIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(size: const Size(92, 92), painter: HeartPainter());
+    return CustomPaint(
+      size: const Size(92, 92),
+      painter: HeartPainter(color: Theme.of(context).colorScheme.primary),
+    );
   }
 }
 
 class HeartPainter extends CustomPainter {
+  final Color color;
+
+  HeartPainter({this.color = const Color(0xFF22C55E)});
+
   @override
   void paint(Canvas canvas, Size size) {
-    const green = Color(0xFF22C55E);
-
     final heartPaint = Paint()
-      ..color = green
+      ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.2
       ..strokeCap = StrokeCap.round
@@ -291,7 +295,7 @@ class HeartPainter extends CustomPainter {
     canvas.drawPath(heart, heartPaint);
 
     final eyePaint = Paint()
-      ..color = green
+      ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.8
       ..strokeCap = StrokeCap.round;
@@ -309,5 +313,7 @@ class HeartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant HeartPainter oldDelegate) {
+    return oldDelegate.color != color;
+  }
 }

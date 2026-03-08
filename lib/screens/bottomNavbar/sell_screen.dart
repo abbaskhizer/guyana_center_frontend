@@ -11,7 +11,10 @@ class SellScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final controller = Get.put(SellController(), permanent: true);
+    final dividerColor = theme.dividerTheme.color ?? cs.outlineVariant;
+    final controller = Get.isRegistered<SellController>()
+        ? Get.find<SellController>()
+        : Get.put(SellController(), permanent: true);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -19,10 +22,8 @@ class SellScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           children: [
-            if (!kIsWeb) MobileHeader(),
-
+            if (!kIsWeb) const MobileHeader(),
             if (!kIsWeb) const SizedBox(height: 10),
-
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -35,8 +36,11 @@ class SellScreen extends StatelessWidget {
                       height: 35,
                       width: 35,
                       decoration: BoxDecoration(
-                        color: cs.surface,
+                        color: theme.cardColor,
                         borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: cs.outlineVariant.withOpacity(.5),
+                        ),
                       ),
                       alignment: Alignment.center,
                       child: Icon(
@@ -80,21 +84,13 @@ class SellScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 14),
-
-            Obx(
-              () => Padding(
-                padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
-                child: _StepStrip(
-                  step: controller.step.value,
-                  onTap: controller.setStep,
-                ),
-              ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: _StepStripWrapper(),
             ),
             const SizedBox(height: 10),
-            Divider(color: cs.surface),
-
+            Divider(color: dividerColor),
             const SizedBox(height: 10),
-
             Obx(() {
               switch (controller.step.value) {
                 case 1:
@@ -114,6 +110,19 @@ class SellScreen extends StatelessWidget {
   }
 }
 
+class _StepStripWrapper extends StatelessWidget {
+  const _StepStripWrapper();
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<SellController>();
+
+    return Obx(
+      () => _StepStrip(step: controller.step.value, onTap: controller.setStep),
+    );
+  }
+}
+
 class _Step1Details extends StatelessWidget {
   const _Step1Details();
 
@@ -121,7 +130,8 @@ class _Step1Details extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final controller = Get.put(SellController());
+    final inputFill = theme.inputDecorationTheme.fillColor ?? cs.surface;
+    final controller = Get.find<SellController>();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,11 +140,10 @@ class _Step1Details extends StatelessWidget {
           "Ad Details",
           style: theme.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w900,
+            color: cs.onSurface,
           ),
         ),
-
         const SizedBox(height: 12),
-
         Text(
           "Category",
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -143,7 +152,6 @@ class _Step1Details extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-
         Obx(
           () => _CategoryGrid(
             selected: controller.selectedCategory.value,
@@ -151,9 +159,7 @@ class _Step1Details extends StatelessWidget {
             categories: controller.categories,
           ),
         ),
-
         const SizedBox(height: 14),
-
         Text(
           "Ad Title",
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -162,13 +168,12 @@ class _Step1Details extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-
         TextField(
           controller: controller.titleCtrl,
           decoration: InputDecoration(
             hintText: "e.g. Toyota Hilux 2022 Super GL...",
             filled: true,
-            fillColor: cs.background,
+            fillColor: cs.surface,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 14,
@@ -183,9 +188,7 @@ class _Step1Details extends StatelessWidget {
             ),
           ),
         ),
-
         const SizedBox(height: 6),
-
         Text(
           "Be specific, include brand, model and key details",
           style: theme.textTheme.bodySmall?.copyWith(
@@ -193,9 +196,7 @@ class _Step1Details extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-
         const SizedBox(height: 14),
-
         Text(
           "Description",
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -204,14 +205,13 @@ class _Step1Details extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-
         TextField(
           controller: controller.descCtrl,
           maxLines: 5,
           decoration: InputDecoration(
             hintText: "Describe your item in detail - condition, features...",
             filled: true,
-            fillColor: cs.background,
+            fillColor: cs.surface,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 14,
@@ -226,9 +226,7 @@ class _Step1Details extends StatelessWidget {
             ),
           ),
         ),
-
         const SizedBox(height: 6),
-
         Obx(
           () => Align(
             alignment: Alignment.centerRight,
@@ -241,9 +239,7 @@ class _Step1Details extends StatelessWidget {
             ),
           ),
         ),
-
         const SizedBox(height: 14),
-
         Text(
           "Condition",
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -252,7 +248,6 @@ class _Step1Details extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-
         Obx(() {
           final active = controller.conditionIndex.value;
           return Row(
@@ -283,9 +278,7 @@ class _Step1Details extends StatelessWidget {
             ],
           );
         }),
-
         const SizedBox(height: 25),
-
         SizedBox(
           height: 52,
           child: ElevatedButton(
@@ -327,7 +320,9 @@ class _Step2PhotosPrice extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final controller = Get.put(SellController());
+    final dividerColor = theme.dividerTheme.color ?? cs.outlineVariant;
+    final inputFill = theme.inputDecorationTheme.fillColor ?? cs.surface;
+    final controller = Get.find<SellController>();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -336,6 +331,7 @@ class _Step2PhotosPrice extends StatelessWidget {
           "Photos",
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w900,
+            color: cs.onSurface,
           ),
         ),
         const SizedBox(height: 6),
@@ -347,7 +343,6 @@ class _Step2PhotosPrice extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-
         Obx(() {
           final imgs = controller.images;
 
@@ -371,6 +366,7 @@ class _Step2PhotosPrice extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14),
                     child: Container(
                       decoration: BoxDecoration(
+                        color: theme.cardColor,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: cs.outlineVariant),
                       ),
@@ -445,8 +441,9 @@ class _Step2PhotosPrice extends StatelessWidget {
                           ),
                           child: Text(
                             "Cover",
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: Colors.white),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -456,21 +453,17 @@ class _Step2PhotosPrice extends StatelessWidget {
             ),
           );
         }),
-
         const SizedBox(height: 18),
-
-        Divider(color: cs.surface),
-
+        Divider(color: dividerColor),
         const SizedBox(height: 18),
-
         Text(
           "Pricing",
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w900,
+            color: cs.onSurface,
           ),
         ),
         const SizedBox(height: 12),
-
         Text(
           "Price (TTD)",
           style: theme.textTheme.bodySmall?.copyWith(
@@ -480,15 +473,13 @@ class _Step2PhotosPrice extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-
         TextField(
           controller: controller.priceCtrl,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
-            hintText: '\$' + '0.00',
-
+            hintText: '\$0.00',
             filled: true,
-            fillColor: cs.background,
+            fillColor: cs.surface,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 14,
@@ -503,9 +494,7 @@ class _Step2PhotosPrice extends StatelessWidget {
             ),
           ),
         ),
-
         const SizedBox(height: 8),
-
         Obx(
           () => CheckboxListTile(
             value: controller.negotiable.value,
@@ -521,13 +510,9 @@ class _Step2PhotosPrice extends StatelessWidget {
             ),
           ),
         ),
-
         const SizedBox(height: 12),
-
-        Divider(color: cs.surface),
-
+        Divider(color: dividerColor),
         const SizedBox(height: 12),
-
         Row(
           children: [
             InkWell(
@@ -551,9 +536,7 @@ class _Step2PhotosPrice extends StatelessWidget {
                 ],
               ),
             ),
-
             const Spacer(),
-
             SizedBox(
               height: 55,
               child: ElevatedButton(
@@ -569,18 +552,22 @@ class _Step2PhotosPrice extends StatelessWidget {
                       "Continue",
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: cs.onPrimary,
                       ),
                     ),
-                    SizedBox(width: 8),
-                    Icon(Icons.arrow_forward_rounded, size: 18),
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 18,
+                      color: cs.onPrimary,
+                    ),
                   ],
                 ),
               ),
             ),
           ],
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
       ],
     );
   }
@@ -593,7 +580,8 @@ class _Step3Contact extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final controller = Get.put(SellController());
+    final dividerColor = theme.dividerTheme.color ?? cs.outlineVariant;
+    final controller = Get.find<SellController>();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -603,10 +591,10 @@ class _Step3Contact extends StatelessWidget {
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w900,
             fontSize: 20,
+            color: cs.onSurface,
           ),
         ),
         const SizedBox(height: 12),
-
         Text(
           "Location",
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -615,31 +603,27 @@ class _Step3Contact extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-
         Obx(() {
           final current = controller.selectedArea.value;
 
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: cs.surface,
+              color: theme.cardColor,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: cs.outlineVariant),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 isExpanded: true,
-
                 icon: Padding(
-                  padding: EdgeInsetsGeometry.only(right: 25),
+                  padding: const EdgeInsets.only(right: 25),
                   child: Icon(
                     Icons.keyboard_arrow_down_rounded,
                     color: cs.onSurfaceVariant,
                   ),
                 ),
-
                 value: current == "Select your area" ? null : current,
-
                 hint: Row(
                   children: [
                     Icon(
@@ -648,7 +632,6 @@ class _Step3Contact extends StatelessWidget {
                       size: 18,
                     ),
                     const SizedBox(width: 8),
-
                     Expanded(
                       child: Center(
                         child: Text(
@@ -662,16 +645,21 @@ class _Step3Contact extends StatelessWidget {
                     ),
                   ],
                 ),
-
                 items: controller.areas
                     .map(
                       (e) => DropdownMenuItem(
                         value: e,
-                        child: Center(child: Text(e)),
+                        child: Center(
+                          child: Text(
+                            e,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: cs.onSurface,
+                            ),
+                          ),
+                        ),
                       ),
                     )
                     .toList(),
-
                 onChanged: (v) {
                   if (v != null) controller.setArea(v);
                 },
@@ -679,9 +667,7 @@ class _Step3Contact extends StatelessWidget {
             ),
           );
         }),
-
         const SizedBox(height: 35),
-
         Text(
           "Phone Number",
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -690,7 +676,6 @@ class _Step3Contact extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-
         TextField(
           controller: controller.phoneCtrl,
           keyboardType: TextInputType.phone,
@@ -713,7 +698,7 @@ class _Step3Contact extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: 5),
+        const SizedBox(height: 5),
         Text(
           "Buyers will contact you in this number",
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -722,11 +707,9 @@ class _Step3Contact extends StatelessWidget {
             color: cs.onSurface.withOpacity(.7),
           ),
         ),
-
         const SizedBox(height: 35),
-
         Padding(
-          padding: EdgeInsetsGeometry.symmetric(horizontal: 35),
+          padding: const EdgeInsets.symmetric(horizontal: 35),
           child: Text(
             "Preferred Contact Method",
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -737,7 +720,6 @@ class _Step3Contact extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Obx(() {
@@ -748,7 +730,6 @@ class _Step3Contact extends StatelessWidget {
               required ContactMethod value,
               IconData? icon,
               required String label,
-              required bool danger,
             }) {
               final active = m == value;
 
@@ -756,7 +737,7 @@ class _Step3Contact extends StatelessWidget {
               const lightRed = Color(0xFFFFEBEE);
 
               final borderColor = active ? red : cs.outlineVariant;
-              final bg = active ? lightRed : cs.surface;
+              final bg = active ? lightRed : theme.cardColor;
               final txt = active ? red : cs.onSurfaceVariant;
 
               return InkWell(
@@ -776,14 +757,11 @@ class _Step3Contact extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // icon OR image
                       if (image != null)
                         Image.asset(image, width: 18, height: 18, color: txt)
                       else if (icon != null)
                         Icon(icon, size: 18, color: txt),
-
                       const SizedBox(width: 10),
-
                       Text(
                         label,
                         style: theme.textTheme.bodySmall?.copyWith(
@@ -804,23 +782,18 @@ class _Step3Contact extends StatelessWidget {
                   value: ContactMethod.chat,
                   image: 'assets/chat.png',
                   label: "In-app Chat",
-                  danger: false,
                 ),
-
                 const SizedBox(height: 12),
-
                 tile(
                   value: ContactMethod.call,
                   icon: Icons.call_rounded,
                   label: "Phone Call",
-                  danger: true,
                 ),
               ],
             );
           }),
         ),
         const SizedBox(height: 14),
-
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -831,33 +804,29 @@ class _Step3Contact extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
+              const Icon(
                 Icons.check_circle_outline,
                 size: 25,
                 color: Color(0xFFE53935),
               ),
-
               const SizedBox(width: 12),
-
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       "Ready to Publish",
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w800,
                         color: const Color(0xFFB71C1C),
                       ),
                     ),
-
                     const SizedBox(height: 6),
-
                     Text(
                       "Your ad will be live immediately and visible to\n"
                       "thousands of buyers across Trinidad & Tobago.\n"
                       "You can edit or remove it anytime.",
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         fontSize: 11,
                         color: cs.onSurfaceVariant,
                         height: 1.8,
@@ -870,9 +839,8 @@ class _Step3Contact extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
-        Divider(color: cs.surface),
+        Divider(color: dividerColor),
         const SizedBox(height: 14),
-
         Row(
           children: [
             TextButton.icon(
@@ -890,15 +858,19 @@ class _Step3Contact extends StatelessWidget {
                 ),
               ),
             ),
-
             const Spacer(),
-
             SizedBox(
               height: 46,
               child: ElevatedButton.icon(
                 onPressed: controller.continueNext,
-                icon: const Icon(Icons.upload_rounded, size: 18),
-                label: const Text("Post ad for free"),
+                icon: Icon(Icons.upload_rounded, size: 18, color: cs.onPrimary),
+                label: Text(
+                  "Post ad for free",
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: cs.onPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -917,6 +889,7 @@ class _CategoryGrid extends StatelessWidget {
   final int selected;
   final void Function(int) onTap;
   final List categories;
+
   const _CategoryGrid({
     required this.selected,
     required this.onTap,
@@ -948,17 +921,19 @@ class _CategoryGrid extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
             decoration: BoxDecoration(
-              color: active ? cs.primary.withOpacity(.10) : cs.surface,
+              color: active ? cs.primary.withOpacity(.10) : theme.cardColor,
               borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: active ? cs.primary.withOpacity(.15) : cs.outlineVariant,
+              ),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
+                  cat.icon,
                   height: 22,
                   width: 22,
-                  cat.icon,
-
                   color: active ? cs.primary : cs.onSurfaceVariant,
                 ),
                 const SizedBox(height: 6),
@@ -970,7 +945,7 @@ class _CategoryGrid extends StatelessWidget {
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontSize: 10.5,
                     fontWeight: FontWeight.w800,
-                    color: cs.onSurface.withOpacity(.75),
+                    color: active ? cs.primary : cs.onSurface.withOpacity(.75),
                     height: 1.1,
                   ),
                 ),
@@ -986,6 +961,7 @@ class _CategoryGrid extends StatelessWidget {
 class _StepStrip extends StatelessWidget {
   final int step;
   final void Function(int) onTap;
+
   const _StepStrip({required this.step, required this.onTap});
 
   @override
@@ -1003,7 +979,7 @@ class _StepStrip extends StatelessWidget {
           ? currentYellow
           : done
           ? cs.primary
-          : cs.surface;
+          : theme.cardColor;
 
       final border = active
           ? currentYellow
@@ -1092,6 +1068,7 @@ class _PillChoice extends StatelessWidget {
   final String text;
   final bool active;
   final VoidCallback onTap;
+
   const _PillChoice({
     required this.text,
     required this.active,
@@ -1110,7 +1087,7 @@ class _PillChoice extends StatelessWidget {
         height: 40,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: active ? cs.primary.withOpacity(.10) : cs.background,
+          color: active ? cs.primary.withOpacity(.10) : cs.surface,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
             color: active ? cs.primary : cs.outlineVariant,

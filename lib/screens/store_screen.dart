@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/store_controller.dart';
 import 'package:guyana_center_frontend/modal/storeVm.dart';
 import 'package:guyana_center_frontend/screens/custom_bottom_navbar.dart';
-import 'package:guyana_center_frontend/widgets/app_drawar.dart';
 import 'package:guyana_center_frontend/widgets/mobile_header.dart';
 
 class StoresScreen extends StatelessWidget {
@@ -17,7 +16,7 @@ class StoresScreen extends StatelessWidget {
     return Scaffold(
       bottomNavigationBar: CustomBottomNavBar(),
       backgroundColor: theme.scaffoldBackgroundColor,
-      drawer: const AppDrawer(),
+
       body: SafeArea(
         child: ListView(
           children: [

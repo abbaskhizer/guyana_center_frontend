@@ -43,10 +43,11 @@ class _MobileLayout extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
       children: [
-        MobileTopBar(),
+        const MobileTopBar(),
         const SizedBox(height: 14),
         const _HeroSection(web: false),
         const SizedBox(height: 18),
+
         _SectionHeader(
           title: "Browse Categories",
           actionText: "See All",
@@ -54,7 +55,6 @@ class _MobileLayout extends StatelessWidget {
         ),
         const SizedBox(height: 10),
 
-        /// ✅ HOME shows: All + 4 (total 5)
         SizedBox(
           height: 92,
           child: Obx(() {
@@ -175,6 +175,12 @@ class _MobileLayout extends StatelessWidget {
             ),
           ],
         ),
+
+        const SizedBox(height: 24),
+
+        const TopStoresSection(),
+
+        const SizedBox(height: 24),
       ],
     );
   }
@@ -191,7 +197,6 @@ class _WebLayout extends StatelessWidget {
 
     return CustomScrollView(
       slivers: [
-        // Hero section - centered
         SliverToBoxAdapter(
           child: Center(
             child: ConstrainedBox(
@@ -203,8 +208,6 @@ class _WebLayout extends StatelessWidget {
             ),
           ),
         ),
-
-        /// ✅ WEB: Full-width background with padding
         SliverToBoxAdapter(
           child: Container(
             color: theme.colorScheme.background,
@@ -214,7 +217,6 @@ class _WebLayout extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 16),
-                // Browse Categories section header
                 Padding(
                   padding: const EdgeInsets.fromLTRB(0, 16, 0, 10),
                   child: _SectionHeader(
@@ -224,14 +226,12 @@ class _WebLayout extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Categories grid
                 WebCategoriesGrid(controller: controller),
                 const SizedBox(height: 32),
                 const FeaturedVehiclesSection(),
                 const SizedBox(height: 48),
                 const RealEstateSection(),
                 const SizedBox(height: 48),
-                // Stats section in single white card
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 48),
                   decoration: BoxDecoration(
@@ -252,11 +252,11 @@ class _WebLayout extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Expanded(
+                      const Expanded(
                         child: _WebStatChip(
                           value: "50K+",
                           label: "Active Listings",
-                          baseColor: const Color(0xFF16A34A),
+                          baseColor: Color(0xFF16A34A),
                         ),
                       ),
                       Container(
@@ -266,11 +266,11 @@ class _WebLayout extends StatelessWidget {
                           0.5,
                         ),
                       ),
-                      Expanded(
+                      const Expanded(
                         child: _WebStatChip(
                           value: "100K+",
                           label: "Happy Users",
-                          baseColor: const Color(0xFFDC2626),
+                          baseColor: Color(0xFFDC2626),
                         ),
                       ),
                       Container(
@@ -280,11 +280,11 @@ class _WebLayout extends StatelessWidget {
                           0.5,
                         ),
                       ),
-                      Expanded(
+                      const Expanded(
                         child: _WebStatChip(
                           value: "12",
                           label: "Categories",
-                          baseColor: const Color(0xFFD97706),
+                          baseColor: Color(0xFFD97706),
                         ),
                       ),
                       Container(
@@ -318,9 +318,8 @@ class _WebLayout extends StatelessWidget {
             ),
           ),
         ),
-
         SliverToBoxAdapter(
-          child: Container(color: cs.surface, child: WebFooter()),
+          child: Container(color: cs.surface, child: const WebFooter()),
         ),
       ],
     );
@@ -355,7 +354,6 @@ class _HeroSection extends StatelessWidget {
           ? CrossAxisAlignment.center
           : CrossAxisAlignment.start,
       children: [
-        // ✅ WEB badge
         if (web)
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 360),
@@ -395,8 +393,6 @@ class _HeroSection extends StatelessWidget {
               ),
             ),
           ),
-
-        // ✅ APP label
         if (!web)
           Text(
             "Your Local Marketplace",
@@ -405,9 +401,7 @@ class _HeroSection extends StatelessWidget {
               color: cs.onSurface.withOpacity(.55),
             ),
           ),
-
         SizedBox(height: web ? 26 : 10),
-
         RichText(
           textAlign: web ? TextAlign.center : TextAlign.start,
           text: TextSpan(
@@ -464,10 +458,7 @@ class _HeroSection extends StatelessWidget {
             ],
           ),
         ),
-
         const SizedBox(height: 14),
-
-        // ✅ Subtitle different for Web & App (matches your 2 screenshots)
         Text(
           web
               ? 'The free classifieds marketplace for Trinis — cars, homes,\njobs, electronics & more.'
@@ -475,9 +466,7 @@ class _HeroSection extends StatelessWidget {
           textAlign: web ? TextAlign.center : TextAlign.start,
           style: subtitle,
         ),
-
         const SizedBox(height: 26),
-
         SizedBox(
           width: web ? 720 : double.infinity,
           child: web ? const _WebSearchBar() : const _SearchBar(),
@@ -573,25 +562,36 @@ class _WebSearchBar extends StatelessWidget {
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Trending',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: const Color(0xFF9CA3AF),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(width: 10),
+          children: const [
+            _TrendingLabel(),
+            SizedBox(width: 10),
             _TrendChip(label: 'Toyota Hilux'),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             _TrendChip(label: '2BR House POS'),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             _TrendChip(label: 'iPhone 15'),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             _TrendChip(label: 'Driver Jobs'),
           ],
         ),
       ],
+    );
+  }
+}
+
+class _TrendingLabel extends StatelessWidget {
+  const _TrendingLabel();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Text(
+      'Trending',
+      style: theme.textTheme.bodySmall?.copyWith(
+        color: const Color(0xFF9CA3AF),
+        fontWeight: FontWeight.w500,
+      ),
     );
   }
 }
@@ -741,7 +741,7 @@ class _CategoryCard extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    final boxColor = active ? cs.primary : const Color(0xFFF3F4F6);
+    final boxColor = active ? cs.primary : theme.colorScheme.surface;
     final textColor = active ? cs.primary : cs.onSurface.withOpacity(.65);
 
     return InkWell(
@@ -758,6 +758,9 @@ class _CategoryCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: boxColor,
                 borderRadius: BorderRadius.circular(18),
+                border: active
+                    ? null
+                    : Border.all(color: cs.outlineVariant.withOpacity(0.6)),
               ),
               alignment: Alignment.center,
               child: Padding(
@@ -813,7 +816,7 @@ class _ListingCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: cs.outlineVariant),
         boxShadow: [
@@ -837,7 +840,7 @@ class _ListingCard extends StatelessWidget {
                     image: item.image,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
-                      color: cs.surfaceVariant,
+                      color: cs.surfaceContainerHighest,
                       alignment: Alignment.center,
                       child: Icon(
                         Icons.broken_image_outlined,
@@ -872,7 +875,7 @@ class _ListingCard extends StatelessWidget {
                   right: 10,
                   top: 10,
                   child: Material(
-                    color: cs.surface.withOpacity(0.92),
+                    color: theme.cardColor.withOpacity(0.92),
                     shape: const CircleBorder(),
                     child: InkWell(
                       customBorder: const CircleBorder(),
@@ -981,7 +984,7 @@ class _PropertyCard extends StatelessWidget {
       child: Container(
         width: 250,
         decoration: BoxDecoration(
-          color: cs.surface,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: cs.outlineVariant),
           boxShadow: [
@@ -1008,7 +1011,7 @@ class _PropertyCard extends StatelessWidget {
                       image: image,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
-                        color: cs.surfaceVariant,
+                        color: cs.surfaceContainerHighest,
                         alignment: Alignment.center,
                         child: Icon(
                           Icons.broken_image_outlined,
@@ -1020,7 +1023,7 @@ class _PropertyCard extends StatelessWidget {
                       top: 10,
                       right: 10,
                       child: Material(
-                        color: Colors.white.withOpacity(0.92),
+                        color: theme.cardColor.withOpacity(0.92),
                         shape: const CircleBorder(),
                         elevation: 1,
                         child: InkWell(
@@ -1031,7 +1034,7 @@ class _PropertyCard extends StatelessWidget {
                             child: Icon(
                               isFav ? Icons.favorite : Icons.favorite_border,
                               size: 18,
-                              color: isFav ? Colors.red : Colors.black87,
+                              color: isFav ? Colors.red : cs.onSurface,
                             ),
                           ),
                         ),
@@ -1172,11 +1175,9 @@ class _StatChip extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.surface, // background color from theme
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: cs.outlineVariant, // border color from theme
-        ),
+        border: Border.all(color: cs.outlineVariant),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       child: Column(

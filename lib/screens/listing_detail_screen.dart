@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/listing_detail_controller.dart';
 import 'package:guyana_center_frontend/screens/custom_bottom_navbar.dart';
+import 'package:guyana_center_frontend/screens/message_screen.dart';
 import 'package:guyana_center_frontend/widgets/mobile_header.dart';
-
 import 'package:guyana_center_frontend/widgets/web_footer.dart';
 
 class ListingDetailScreen extends StatelessWidget {
@@ -20,9 +20,7 @@ class ListingDetailScreen extends StatelessWidget {
 
     return Scaffold(
       bottomNavigationBar: CustomBottomNavBar(),
-      backgroundColor: _isWebDesktop(context)
-          ? theme.scaffoldBackgroundColor
-          : theme.scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: _isWebDesktop(context)
             ? _WebLayout(controller: controller)
@@ -42,7 +40,9 @@ class _MobileLayout extends StatelessWidget {
     return Obx(() {
       final item = controller.item;
       final idx = controller.currentImage.value;
-      final cs = Theme.of(context).colorScheme;
+      final theme = Theme.of(context);
+      final cs = theme.colorScheme;
+      final dividerColor = theme.dividerTheme.color ?? cs.outlineVariant;
 
       return SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 20),
@@ -53,12 +53,10 @@ class _MobileLayout extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(10, 8, 10, 6),
               child: MobileHeader(),
             ),
-
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
               child: _Breadcrumb(title: item.title, web: false),
             ),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: _ImageGalleryMobile(
@@ -66,9 +64,7 @@ class _MobileLayout extends StatelessWidget {
                 imageIndex: idx,
               ),
             ),
-
             const SizedBox(height: 8),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Column(
@@ -76,89 +72,70 @@ class _MobileLayout extends StatelessWidget {
                 children: [
                   _ThumbnailStrip(controller: controller, compact: false),
                   const SizedBox(height: 12),
-
-                  Padding(
-                    padding: EdgeInsetsGeometry.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     child: _Breadcrumb2(title: 'habibi', web: false),
                   ),
                   const SizedBox(height: 12),
-
                   _MobileTitleBlock(item: item),
                   const SizedBox(height: 10),
-
                   Padding(
-                    padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
-                    child: Divider(color: cs.surface),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Divider(color: dividerColor),
                   ),
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   _MobilePriceBlock(item: item),
                   const SizedBox(height: 14),
-
                   Padding(
-                    padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
-                    child: Divider(color: cs.surface),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Divider(color: dividerColor),
                   ),
                   const SizedBox(height: 14),
-
                   _SpecsRow(item: item),
                   const SizedBox(height: 14),
                   Padding(
-                    padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
-                    child: Divider(color: cs.surface),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Divider(color: dividerColor),
                   ),
                   const SizedBox(height: 14),
-
                   _MobileActionSection(item: item),
                   const SizedBox(height: 12),
-
-                  Padding(
-                    padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
-                    child: const _SellerCard(web: false),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  Padding(
-                    padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
-                    child: Divider(color: cs.surface),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: _SellerCard(web: false),
                   ),
                   const SizedBox(height: 12),
-
                   Padding(
-                    padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
-                    child: const _SafetyTipsCard(web: false),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Divider(color: dividerColor),
+                  ),
+                  const SizedBox(height: 12),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: _SafetyTipsCard(web: false),
                   ),
                   const SizedBox(height: 14),
-
                   Padding(
-                    padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
-                    child: Divider(color: cs.surface),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Divider(color: dividerColor),
                   ),
                   const SizedBox(height: 8),
-
-                  _ReportAd(),
+                  const _ReportAd(),
                   const SizedBox(height: 8),
                   Padding(
-                    padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
-                    child: Divider(color: cs.surface),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Divider(color: dividerColor),
                   ),
                   const SizedBox(height: 14),
-
                   _DescriptionSection(controller: controller, web: false),
                   const SizedBox(height: 14),
-
                   Padding(
-                    padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
-                    child: Divider(color: cs.surface),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Divider(color: dividerColor),
                   ),
                   const SizedBox(height: 14),
-
-                  _LocationSection(web: false),
+                  const _LocationSection(web: false),
                   const SizedBox(height: 16),
-
                   _SimilarAdsSection(controller: controller, web: false),
                 ],
               ),
@@ -220,7 +197,7 @@ class _WebLayout extends StatelessWidget {
                                   web: true,
                                 ),
                                 const SizedBox(height: 14),
-                                _LocationSection(web: true),
+                                const _LocationSection(web: true),
                                 const SizedBox(height: 16),
                                 _SimilarAdsSection(
                                   controller: controller,
@@ -278,7 +255,7 @@ class _Breadcrumb extends StatelessWidget {
           style: theme.textTheme.bodySmall?.copyWith(
             color: cs.onSurface.withOpacity(.45),
             fontWeight: FontWeight.w800,
-            fontSize: web ? 10.5 : 10.5,
+            fontSize: 10.5,
           ),
         ),
         Expanded(
@@ -289,7 +266,7 @@ class _Breadcrumb extends StatelessWidget {
             style: theme.textTheme.bodySmall?.copyWith(
               color: cs.primary,
               fontWeight: FontWeight.w900,
-              fontSize: web ? 10.5 : 10.5,
+              fontSize: 10.5,
             ),
           ),
         ),
@@ -310,9 +287,11 @@ class _ImageGalleryMobile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final item = controller.item;
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
       child: SizedBox(
         height: 240,
         width: double.infinity,
@@ -356,7 +335,7 @@ class _ImageGalleryMobile extends StatelessWidget {
               child: Obx(() {
                 final fav = controller.isFav.value;
                 return Material(
-                  color: Colors.white.withOpacity(.95),
+                  color: theme.cardColor.withOpacity(.95),
                   shape: const CircleBorder(),
                   child: InkWell(
                     customBorder: const CircleBorder(),
@@ -368,7 +347,7 @@ class _ImageGalleryMobile extends StatelessWidget {
                             ? Icons.favorite_rounded
                             : Icons.favorite_border_rounded,
                         size: 18,
-                        color: fav ? cs.primary : Colors.black87,
+                        color: fav ? cs.primary : cs.onSurface,
                       ),
                     ),
                   ),
@@ -391,11 +370,12 @@ class _ImageGalleryWeb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final item = controller.item;
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: cs.outlineVariant),
       ),
@@ -541,12 +521,12 @@ class _Breadcrumb2 extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    Widget sep() => Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+    Widget sep() => const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 8),
       child: Icon(
         Icons.chevron_right_rounded,
         size: 12,
-        color: const Color(0xFFB8BEC8),
+        color: Color(0xFFB8BEC8),
       ),
     );
 
@@ -597,7 +577,7 @@ class _MobileTitleBlock extends StatelessWidget {
     );
 
     return Padding(
-      padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -687,9 +667,9 @@ class _MobilePriceBlock extends StatelessWidget {
               fontSize: 14,
             ),
           ),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           Text(
-            '\$' + '150,000 without music system',
+            '\$150,000 without music system',
             style: theme.textTheme.bodyMedium?.copyWith(
               height: 1.35,
               color: cs.onSurface.withOpacity(.55),
@@ -747,6 +727,7 @@ class _MobileActionSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final dividerColor = theme.dividerTheme.color ?? cs.outlineVariant;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -771,10 +752,9 @@ class _MobileActionSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-
           Padding(
-            padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
-            child: Divider(color: cs.surface),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Divider(color: dividerColor),
           ),
           const SizedBox(height: 12),
           Row(
@@ -784,16 +764,12 @@ class _MobileActionSection extends StatelessWidget {
                   height: 55,
                   child: ElevatedButton.icon(
                     onPressed: () {},
-                    icon: Icon(
-                      Icons.call,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.surface,
-                    ),
+                    icon: Icon(Icons.call, size: 16, color: cs.onPrimary),
                     label: Text(
                       'Show Phone Number',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w900,
-                        color: Colors.white,
+                        color: cs.onPrimary,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -810,15 +786,17 @@ class _MobileActionSection extends StatelessWidget {
                 child: SizedBox(
                   height: 55,
                   child: OutlinedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      Get.to(() => const MessagesScreen());
+                    },
                     icon: Icon(
                       Icons.mail_outline,
                       size: 16,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: cs.onSurfaceVariant,
                     ),
                     label: Text(
                       'Send Message',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w900,
                       ),
                     ),
@@ -855,7 +833,7 @@ class _WebMainDetailsCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: cs.outlineVariant),
       ),
@@ -987,7 +965,7 @@ class _WebSidebarCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: cs.outlineVariant),
       ),
@@ -1020,7 +998,9 @@ class _WebSidebarCard extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () {},
+              onPressed: () {
+                Get.to(() => const MessagesScreen());
+              },
               icon: const Icon(Icons.message_outlined, size: 16),
               label: const Text('Send Message'),
               style: OutlinedButton.styleFrom(
@@ -1053,7 +1033,7 @@ class _SellerCard extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: cs.surface,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: cs.outlineVariant),
         ),
@@ -1111,7 +1091,7 @@ class _SellerCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: cs.outlineVariant),
       ),
@@ -1122,8 +1102,8 @@ class _SellerCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 22,
-                child: Text('M'),
                 backgroundColor: cs.onSurfaceVariant.withOpacity(.6),
+                child: const Text('M'),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -1139,7 +1119,6 @@ class _SellerCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-
                     Text(
                       'Posting since Apr 2023',
                       style: theme.textTheme.bodyMedium?.copyWith(
@@ -1148,7 +1127,6 @@ class _SellerCard extends StatelessWidget {
                         fontSize: 13.5,
                       ),
                     ),
-
                     const SizedBox(height: 4),
                     Row(
                       children: [
@@ -1196,14 +1174,21 @@ class _SafetyTipsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    final bgColor = isDark ? const Color(0xFF2A2116) : const Color(0xFFFFF4E5);
+
+    final borderColor = isDark
+        ? const Color(0xFF5B4A2E)
+        : const Color(0xFFFFE1A6);
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF4E5),
+        color: bgColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFFE1A6)),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1211,7 +1196,7 @@ class _SafetyTipsCard extends StatelessWidget {
           Row(
             children: [
               Icon(Icons.shield_outlined, color: cs.error),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Text(
                 'Safety Tips',
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -1222,7 +1207,6 @@ class _SafetyTipsCard extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 8),
           _bullet(theme, cs, 'Meet in a safe, public location'),
           _bullet(theme, cs, 'Inspect item before payment'),
@@ -1248,7 +1232,7 @@ class _SafetyTipsCard extends StatelessWidget {
               text,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w700,
-                color: cs.error.withOpacity(.6),
+                color: cs.onSurface.withOpacity(.78),
                 fontSize: 13,
               ),
             ),
@@ -1267,31 +1251,25 @@ class _ReportAd extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    return Column(
-      children: [
-        InkWell(
-          onTap: () {},
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-            child: Row(
-              children: [
-                Icon(Icons.outlined_flag, size: 25, color: cs.onSurfaceVariant),
-
-                const SizedBox(width: 10),
-
-                Text(
-                  'Report this ad',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontSize: 14,
-                    color: cs.onSurfaceVariant.withOpacity(.4),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+    return InkWell(
+      onTap: () {},
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+        child: Row(
+          children: [
+            Icon(Icons.outlined_flag, size: 25, color: cs.onSurfaceVariant),
+            const SizedBox(width: 10),
+            Text(
+              'Report this ad',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontSize: 14,
+                color: cs.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -1304,7 +1282,6 @@ class _DescriptionSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final item = controller.item;
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
@@ -1319,16 +1296,18 @@ class _DescriptionSection extends StatelessWidget {
         const SizedBox(height: 18),
         Text(
           'Toyota Hiace Super GL, Gas, Not heavy T, inspected and ready for immediate transfer.',
-
           style: theme.textTheme.bodyMedium?.copyWith(
             height: 1.7,
-            color: const Color(0xFF5F6B7A),
+            color: cs.onSurfaceVariant,
             fontWeight: FontWeight.w600,
             fontSize: 14,
           ),
         ),
         const SizedBox(height: 10),
-        Column(children: highlights.map((e) => _GreenBullet(text: e)).toList()),
+
+        // UPDATED HERE
+        Column(children: highlights.map((e) => _GreyBullet(text: e)).toList()),
+
         const SizedBox(height: 10),
         const _SubTitle(title: 'Music System Includes:'),
         const SizedBox(height: 14),
@@ -1357,7 +1336,7 @@ class _DescriptionSection extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: cs.outlineVariant),
       ),
@@ -1374,13 +1353,16 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     return Text(
       title,
-      style: const TextStyle(
+      style: theme.textTheme.titleLarge?.copyWith(
         fontSize: 22,
         fontWeight: FontWeight.w800,
         height: 1.2,
-        color: Color(0xFF1F2937),
+        color: cs.onSurface,
       ),
     );
   }
@@ -1402,49 +1384,6 @@ class _SubTitle extends StatelessWidget {
   }
 }
 
-class _GreenBullet extends StatelessWidget {
-  final String text;
-
-  const _GreenBullet({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 18),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 10),
-            child: SizedBox(
-              width: 10,
-              height: 10,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Color(0xFF1FB655),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(
-                fontSize: 16,
-                height: 1.55,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF5F6B7A),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _GreyBullet extends StatelessWidget {
   final String text;
 
@@ -1452,19 +1391,22 @@ class _GreyBullet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 10),
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
             child: SizedBox(
               width: 6,
               height: 6,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: Color(0xFF6B7280),
+                  color: cs.onSurfaceVariant,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -1474,11 +1416,11 @@ class _GreyBullet extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontSize: 15,
                 height: 1.6,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF6B7280),
+                color: cs.onSurfaceVariant,
               ),
             ),
           ),
@@ -1495,13 +1437,14 @@ class _LocationSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     final mapCard = Container(
       height: web ? 200 : 150,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: cs.outlineVariant),
       ),
@@ -1589,7 +1532,6 @@ class _SimilarAdsSection extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _SectionTitle(title: 'Similar Ads', web: web),
-
         Text(
           'See all',
           style: theme.textTheme.bodySmall?.copyWith(
@@ -1600,7 +1542,6 @@ class _SimilarAdsSection extends StatelessWidget {
         ),
       ],
     );
-    SizedBox(height: 14);
 
     final list = SizedBox(
       height: web ? 190 : 176,
@@ -1650,9 +1591,7 @@ class _SpecIconTile extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 24, color: cs.onSurfaceVariant),
-
         const SizedBox(height: 10),
-
         Text(
           value,
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -1661,9 +1600,7 @@ class _SpecIconTile extends StatelessWidget {
             fontSize: 14,
           ),
         ),
-
         const SizedBox(height: 10),
-
         Text(
           label,
           style: theme.textTheme.bodySmall?.copyWith(
@@ -1690,7 +1627,7 @@ class _MiniTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: cs.outlineVariant),
       ),
@@ -1714,15 +1651,18 @@ class _ArrowCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     return Material(
-      color: Colors.white.withOpacity(.92),
+      color: theme.cardColor.withOpacity(.92),
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(6),
-          child: Icon(icon, size: 20, color: Colors.black87),
+          child: Icon(icon, size: 20, color: cs.onSurface),
         ),
       ),
     );
@@ -1752,8 +1692,9 @@ class _SimilarCard extends StatelessWidget {
     return Container(
       width: web ? 160 : 150,
       decoration: BoxDecoration(
-        color: cs.background,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1766,7 +1707,7 @@ class _SimilarCard extends StatelessWidget {
               width: web ? 160 : 150,
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => Container(
-                height: web ? 92 : 72,
+                height: web ? 92 : 100,
                 color: cs.surfaceContainerHighest,
                 alignment: Alignment.center,
                 child: Icon(
@@ -1807,7 +1748,7 @@ class _SimilarCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: cs.onSurface.withOpacity(.6),
+                    color: cs.onSurfaceVariant,
                     fontSize: 10.5,
                   ),
                 ),

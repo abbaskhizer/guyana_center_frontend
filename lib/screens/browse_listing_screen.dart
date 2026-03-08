@@ -8,8 +8,8 @@ import 'package:guyana_center_frontend/modal/listingVM.dart';
 
 import 'package:guyana_center_frontend/screens/agent_profile_screen.dart';
 import 'package:guyana_center_frontend/screens/custom_bottom_navbar.dart';
+import 'package:guyana_center_frontend/screens/side_menu_screen.dart';
 
-import 'package:guyana_center_frontend/widgets/app_drawar.dart';
 import 'package:guyana_center_frontend/widgets/mobile_top_bar.dart';
 import 'package:guyana_center_frontend/widgets/profile_dot.dart';
 
@@ -49,8 +49,8 @@ class _CategoryListingsScreenState extends State<CategoryListingsScreen> {
     final isWeb = _isWebDesktop(context);
 
     return Scaffold(
-      backgroundColor: isWeb ? Colors.white : theme.scaffoldBackgroundColor,
-      drawer: isWeb ? null : const AppDrawer(),
+      backgroundColor: isWeb ? theme.cardColor : theme.scaffoldBackgroundColor,
+      drawer: isWeb ? null : const SideMenuScreen(),
       bottomNavigationBar: isWeb ? null : CustomBottomNavBar(),
       body: SafeArea(
         child: isWeb
@@ -68,8 +68,6 @@ class _MobileLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     return ListView(
       padding: const EdgeInsets.only(bottom: 90),
       children: [
@@ -80,13 +78,10 @@ class _MobileLayout extends StatelessWidget {
             children: [
               _MobileTopBar(),
               const SizedBox(height: 10),
-
               _BreadcrumbRow(current: category.title),
               const SizedBox(height: 10),
-
               _TitleRow(category: category),
               const SizedBox(height: 14),
-
               Obx(
                 () => _StatsStrip(
                   listings: controller.listingsCount.value,
@@ -95,31 +90,27 @@ class _MobileLayout extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-
               _ChipRow(controller: controller),
               const SizedBox(height: 12),
-
               _SearchAndFilterRow(
                 controller: controller,
                 hint: "Search ${category.title.toLowerCase()}...",
                 isWeb: false,
               ),
               const SizedBox(height: 12),
-
               _ResultsHeaderRow(controller: controller),
               const SizedBox(height: 12),
             ],
           ),
         ),
-
-        /// Container WITHOUT padding
         Container(
           width: double.infinity,
           color: Theme.of(context).colorScheme.surface,
           child: Column(
             children: [
+              const SizedBox(height: 10),
               Padding(
-                padding: EdgeInsetsGeometry.symmetric(
+                padding: const EdgeInsets.symmetric(
                   vertical: 10,
                   horizontal: 15,
                 ),
@@ -127,7 +118,7 @@ class _MobileLayout extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               Padding(
-                padding: EdgeInsetsGeometry.symmetric(
+                padding: const EdgeInsets.symmetric(
                   vertical: 10,
                   horizontal: 15,
                 ),
@@ -136,21 +127,18 @@ class _MobileLayout extends StatelessWidget {
             ],
           ),
         ),
-
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 25),
-
               Text(
                 "Browse Other Categories",
                 style: Theme.of(
                   context,
                 ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w900),
               ),
-
               const SizedBox(height: 25),
               const _OtherCategoriesRow(),
             ],
@@ -174,7 +162,8 @@ class _WebLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -192,14 +181,10 @@ class _WebLayout extends StatelessWidget {
         return CustomScrollView(
           slivers: [
             const SliverToBoxAdapter(child: WebHeader()),
-
             SliverToBoxAdapter(
               child: Container(
                 width: double.infinity,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors
-                          .black // Match Figma Dark header specifically like All categories
-                    : Colors.white,
+                color: theme.cardColor,
                 child: centered(
                   Padding(
                     padding: const EdgeInsets.only(top: 14, bottom: 0),
@@ -212,26 +197,21 @@ class _WebLayout extends StatelessWidget {
                 ),
               ),
             ),
-
             SliverToBoxAdapter(
               child: Container(
                 width: double.infinity,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Theme.of(context).scaffoldBackgroundColor
-                    : const Color(0xFFFAFAFA),
+                color: theme.colorScheme.surface,
                 child: centered(
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 24),
-
                       _SearchAndFilterRow(
                         controller: controller,
                         hint: "Search in ${category.title}...",
                         isWeb: true,
                       ),
                       const SizedBox(height: 24),
-
                       Text(
                         "Showing ${controller.totalFilteredCount} results",
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -241,14 +221,10 @@ class _WebLayout extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-
                       _ListingsSection(controller: controller, isWeb: true),
                       const SizedBox(height: 48),
-
-                      // ✅ screenshot wali pagination (web)
                       _PaginationBar(controller: controller),
                       const SizedBox(height: 64),
-
                       Text(
                         "Browse Other Categories",
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -257,7 +233,6 @@ class _WebLayout extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-
                       const _OtherCategoriesRowWeb(),
                       const SizedBox(height: 32),
                     ],
@@ -266,9 +241,8 @@ class _WebLayout extends StatelessWidget {
                 ),
               ),
             ),
-
             SliverToBoxAdapter(
-              child: Container(color: cs.surface, child: WebFooter()),
+              child: Container(color: cs.surface, child: const WebFooter()),
             ),
           ],
         );
@@ -301,7 +275,7 @@ class _MobileTopBar extends StatelessWidget {
           icon: Icon(Icons.search_rounded, color: cs.onSurface),
         ),
         const SizedBox(width: 4),
-        ProfileDot(onTap: () => Get.to(() => AgentProfileScreen())),
+        ProfileDot(onTap: () => Get.to(() => const AgentProfileScreen())),
       ],
     );
   }
@@ -354,53 +328,26 @@ class _TitleRow extends StatelessWidget {
   String _imageForCategory(String title) {
     final t = title.toLowerCase();
 
-    if (t.contains("vehicle") || t.contains("car")) {
-      return 'assets/vehicle.png';
-    }
-
-    if (t.contains("real")) {
-      return 'assets/realestate.png';
-    }
-
-    if (t.contains("job")) {
-      return 'assets/jobs.png';
-    }
-
-    if (t.contains("electronic")) {
-      return 'assets/electronics.png';
-    }
-
-    if (t.contains("fashion")) {
-      return 'assets/fashion.png';
-    }
-
+    if (t.contains("vehicle") || t.contains("car")) return 'assets/vehicle.png';
+    if (t.contains("real")) return 'assets/realestate.png';
+    if (t.contains("job")) return 'assets/jobs.png';
+    if (t.contains("electronic")) return 'assets/electronics.png';
+    if (t.contains("fashion")) return 'assets/fashion.png';
     if (t.contains("health") || t.contains("beauty")) {
       return 'assets/health&beauty.png';
     }
-
     if (t.contains("home") || t.contains("garden")) {
       return 'assets/home&gardan.png';
     }
-
-    if (t.contains("kid")) {
-      return 'assets/kids.png';
-    }
-
+    if (t.contains("kid")) return 'assets/kids.png';
     if (t.contains("pet") || t.contains("animal")) {
       return 'assets/pet&animals.png';
     }
-
     if (t.contains("sport") || t.contains("hobbies")) {
       return 'assets/sports&hobbies.png';
     }
-
-    if (t.contains("business")) {
-      return 'assets/bussiness.png';
-    }
-
-    if (t.contains("service")) {
-      return 'assets/service.png';
-    }
+    if (t.contains("business")) return 'assets/bussiness.png';
+    if (t.contains("service")) return 'assets/service.png';
 
     return 'assets/service.png';
   }
@@ -416,7 +363,7 @@ class _TitleRow extends StatelessWidget {
           height: 40,
           width: 40,
           decoration: BoxDecoration(
-            color: cs.surface,
+            color: Theme.of(context).cardColor,
             borderRadius: const BorderRadius.all(Radius.circular(14)),
           ),
           child: Center(
@@ -533,7 +480,7 @@ class _WebPageHeader extends StatelessWidget {
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w900,
                       color: cs.onSurface,
-                      fontSize: 30, // big and bold
+                      fontSize: 30,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -559,7 +506,7 @@ class _WebPageHeader extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 20),
-        const Divider(height: 1, color: Color(0xFFF0F0F0)),
+        Divider(height: 1, color: cs.outlineVariant.withOpacity(.4)),
         const SizedBox(height: 16),
         _ChipRow(controller: controller),
         const SizedBox(height: 16),
@@ -736,7 +683,7 @@ class _SearchAndFilterRow extends StatelessWidget {
         ),
         prefixIcon: Icon(Icons.search_rounded, color: cs.onSurfaceVariant),
         filled: true,
-        fillColor: cs.surface,
+        fillColor: Theme.of(context).cardColor,
         contentPadding: const EdgeInsets.symmetric(vertical: 12),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
@@ -753,7 +700,7 @@ class _SearchAndFilterRow extends StatelessWidget {
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: cs.outlineVariant),
       ),
@@ -781,19 +728,13 @@ class _SearchAndFilterRow extends StatelessWidget {
           child: ElevatedButton.icon(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).brightness == Brightness.dark
-                  ? cs.surface
-                  : Colors.white,
+              backgroundColor: Theme.of(context).cardColor,
               foregroundColor: cs.onSurface,
               elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
-                side: BorderSide(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.transparent
-                      : cs.outlineVariant,
-                ),
+                side: BorderSide(color: cs.outlineVariant),
               ),
               textStyle: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w700,
@@ -811,19 +752,13 @@ class _SearchAndFilterRow extends StatelessWidget {
           child: ElevatedButton.icon(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).brightness == Brightness.dark
-                  ? cs.surface
-                  : Colors.white,
+              backgroundColor: Theme.of(context).cardColor,
               foregroundColor: cs.onSurface,
               elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
-                side: BorderSide(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.transparent
-                      : cs.outlineVariant,
-                ),
+                side: BorderSide(color: cs.outlineVariant),
               ),
               textStyle: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w700,
@@ -844,15 +779,9 @@ class _SearchAndFilterRow extends StatelessWidget {
           return Container(
             height: 48,
             decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? cs.surface
-                  : Colors.white,
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.transparent
-                    : cs.outlineVariant,
-              ),
+              border: Border.all(color: cs.outlineVariant),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -933,9 +862,7 @@ class _ResultsHeaderRow extends StatelessWidget {
             ),
           );
         }),
-
         const Spacer(),
-
         Text(
           "Newest First",
           style: theme.textTheme.bodySmall?.copyWith(
@@ -943,15 +870,12 @@ class _ResultsHeaderRow extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-
         const SizedBox(width: 12),
-
         Obx(() {
           final grid = controller.isGrid.value;
 
           return Row(
             children: [
-              /// GRID BUTTON
               InkWell(
                 onTap: () => controller.isGrid.value = true,
                 borderRadius: BorderRadius.circular(10),
@@ -959,7 +883,7 @@ class _ResultsHeaderRow extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: grid ? cs.primary : cs.surface,
+                    color: grid ? cs.primary : Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   alignment: Alignment.center,
@@ -970,10 +894,7 @@ class _ResultsHeaderRow extends StatelessWidget {
                   ),
                 ),
               ),
-
               const SizedBox(width: 6),
-
-              /// LIST BUTTON
               InkWell(
                 onTap: () => controller.isGrid.value = false,
                 borderRadius: BorderRadius.circular(10),
@@ -981,7 +902,7 @@ class _ResultsHeaderRow extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: !grid ? cs.primary : cs.surface,
+                    color: !grid ? cs.primary : Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   alignment: Alignment.center,
@@ -1007,21 +928,17 @@ class _ListingsSection extends StatelessWidget {
 
   int _colsForWidth(double w) {
     if (!isWeb) return 2;
-
     if (w >= 1200) return 4;
     if (w >= 900) return 3;
     if (w >= 600) return 2;
-
     return 1;
   }
 
   double _extentForCols(int cols) {
     if (!isWeb) return 220;
-
     if (cols >= 4) return 305;
     if (cols == 3) return 320;
     if (cols == 2) return 340;
-
     return 360;
   }
 
@@ -1151,7 +1068,6 @@ class _PaginationBar extends StatelessWidget {
       final tpSafe = tp < 1 ? 1 : tp;
       final pSafe = p.clamp(1, tpSafe);
 
-      // ✅ show only when pages > 1
       if (tpSafe <= 1) return const SizedBox.shrink();
 
       final pages = _visiblePages(pSafe, tpSafe);
@@ -1224,9 +1140,7 @@ class _PagerArrow extends StatelessWidget {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Theme.of(context).colorScheme.surface
-                : Colors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: border),
           ),
@@ -1265,11 +1179,7 @@ class _PagePill extends StatelessWidget {
         height: 32,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: active
-              ? activeColor
-              : (Theme.of(context).brightness == Brightness.dark
-                    ? cs.surface
-                    : Colors.white),
+          color: active ? activeColor : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: active ? activeColor : inactiveBorder),
         ),
@@ -1315,21 +1225,21 @@ class _OtherCategoriesRowWeb extends StatelessWidget {
           image: "assets/realestate.png",
           text: "Real Estate",
         ),
-        const SizedBox(width: 14),
+        SizedBox(width: 14),
         _StandaloneCategoryCard(image: "assets/jobs.png", text: "Jobs"),
-        const SizedBox(width: 14),
+        SizedBox(width: 14),
         _StandaloneCategoryCard(
           image: "assets/electronics.png",
           text: "Electronics",
         ),
-        const SizedBox(width: 14),
+        SizedBox(width: 14),
         _StandaloneCategoryCard(image: "assets/fashion.png", text: "Fashion"),
-        const SizedBox(width: 14),
+        SizedBox(width: 14),
         _StandaloneCategoryCard(
           image: "assets/home&gardan.png",
           text: "Home & Furniture",
         ),
-        const SizedBox(width: 14),
+        SizedBox(width: 14),
         _StandaloneCategoryCard(
           image: "assets/sports&hobbies.png",
           text: "Sports & Hobbies",
@@ -1354,9 +1264,7 @@ class _StandaloneCategoryCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 24),
         decoration: BoxDecoration(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? cs.surface
-              : Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: Theme.of(context).brightness == Brightness.dark
@@ -1428,7 +1336,7 @@ class OtherCategoryIcon extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: cs.surface,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: cs.outlineVariant),
                 ),
@@ -1436,9 +1344,7 @@ class OtherCategoryIcon extends StatelessWidget {
                 child: iconWidget,
               )
             : iconWidget,
-
         const SizedBox(height: 6),
-
         Text(
           text,
           style: theme.textTheme.bodySmall?.copyWith(
@@ -1463,9 +1369,8 @@ class ListingCardGrid extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.background,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
-
         boxShadow: [
           BoxShadow(
             color: cs.onSurface.withOpacity(0.06),
@@ -1507,7 +1412,7 @@ class ListingCardGrid extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEAB308), // Figma: Orange yellow
+                        color: const Color(0xFFEAB308),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -1600,7 +1505,7 @@ class ListingCardGrid extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFDCFCE7), // light green
+                          color: const Color(0xFFDCFCE7),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -1639,7 +1544,7 @@ class ListingCardGrid extends StatelessWidget {
                     item.price,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w900,
-                      color: const Color(0xFF16A34A), // Deep green like design
+                      color: const Color(0xFF16A34A),
                       fontSize: 16,
                     ),
                   ),
@@ -1712,7 +1617,7 @@ class ListingCardList extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: cs.outlineVariant),
       ),

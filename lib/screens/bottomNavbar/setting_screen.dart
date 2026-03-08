@@ -18,12 +18,14 @@ class SettingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.put(SettingController());
+    final c = Get.isRegistered<SettingController>()
+        ? Get.find<SettingController>()
+        : Get.put(SettingController());
     final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: _isWebDesktop(context)
-          ? const Color(0xFFF3F4F6)
+          ? theme.colorScheme.surface
           : theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: _isWebDesktop(context)
@@ -54,32 +56,33 @@ class _WebSettingsLayout extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 27),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1280),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const _WebSettingsPageHeader(),
-                  const SizedBox(height: 16),
-
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _SettingsSidebar(controller: controller),
-                      const SizedBox(width: 18),
-
-                      Expanded(child: _WebContentPanel(controller: controller)),
-                    ],
-                  ),
-                ],
+          const SizedBox(height: 27),
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1280),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const _WebSettingsPageHeader(),
+                    const SizedBox(height: 16),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _SettingsSidebar(controller: controller),
+                        const SizedBox(width: 18),
+                        Expanded(
+                          child: _WebContentPanel(controller: controller),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-          SizedBox(height: 45),
-
+          const SizedBox(height: 45),
           const WebFooter(),
         ],
       ),
@@ -94,7 +97,8 @@ class _SettingsMobileContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = controller;
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(18, 20, 18, 20),
@@ -103,7 +107,7 @@ class _SettingsMobileContent extends StatelessWidget {
         children: [
           Text(
             "Settings",
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w900,
               color: cs.onSurface,
             ),
@@ -111,18 +115,17 @@ class _SettingsMobileContent extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             "Manage your preferences",
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            style: theme.textTheme.bodySmall?.copyWith(
               color: cs.onSurfaceVariant,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 18),
-
           Obx(() {
             return Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: cs.error.withOpacity(0.15),
+                color: cs.primary.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: cs.outlineVariant),
               ),
@@ -146,20 +149,18 @@ class _SettingsMobileContent extends StatelessWidget {
                       children: [
                         Text(
                           c.userName.value,
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.w900,
-                                color: cs.onSurface,
-                              ),
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            color: cs.onSurface,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           c.userEmail.value,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: cs.onSurfaceVariant,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ],
                     ),
@@ -168,8 +169,9 @@ class _SettingsMobileContent extends StatelessWidget {
                     width: 35,
                     height: 35,
                     decoration: BoxDecoration(
-                      color: cs.background,
+                      color: theme.cardColor,
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: cs.outlineVariant),
                     ),
                     child: Icon(
                       Icons.chevron_right_rounded,
@@ -181,9 +183,7 @@ class _SettingsMobileContent extends StatelessWidget {
               ),
             );
           }),
-
           const SizedBox(height: 16),
-
           _mobileTile(
             context,
             image: 'assets/person.png',
@@ -212,7 +212,6 @@ class _SettingsMobileContent extends StatelessWidget {
             subtitle: "Password & 2FA",
             onTap: () => Get.to(() => const SecurityScreen()),
           ),
-
           _mobileTile(
             context,
             image: 'assets/pref.png',
@@ -228,7 +227,6 @@ class _SettingsMobileContent extends StatelessWidget {
             onTap: () => Get.to(() => const BillingScreen()),
           ),
           const SizedBox(height: 18),
-
           Container(
             decoration: BoxDecoration(
               color: cs.errorContainer.withOpacity(.45),
@@ -257,13 +255,15 @@ class _SettingsMobileContent extends StatelessWidget {
     required String subtitle,
     required VoidCallback onTap,
   }) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outlineVariant.withOpacity(.6)),
       ),
       child: ListTile(
         onTap: onTap,
@@ -272,8 +272,9 @@ class _SettingsMobileContent extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: cs.background,
+            color: cs.surface,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: cs.outlineVariant.withOpacity(.5)),
           ),
           child: Center(
             child: Image.asset(
@@ -287,14 +288,14 @@ class _SettingsMobileContent extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w900,
             color: cs.onSurface,
           ),
         ),
         subtitle: Text(
           subtitle,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          style: theme.textTheme.bodySmall?.copyWith(
             color: cs.onSurfaceVariant,
             fontWeight: FontWeight.w600,
           ),
@@ -311,7 +312,8 @@ class _SettingsSidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return SizedBox(
       width: 220,
@@ -320,9 +322,8 @@ class _SettingsSidebar extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
               decoration: BoxDecoration(
-                color: cs.background,
+                color: theme.cardColor,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: cs.outlineVariant.withOpacity(.55)),
               ),
@@ -383,7 +384,7 @@ class _SettingsSidebar extends StatelessWidget {
               return Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: cs.background,
+                  color: theme.cardColor,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: cs.outlineVariant.withOpacity(.55)),
                 ),
@@ -412,22 +413,20 @@ class _SettingsSidebar extends StatelessWidget {
                                 controller.userName.value,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                      color: cs.onSurface,
-                                    ),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: cs.onSurface,
+                                ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 controller.userEmail.value,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.labelSmall
-                                    ?.copyWith(
-                                      color: cs.onSurfaceVariant,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: cs.onSurfaceVariant,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ],
                           ),
@@ -473,19 +472,14 @@ class _WebContentPanel extends StatelessWidget {
       switch (controller.selectedTab.value) {
         case SettingsTab.account:
           return AccountContent();
-
         case SettingsTab.notifications:
           return NotificationsContent();
-
         case SettingsTab.privacy:
           return PrivacyContent();
-
         case SettingsTab.security:
           return SecurityContent();
-
         case SettingsTab.preferences:
           return PreferencesContent();
-
         case SettingsTab.billing:
           return BillingContent();
       }
@@ -498,7 +492,8 @@ class _WebSettingsPageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -507,7 +502,7 @@ class _WebSettingsPageHeader extends StatelessWidget {
           width: 28,
           height: 28,
           decoration: BoxDecoration(
-            color: cs.surface,
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: cs.outlineVariant.withOpacity(.55)),
           ),
@@ -528,7 +523,7 @@ class _WebSettingsPageHeader extends StatelessWidget {
             children: [
               Text(
                 "Settings",
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w900,
                   color: cs.onSurface,
                 ),
@@ -536,7 +531,7 @@ class _WebSettingsPageHeader extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 "Manage your account preferences and security",
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                style: theme.textTheme.bodySmall?.copyWith(
                   color: cs.onSurfaceVariant,
                   fontWeight: FontWeight.w500,
                 ),
@@ -556,12 +551,14 @@ Widget _sidebarItem(
   required VoidCallback onTap,
   bool active = false,
 }) {
-  final cs = Theme.of(context).colorScheme;
+  final theme = Theme.of(context);
+  final cs = theme.colorScheme;
 
   return Container(
     margin: const EdgeInsets.only(bottom: 6),
     decoration: BoxDecoration(
       color: active ? cs.primary.withOpacity(.08) : Colors.transparent,
+      borderRadius: BorderRadius.circular(12),
     ),
     child: ListTile(
       onTap: onTap,
@@ -575,7 +572,7 @@ Widget _sidebarItem(
       ),
       title: Text(
         title,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+        style: theme.textTheme.bodySmall?.copyWith(
           fontWeight: active ? FontWeight.w800 : FontWeight.w700,
           color: active ? cs.primary : cs.onSurface,
         ),

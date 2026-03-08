@@ -54,7 +54,6 @@ class _WebAuthLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cs = theme.colorScheme;
 
     return Column(
       children: [
@@ -81,12 +80,10 @@ class _WebAuthLayout extends StatelessWidget {
                                 26,
                               ),
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surface,
+                                color: theme.cardColor,
                                 borderRadius: BorderRadius.circular(22),
                                 border: Border.all(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.outlineVariant,
+                                  color: theme.colorScheme.outlineVariant,
                                 ),
                                 boxShadow: [
                                   if (theme.brightness == Brightness.light)
@@ -209,7 +206,7 @@ class _AuthForm extends StatelessWidget {
                 text: "Continue with Google",
                 leading: const FaIcon(
                   FontAwesomeIcons.google,
-                  color: Color(0xFFDB4437), // Official Google Red
+                  color: Color(0xFFDB4437),
                   size: 16,
                 ),
                 onPressed: c.continueWithGoogle,
@@ -219,7 +216,7 @@ class _AuthForm extends StatelessWidget {
                 text: "Continue with Facebook",
                 leading: const FaIcon(
                   FontAwesomeIcons.facebookF,
-                  color: Color(0xFF1877F2), // Official Facebook Blue
+                  color: Color(0xFF1877F2),
                   size: 16,
                 ),
                 onPressed: c.continueWithFacebook,
@@ -276,10 +273,10 @@ class _AuthForm extends StatelessWidget {
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     onPressed: c.forgotPassword,
-                    child: const Text(
+                    child: Text(
                       "Forgot password?",
-                      style: TextStyle(
-                        color: Color(0xFF16A34A),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.primary,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -458,9 +455,7 @@ class _AuthToggle extends StatelessWidget {
             height: 44,
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: theme.brightness == Brightness.dark
-                  ? const Color(0xFF6B7280)
-                  : cs.surface,
+              color: theme.cardColor,
               borderRadius: BorderRadius.circular(999),
               border: Border.all(
                 color: theme.brightness == Brightness.dark
@@ -480,7 +475,9 @@ class _AuthToggle extends StatelessWidget {
                     width: tabWidth,
                     height: double.infinity,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: theme.brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.white,
                       borderRadius: BorderRadius.circular(999),
                       boxShadow: [
                         if (theme.brightness == Brightness.light)
@@ -505,12 +502,8 @@ class _AuthToggle extends StatelessWidget {
                             style: theme.textTheme.labelLarge?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: isLogin
-                                  ? (theme.brightness == Brightness.dark
-                                        ? Colors.black
-                                        : cs.onSurface)
-                                  : (theme.brightness == Brightness.dark
-                                        ? Colors.white.withOpacity(0.9)
-                                        : cs.onSurfaceVariant),
+                                  ? Colors.black
+                                  : cs.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -526,12 +519,8 @@ class _AuthToggle extends StatelessWidget {
                             style: theme.textTheme.labelLarge?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: !isLogin
-                                  ? (theme.brightness == Brightness.dark
-                                        ? Colors.black
-                                        : cs.onSurface)
-                                  : (theme.brightness == Brightness.dark
-                                        ? Colors.white.withOpacity(0.9)
-                                        : cs.onSurfaceVariant),
+                                  ? Colors.black
+                                  : cs.onSurfaceVariant,
                             ),
                           ),
                         ),

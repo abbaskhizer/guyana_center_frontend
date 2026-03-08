@@ -10,7 +10,9 @@ class PrivacyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(PrivacyController());
+    if (!Get.isRegistered<PrivacyController>()) {
+      Get.put(PrivacyController());
+    }
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -31,7 +33,8 @@ class PrivacyContent extends StatelessWidget {
         ? Get.find<PrivacyController>()
         : Get.put(PrivacyController());
 
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     final content = Column(
       children: [
@@ -39,18 +42,16 @@ class PrivacyContent extends StatelessWidget {
           title: "Profile Visibility",
           children: [
             const SizedBox(height: 6),
-            Obx(() {
-              return _VisibilitySegment(
+            Obx(
+              () => _VisibilitySegment(
                 isPublic: c.isPublic.value,
                 onChanged: c.setVisibility,
                 cs: cs,
-              );
-            }),
+              ),
+            ),
           ],
         ),
-
         const SizedBox(height: 16),
-
         SectionCard(
           title: "Activity & Content",
           children: [
@@ -100,7 +101,7 @@ class PrivacyContent extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   "Privacy",
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: cs.onSurface,
                   ),
@@ -108,17 +109,18 @@ class PrivacyContent extends StatelessWidget {
               ],
             ),
           ),
-
         if (!kIsWeb)
           Container(
             padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
             width: double.infinity,
-            // height: double.infinity,
             decoration: BoxDecoration(color: cs.surface),
             child: content,
           )
         else
-          content,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
+            child: content,
+          ),
       ],
     );
   }
@@ -137,7 +139,7 @@ class _VisibilitySegment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final inactiveBg = cs.surface;
+    final inactiveBg = Theme.of(context).cardColor;
     final inactiveFg = cs.onSurfaceVariant;
 
     return Row(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/screens/auth/login_signup_screen.dart';
+import 'package:guyana_center_frontend/screens/side_menu_screen.dart';
 
 class MobileTopBar extends StatelessWidget {
   const MobileTopBar({super.key});
@@ -12,16 +13,16 @@ class MobileTopBar extends StatelessWidget {
 
     return Container(
       height: 60,
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      // padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Row(
         children: [
           Builder(
             builder: (ctx) => InkWell(
               onTap: () => Scaffold.of(ctx).openDrawer(),
               borderRadius: BorderRadius.circular(12),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(
+              child: IconButton(
+                onPressed: () => Get.to(SideMenuScreen()),
+                icon: Icon(
                   Icons.menu_rounded,
                   color: isDark ? Colors.white : const Color(0xFF111827),
                   size: 24,
@@ -29,7 +30,7 @@ class MobileTopBar extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 4),
+
           const Expanded(child: GuyanaCentralLogo()),
           const SizedBox(width: 8),
           SizedBox(

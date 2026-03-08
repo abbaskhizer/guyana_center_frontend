@@ -1,9 +1,13 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:get/route_manager.dart';
+import 'package:get/state_manager.dart';
+import 'package:guyana_center_frontend/screens/store_screen.dart';
 
 class TopStoresSection extends StatelessWidget {
   const TopStoresSection({super.key});
 
-  final stores = const [
+  static const List<Map<String, dynamic>> stores = [
     {
       'name': 'Adelan Properties',
       'category': 'Real Estate',
@@ -27,136 +31,230 @@ class TopStoresSection extends StatelessWidget {
     },
   ];
 
+  bool _isWebDesktop(BuildContext context) =>
+      kIsWeb && MediaQuery.of(context).size.width >= 1000;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isWeb = _isWebDesktop(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Top Stores',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: theme.colorScheme.onSurface,
-                    fontSize: 24,
-                  ),
-                ),
-                Text(
-                  'Trusted sellers on Pin.tt',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-            TextButton(
-              onPressed: () {},
-              child: Row(
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'All stores',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: const Color(0xFF16A34A),
-                      fontWeight: FontWeight.w700,
+                    'Top Stores',
+                    style:
+                        (isWeb
+                                ? theme.textTheme.titleLarge
+                                : theme.textTheme.bodyMedium)
+                            ?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              fontSize: isWeb ? 24 : 14.5,
+                              color: cs.onSurface,
+                            ),
+                  ),
+                  const SizedBox(height: 4),
+                  if (isWeb)
+                    Text(
+                      'Trusted sellers on Pin.tt',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurface.withOpacity(0.6),
+                        fontSize: isWeb ? 14 : 12.5,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
+                ],
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Get.to(StoresScreen());
+              },
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                minimumSize: Size.zero,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    isWeb ? 'All stores' : 'View All',
+                    style:
+                        (isWeb
+                                ? theme.textTheme.bodyMedium
+                                : theme.textTheme.bodySmall)
+                            ?.copyWith(
+                              color: cs.primary,
+                              fontWeight: isWeb
+                                  ? FontWeight.w700
+                                  : FontWeight.w800,
+                            ),
                   ),
                   const SizedBox(width: 4),
-                  const Icon(
-                    Icons.chevron_right,
-                    color: Color(0xFF16A34A),
-                    size: 18,
-                  ),
+                  if (isWeb)
+                    Icon(Icons.chevron_right, color: cs.primary, size: 18),
                 ],
               ),
             ),
           ],
         ),
-        const SizedBox(height: 24),
-        Row(
-          children: stores.map((store) {
-            return Expanded(
-              child: Container(
-                margin: EdgeInsets.only(right: store == stores.last ? 0 : 16),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: theme.colorScheme.outlineVariant),
+        const SizedBox(height: 10),
+
+        if (isWeb)
+          Row(
+            children: List.generate(stores.length, (index) {
+              final store = stores[index];
+              return Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: index == stores.length - 1 ? 0 : 16,
+                  ),
+                  child: _TopStoreCard(
+                    name: store['name'] as String,
+                    category: store['category'] as String,
+                    rating: store['rating'] as String,
+                    color: store['color'] as Color,
+                    letter: store['letter'] as String,
+                    compact: false,
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: store['color'] as Color,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        store['letter'] as String,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            store['name'] as String,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                          ),
-                          Text(
-                            store['category'] as String,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withOpacity(
-                                0.6,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.star_outline,
-                          color: Color(0xFFD97706),
-                          size: 16,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          store['rating'] as String,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.onSurface,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+              );
+            }),
+          )
+        else
+          Column(
+            children: List.generate(stores.length, (index) {
+              final store = stores[index];
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: index == stores.length - 1 ? 0 : 12,
+                ),
+                child: _TopStoreCard(
+                  name: store['name'] as String,
+                  category: store['category'] as String,
+                  rating: store['rating'] as String,
+                  color: store['color'] as Color,
+                  letter: store['letter'] as String,
+                  compact: true,
+                ),
+              );
+            }),
+          ),
+      ],
+    );
+  }
+}
+
+class _TopStoreCard extends StatelessWidget {
+  final String name;
+  final String category;
+  final String rating;
+  final Color color;
+  final String letter;
+  final bool compact;
+
+  const _TopStoreCard({
+    required this.name,
+    required this.category,
+    required this.rating,
+    required this.color,
+    required this.letter,
+    required this.compact,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(compact ? 14 : 16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: compact ? 44 : 48,
+            height: compact ? 44 : 48,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              letter,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: compact ? 18 : 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                    fontSize: compact ? 13.5 : 14,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  category,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cs.onSurface.withOpacity(0.6),
+                    fontSize: compact ? 11.5 : 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.star_outline,
+                color: Color(0xFFD97706),
+                size: 16,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                rating,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: cs.onSurface,
                 ),
               ),
-            );
-          }).toList(),
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -164,70 +262,89 @@ class TopStoresSection extends StatelessWidget {
 class WhyTrinisLoveSection extends StatelessWidget {
   const WhyTrinisLoveSection({super.key});
 
+  bool _isWebDesktop(BuildContext context) =>
+      kIsWeb && MediaQuery.of(context).size.width >= 1000;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isWeb = _isWebDesktop(context);
+
+    final cards = [
+      const _BenefitCard(
+        title: '100% Free',
+        description:
+            'Post unlimited ads at no cost. No hidden fees, no premium plans — just free classifieds.',
+        icon: Icons.shield_outlined,
+        color: Color(0xFF16A34A),
+        bgColor: Color(0xFFF0FDF4),
+        borderColor: Color(0xFFDCFCE7),
+      ),
+      const _BenefitCard(
+        title: 'Fast Results',
+        description:
+            'Post an ad in under 60 seconds. Get calls from buyers the same day you list.',
+        icon: Icons.trending_up,
+        color: Color(0xFFDC2626),
+        bgColor: Color(0xFFFEF2F2),
+        borderColor: Color(0xFFFEE2E2),
+      ),
+      const _BenefitCard(
+        title: 'Made for T&T',
+        description:
+            'Built for locals — browse by parish, connect with nearby sellers, and deal in TTD.',
+        icon: Icons.location_on_outlined,
+        color: Color(0xFFD97706),
+        bgColor: Color(0xFFFFFBEB),
+        borderColor: Color(0xFFFEF3C7),
+      ),
+    ];
 
     return Column(
       children: [
-        const SizedBox(height: 64),
+        SizedBox(height: isWeb ? 64 : 28),
         Text(
           'Why Trinis Love Gyanacentral',
+          textAlign: TextAlign.center,
           style: theme.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.w900,
-            color: theme.colorScheme.onSurface,
-            fontSize: 32,
+            color: cs.onSurface,
+            fontSize: isWeb ? 32 : 22,
           ),
         ),
         const SizedBox(height: 12),
         Text(
           'Simple, free, and built for Trinidad & Tobago',
+          textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.6),
-            fontSize: 16,
+            color: cs.onSurface.withOpacity(0.6),
+            fontSize: isWeb ? 16 : 13.5,
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 48),
-        Row(
-          children: [
-            Expanded(
-              child: _BenefitCard(
-                title: '100% Free',
-                description:
-                    'Post unlimited ads at no cost. No hidden fees, no premium plans — just free classifieds.',
-                icon: Icons.shield_outlined,
-                color: const Color(0xFF16A34A),
-                bgColor: const Color(0xFFF0FDF4),
-                borderColor: const Color(0xFFDCFCE7),
-              ),
-            ),
-            const SizedBox(width: 24),
-            Expanded(
-              child: _BenefitCard(
-                title: 'Fast Results',
-                description:
-                    'Post an ad in under 60 seconds. Get calls from buyers the same day you list.',
-                icon: Icons.trending_up,
-                color: const Color(0xFFDC2626),
-                bgColor: const Color(0xFFFEF2F2),
-                borderColor: const Color(0xFFFEE2E2),
-              ),
-            ),
-            const SizedBox(width: 24),
-            Expanded(
-              child: _BenefitCard(
-                title: 'Made for T&T',
-                description:
-                    'Built for locals — browse by parish, connect with nearby sellers, and deal in TTD.',
-                icon: Icons.location_on_outlined,
-                color: const Color(0xFFD97706),
-                bgColor: const Color(0xFFFFFBEB),
-                borderColor: const Color(0xFFFEF3C7),
-              ),
-            ),
-          ],
-        ),
+        SizedBox(height: isWeb ? 48 : 24),
+
+        if (isWeb)
+          Row(
+            children: [
+              Expanded(child: cards[0]),
+              const SizedBox(width: 24),
+              Expanded(child: cards[1]),
+              const SizedBox(width: 24),
+              Expanded(child: cards[2]),
+            ],
+          )
+        else
+          Column(
+            children: [
+              cards[0],
+              const SizedBox(height: 12),
+              cards[1],
+              const SizedBox(height: 12),
+              cards[2],
+            ],
+          ),
       ],
     );
   }
@@ -250,16 +367,25 @@ class _BenefitCard extends StatelessWidget {
     required this.borderColor,
   });
 
+  bool _isWebDesktop(BuildContext context) =>
+      kIsWeb && MediaQuery.of(context).size.width >= 1000;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
+    final isWeb = _isWebDesktop(context);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: isWeb ? 32 : 18,
+        vertical: isWeb ? 48 : 24,
+      ),
       decoration: BoxDecoration(
-        color: isDark ? color.withOpacity(0.1) : bgColor,
-        borderRadius: BorderRadius.circular(24),
+        color: isDark ? color.withOpacity(0.10) : bgColor,
+        borderRadius: BorderRadius.circular(isWeb ? 24 : 18),
         border: Border.all(
           color: isDark ? color.withOpacity(0.25) : borderColor,
           width: 1,
@@ -268,32 +394,35 @@ class _BenefitCard extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 56,
-            height: 56,
+            width: isWeb ? 56 : 48,
+            height: isWeb ? 56 : 48,
             decoration: BoxDecoration(
               color: color,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(isWeb ? 16 : 14),
             ),
             alignment: Alignment.center,
-            child: Icon(icon, color: Colors.white, size: 28),
+            child: Icon(icon, color: Colors.white, size: isWeb ? 28 : 24),
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: isWeb ? 32 : 18),
           Text(
             title,
+            textAlign: TextAlign.center,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w900,
-              color: theme.colorScheme.onSurface,
-              fontSize: 20,
+              color: cs.onSurface,
+              fontSize: isWeb ? 20 : 17,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Text(
             description,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: const Color(0xFF6B7280),
+              color: isDark
+                  ? cs.onSurface.withOpacity(.72)
+                  : const Color(0xFF6B7280),
               height: 1.6,
-              fontSize: 14,
+              fontSize: isWeb ? 14 : 13,
               fontWeight: FontWeight.w500,
             ),
           ),

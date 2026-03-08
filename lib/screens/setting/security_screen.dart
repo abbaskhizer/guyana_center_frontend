@@ -10,7 +10,9 @@ class SecurityScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(SecurityController());
+    if (!Get.isRegistered<SecurityController>()) {
+      Get.put(SecurityController());
+    }
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -31,7 +33,9 @@ class SecurityContent extends StatelessWidget {
         ? Get.find<SecurityController>()
         : Get.put(SecurityController());
 
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final dividerColor = theme.dividerTheme.color ?? cs.outlineVariant;
 
     final content = Column(
       children: [
@@ -46,7 +50,7 @@ class SecurityContent extends StatelessWidget {
                     children: [
                       Text(
                         "••••••••",
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w900,
                           color: cs.onSurface,
                         ),
@@ -54,7 +58,7 @@ class SecurityContent extends StatelessWidget {
                       const SizedBox(height: 6),
                       Text(
                         "Changed 3 months ago",
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        style: theme.textTheme.bodySmall?.copyWith(
                           color: cs.onSurfaceVariant,
                           fontWeight: FontWeight.w600,
                         ),
@@ -158,19 +162,19 @@ class SecurityContent extends StatelessWidget {
               subtitle: "Chrome · Mac",
               success: true,
             ),
-            Divider(color: cs.outlineVariant.withOpacity(.8)),
+            Divider(color: dividerColor),
             _HistoryTile(
               title: "Yesterday",
               subtitle: "Safari · iOS",
               success: true,
             ),
-            Divider(color: cs.outlineVariant.withOpacity(.8)),
+            Divider(color: dividerColor),
             _HistoryTile(
               title: "Jan 8",
               subtitle: "Firefox · Win",
               success: true,
             ),
-            Divider(color: cs.outlineVariant.withOpacity(.8)),
+            Divider(color: dividerColor),
             _HistoryTile(
               title: "Jan 7",
               subtitle: "Unknown · Linux",
@@ -200,7 +204,7 @@ class SecurityContent extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   "Security",
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: cs.onSurface,
                   ),
@@ -208,7 +212,6 @@ class SecurityContent extends StatelessWidget {
               ],
             ),
           ),
-
         if (!kIsWeb)
           ColoredBox(
             color: cs.surface,
@@ -218,7 +221,10 @@ class SecurityContent extends StatelessWidget {
             ),
           )
         else
-          content,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
+            child: content,
+          ),
       ],
     );
   }
@@ -242,14 +248,16 @@ class SessionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tileBg = cs.surface;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tileBg = theme.cardColor;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: tileBg,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outlineVariant.withOpacity(.55)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -263,7 +271,7 @@ class SessionTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w900,
                       color: cs.onSurface,
                     ),
@@ -271,7 +279,7 @@ class SessionTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: cs.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
                     ),
@@ -286,7 +294,7 @@ class SessionTile extends StatelessWidget {
                   const SizedBox(width: 6),
                   Text(
                     "Now",
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: cs.primary,
                       fontWeight: FontWeight.w900,
                     ),
@@ -296,7 +304,7 @@ class SessionTile extends StatelessWidget {
             else
               Text(
                 status,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                style: theme.textTheme.bodySmall?.copyWith(
                   color: cs.onSurfaceVariant,
                   fontWeight: FontWeight.w700,
                 ),
@@ -321,7 +329,8 @@ class _HistoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -333,7 +342,7 @@ class _HistoryTile extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: cs.onSurface,
                   ),
@@ -341,7 +350,7 @@ class _HistoryTile extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  style: theme.textTheme.bodySmall?.copyWith(
                     color: cs.onSurfaceVariant,
                     fontWeight: FontWeight.w600,
                   ),

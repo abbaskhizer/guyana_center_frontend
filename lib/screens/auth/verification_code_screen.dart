@@ -84,7 +84,7 @@ class _WebVerificationLayout extends StatelessWidget {
                                       ?.copyWith(
                                         fontWeight: FontWeight.w900,
                                         letterSpacing: 0.4,
-                                        color: Colors.black,
+                                        color: cs.onSurface,
                                       ),
                                   children: [
                                     TextSpan(
@@ -92,6 +92,7 @@ class _WebVerificationLayout extends StatelessWidget {
                                       style: theme.textTheme.headlineSmall
                                           ?.copyWith(
                                             fontWeight: FontWeight.w900,
+                                            color: cs.onSurface,
                                           ),
                                     ),
                                     TextSpan(
@@ -124,7 +125,7 @@ class _WebVerificationLayout extends StatelessWidget {
                                   22,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.surface,
+                                  color: theme.cardColor,
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
                                     color: theme.colorScheme.outlineVariant,
@@ -187,8 +188,6 @@ class _VerificationForm extends StatelessWidget {
     final pinSize = centerOnWeb ? 44.0 : 56.0;
     final buttonHeight = centerOnWeb ? 48.0 : 54.0;
 
-    final isDark = theme.brightness == Brightness.dark;
-
     final defaultPinTheme = PinTheme(
       width: pinSize,
       height: pinSize,
@@ -197,7 +196,7 @@ class _VerificationForm extends StatelessWidget {
         color: cs.onSurface,
       ),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF6B7280) : cs.surface,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: cs.outlineVariant),
       ),
@@ -215,7 +214,6 @@ class _VerificationForm extends StatelessWidget {
       ),
     );
 
-    // ✅ FIX: mobile + web dono pe title/text/email center
     final titleAlign = TextAlign.center;
     final crossAlign = CrossAxisAlignment.center;
 
@@ -227,7 +225,11 @@ class _VerificationForm extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: IconButton(
               onPressed: () => Get.back(),
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+              icon: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                size: 18,
+                color: cs.onSurface,
+              ),
             ),
           ),
           const SizedBox(height: 10),
@@ -237,13 +239,14 @@ class _VerificationForm extends StatelessWidget {
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0.4,
-                  color: Colors.black,
+                  color: cs.onSurface,
                 ),
                 children: [
                   TextSpan(
                     text: "GUYANA",
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
+                      color: cs.onSurface,
                     ),
                   ),
                   TextSpan(
@@ -259,7 +262,6 @@ class _VerificationForm extends StatelessWidget {
           ),
           const SizedBox(height: 18),
         ],
-
         Center(
           child: Container(
             width: 56,
@@ -275,9 +277,7 @@ class _VerificationForm extends StatelessWidget {
             ),
           ),
         ),
-
         const SizedBox(height: 18),
-
         Column(
           crossAxisAlignment: crossAlign,
           children: [
@@ -288,7 +288,10 @@ class _VerificationForm extends StatelessWidget {
                   (centerOnWeb
                           ? theme.textTheme.titleMedium
                           : theme.textTheme.titleLarge)
-                      ?.copyWith(fontWeight: FontWeight.w900),
+                      ?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: cs.onSurface,
+                      ),
             ),
             const SizedBox(height: 10),
             Text(
@@ -311,13 +314,14 @@ class _VerificationForm extends StatelessWidget {
                   (centerOnWeb
                           ? theme.textTheme.bodySmall
                           : theme.textTheme.bodyMedium)
-                      ?.copyWith(fontWeight: FontWeight.w800),
+                      ?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: cs.onSurface,
+                      ),
             ),
           ],
         ),
-
         SizedBox(height: centerOnWeb ? 18 : 20),
-
         Center(
           child: Pinput(
             length: 6,
@@ -332,9 +336,7 @@ class _VerificationForm extends StatelessWidget {
             onCompleted: (_) => c.verifyCode(),
           ),
         ),
-
         const SizedBox(height: 16),
-
         Center(
           child: Obx(() {
             final s = c.secondsLeft.value;
@@ -359,9 +361,7 @@ class _VerificationForm extends StatelessWidget {
             );
           }),
         ),
-
         SizedBox(height: centerOnWeb ? 18 : 22),
-
         SizedBox(
           height: buttonHeight,
           width: double.infinity,
@@ -369,6 +369,7 @@ class _VerificationForm extends StatelessWidget {
             onPressed: c.verifyCode,
             style: ElevatedButton.styleFrom(
               backgroundColor: cs.primary,
+              foregroundColor: cs.onPrimary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
@@ -377,14 +378,12 @@ class _VerificationForm extends StatelessWidget {
               "Verify code",
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w900,
-                color: Colors.white,
+                color: cs.onPrimary,
               ),
             ),
           ),
         ),
-
         SizedBox(height: centerOnWeb ? 18 : 150),
-
         Row(
           children: [
             Expanded(child: Divider(color: cs.outlineVariant)),
@@ -401,9 +400,7 @@ class _VerificationForm extends StatelessWidget {
             Expanded(child: Divider(color: cs.outlineVariant)),
           ],
         ),
-
         SizedBox(height: centerOnWeb ? 14 : 18),
-
         if (centerOnWeb)
           SizedBox(
             height: 44,
@@ -419,6 +416,7 @@ class _VerificationForm extends StatelessWidget {
                 ),
               ),
               style: OutlinedButton.styleFrom(
+                backgroundColor: theme.cardColor,
                 side: BorderSide(color: cs.outlineVariant),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -430,11 +428,7 @@ class _VerificationForm extends StatelessWidget {
           Center(
             child: TextButton.icon(
               onPressed: () => Get.back(),
-              icon: Icon(
-                Icons.arrow_back,
-                weight: 700,
-                color: cs.onSurfaceVariant,
-              ),
+              icon: Icon(Icons.arrow_back, color: cs.onSurfaceVariant),
               label: Text(
                 "Back to log in",
                 style: theme.textTheme.bodyMedium?.copyWith(

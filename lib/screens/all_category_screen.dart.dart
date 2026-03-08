@@ -19,7 +19,9 @@ class AllCategoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(AllCategoryController(), permanent: true);
+    final controller = Get.isRegistered<AllCategoryController>()
+        ? Get.find<AllCategoryController>()
+        : Get.put(AllCategoryController(), permanent: true);
     final theme = Theme.of(context);
 
     if (controller.categories.isEmpty) {
@@ -30,7 +32,7 @@ class AllCategoryScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: _isWebDesktop(context)
-          ? theme.colorScheme.background
+          ? theme.colorScheme.surface
           : theme.scaffoldBackgroundColor,
       bottomNavigationBar: _isWebDesktop(context) ? null : CustomBottomNavBar(),
       body: SafeArea(
@@ -123,9 +125,7 @@ class _WebLayout extends StatelessWidget {
                   const WebHeader(),
                   Container(
                     width: double.infinity,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.black
-                        : Colors.white,
+                    color: theme.cardColor,
                     child: centered(
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 14, 0, 12),
@@ -146,9 +146,7 @@ class _WebLayout extends StatelessWidget {
             SliverToBoxAdapter(
               child: Container(
                 width: double.infinity,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Theme.of(context).scaffoldBackgroundColor
-                    : const Color(0xFFFAFAFA),
+                color: theme.colorScheme.surface,
                 child: centered(
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,10 +158,8 @@ class _WebLayout extends StatelessWidget {
                       const SizedBox(height: 14),
                       const _StatsRow(isWeb: true),
                       const SizedBox(height: 48),
-
                       _WebCategoriesContainer(controller: controller),
                       const SizedBox(height: 48),
-
                       const _NeedHelpCta(),
                       const SizedBox(height: 48),
                     ],
@@ -173,7 +169,7 @@ class _WebLayout extends StatelessWidget {
               ),
             ),
             SliverToBoxAdapter(
-              child: Container(color: cs.surface, child: WebFooter()),
+              child: Container(color: cs.surface, child: const WebFooter()),
             ),
           ],
         );
@@ -220,43 +216,37 @@ class _BreadcrumbTitleBlock extends StatelessWidget {
         Row(
           children: [
             if (isWeb) ...[
-              Image.asset(
-                'assets/icons/app_icon.png', // Fallback for the lines or replace with specific asset if needed, or build custom lines. Let's build custom lines.
-                height: 38,
-                errorBuilder: (context, error, stackTrace) {
-                  return Row(
-                    children: [
-                      Container(
-                        width: 6,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF16A34A),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Container(
-                        width: 6,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFD97706),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Container(
-                        width: 6,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFDC2626),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                    ],
-                  );
-                },
+              Row(
+                children: [
+                  Container(
+                    width: 6,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF16A34A),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Container(
+                    width: 6,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD97706),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Container(
+                    width: 6,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDC2626),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ],
               ),
-              if (isWeb) const SizedBox(width: 12),
+              const SizedBox(width: 12),
             ],
             Text(
               "All Categories",
@@ -379,15 +369,7 @@ class _WebIconBtn extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: cs.outlineVariant),
       ),
-      child: Icon(
-        icon,
-        size: 18,
-        color: Theme.of(context).brightness == Brightness.dark
-            ? const Color(
-                0xFF1E1E1E,
-              ) // For visibility against always-white background
-            : cs.onSurface.withOpacity(.7),
-      ),
+      child: Icon(icon, size: 18, color: cs.onSurface.withOpacity(.7)),
     );
   }
 }
@@ -452,7 +434,7 @@ class _MobileCollageRow extends StatelessWidget {
             imageUrl,
             fit: BoxFit.cover,
             errorBuilder: (_, __, ___) => Container(
-              color: cs.surface,
+              color: Theme.of(context).cardColor,
               alignment: Alignment.center,
               child: Icon(
                 Icons.broken_image_outlined,
@@ -605,11 +587,7 @@ class _WebCollageCard extends StatelessWidget {
                     color: Colors.white.withOpacity(.92),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
-                    Icons.category_rounded,
-                    size: 18,
-                    color: Colors.black87,
-                  ),
+                  child: Icon(icon, size: 18, color: Colors.black87),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -659,7 +637,7 @@ class _StatsRow extends StatelessWidget {
       children: [
         Expanded(
           child: _StatCard(
-            value: "50,000+",
+            value: "50,00+",
             label: "Total Listings",
             valueColor: isWeb ? const Color(0xFF16A34A) : mobileColor,
             icon: Icons.sell_outlined,
@@ -722,22 +700,17 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
 
     if (isWeb && icon != null) {
       return Container(
-        height: 120, // Even taller matching Figma block completely
+        height: 120,
         padding: const EdgeInsets.symmetric(horizontal: 24),
         decoration: BoxDecoration(
-          color: isDark
-              ? const Color(0xFF1F1F1F)
-              : Colors.white, // Deeper contrast in Dark Mode
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(20),
-          border: isDark
-              ? Border.all(color: Colors.transparent)
-              : Border.all(color: Colors.transparent),
+          border: Border.all(color: cs.outlineVariant.withOpacity(.35)),
           boxShadow: [
-            if (!isDark)
+            if (theme.brightness != Brightness.dark)
               BoxShadow(
                 color: Colors.black.withOpacity(0.02),
                 blurRadius: 15,
@@ -751,9 +724,7 @@ class _StatCard extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: isDark
-                    ? valueColor.withOpacity(0.2)
-                    : valueColor.withOpacity(0.08),
+                color: valueColor.withOpacity(0.12),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: valueColor, size: 24),
@@ -793,7 +764,7 @@ class _StatCard extends StatelessWidget {
       height: 70,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: cs.outlineVariant),
       ),
@@ -844,24 +815,13 @@ class _SearchField extends StatelessWidget {
       height: height,
       child: TextField(
         onChanged: onChanged,
-        style: TextStyle(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.black
-              : cs.onSurface,
-        ),
+        style: theme.textTheme.bodyMedium?.copyWith(color: cs.onSurface),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.black54
-                : cs.onSurfaceVariant,
+          hintStyle: theme.textTheme.bodyMedium?.copyWith(
+            color: cs.onSurfaceVariant,
           ),
-          prefixIcon: Icon(
-            Icons.search_rounded,
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.black54
-                : cs.onSurfaceVariant,
-          ),
+          prefixIcon: Icon(Icons.search_rounded, color: cs.onSurfaceVariant),
           filled: true,
           fillColor: theme.cardColor,
           enabledBorder: OutlineInputBorder(
@@ -918,8 +878,7 @@ class _CategoryListMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final cs = Theme.of(context).colorScheme;
 
     return Obx(() {
       final list = controller.filtered;
@@ -954,7 +913,6 @@ class _WebCategoriesContainer extends StatelessWidget {
   const _WebCategoriesContainer({required this.controller});
 
   int _columnsForWidth(double w) {
-    // ✅ Figma desktop layout
     if (w >= 1100) return 3;
     if (w >= 800) return 2;
     return 1;
@@ -964,12 +922,11 @@ class _WebCategoriesContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    const spacing = 24.0; // More spacing for Figma matching
+    const spacing = 24.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ✅ Figma Header Row inline
         Obx(() {
           final count = controller.filtered.length;
           return Row(
@@ -1000,8 +957,6 @@ class _WebCategoriesContainer extends StatelessWidget {
           );
         }),
         const SizedBox(height: 20),
-
-        // ✅ Grid
         Obx(() {
           final list = controller.filtered;
 
@@ -1018,8 +973,7 @@ class _WebCategoriesContainer extends StatelessWidget {
                   final item = list[i];
                   return SizedBox(
                     width: itemW,
-                    height:
-                        250, // Strict exact height for Web Grid cards according to design
+                    height: 250,
                     child: _WebCategoryCard(
                       item: item,
                       onTap: () =>
@@ -1042,37 +996,23 @@ class _WebCategoryCard extends StatelessWidget {
   const _WebCategoryCard({required this.item, required this.onTap});
 
   Color _cardBg(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.dark
-        ? const Color(
-            0xFF1F1F1F,
-          ) // Strictly mapping custom dark background instead of global surface
-        : Colors.white;
+    return Theme.of(context).cardColor;
   }
 
   Color _chipBg(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Theme.of(context).brightness == Brightness.dark
-        ? cs.surfaceVariant.withOpacity(0.5)
-        : const Color(0xFFFAFAFA); // Barely noticeable off-white
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    return theme.brightness == Brightness.dark
+        ? cs.surfaceContainerHighest.withOpacity(0.35)
+        : const Color(0xFFFAFAFA);
   }
 
   Color _chipBorder(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Theme.of(context).brightness == Brightness.dark
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    return theme.brightness == Brightness.dark
         ? cs.outlineVariant.withOpacity(0.2)
-        : const Color(0xFFF3F4F6); // Very slight border color almost invisible
-  }
-
-  Color _chipText(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Theme.of(context).brightness == Brightness.dark
-        ? cs.onSurface.withOpacity(.75)
-        : const Color(0xFF6B7280);
-  }
-
-  Color _mutedText(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return cs.onSurface.withOpacity(.55);
+        : const Color(0xFFF3F4F6);
   }
 
   @override
@@ -1095,9 +1035,7 @@ class _WebCategoryCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: theme.brightness == Brightness.dark
-              ? const Color(0xFF6B7280)
-              : theme.cardColor,
+          color: _cardBg(context),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: theme.brightness == Brightness.dark
@@ -1132,7 +1070,6 @@ class _WebCategoryCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 16),
-
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 4),
@@ -1157,7 +1094,7 @@ class _WebCategoryCard extends StatelessWidget {
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.brightness == Brightness.dark
                                 ? Colors.white.withOpacity(0.85)
-                                : _mutedText(context),
+                                : cs.onSurface.withOpacity(.55),
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
                             height: 1.25,
@@ -1242,15 +1179,9 @@ class _CategoryTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         child: Container(
           decoration: BoxDecoration(
-            color: theme.brightness == Brightness.dark
-                ? const Color(0xFF6B7280)
-                : theme.cardColor,
+            color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: theme.brightness == Brightness.dark
-                  ? Colors.transparent
-                  : cs.outlineVariant,
-            ),
+            border: Border.all(color: cs.outlineVariant),
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
@@ -1391,10 +1322,7 @@ class _NeedHelpCta extends StatelessWidget {
         color: const Color(0xFF16A34A),
         borderRadius: BorderRadius.circular(24),
         gradient: const LinearGradient(
-          colors: [
-            Color(0xFF15803D), // slightly darker green
-            Color(0xFF16A34A), // brand green
-          ],
+          colors: [Color(0xFF15803D), Color(0xFF16A34A)],
           begin: Alignment.bottomLeft,
           end: Alignment.topRight,
         ),

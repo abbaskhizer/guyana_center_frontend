@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/screens/agent_profile_screen.dart';
+import 'package:guyana_center_frontend/screens/side_menu_screen.dart';
 import 'package:guyana_center_frontend/widgets/mobile_top_bar.dart';
 import 'package:guyana_center_frontend/widgets/profile_dot.dart';
 
@@ -19,7 +20,11 @@ class MobileHeader extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             child: Padding(
               padding: const EdgeInsets.all(6),
-              child: Icon(Icons.menu_rounded, color: cs.onSurface, size: 22),
+              child: IconButton(
+                onPressed: () => Get.to(SideMenuScreen()),
+                icon: Icon(Icons.menu_rounded, size: 22),
+                color: cs.onSurface,
+              ),
             ),
           ),
         ),
@@ -33,8 +38,8 @@ class MobileHeader extends StatelessWidget {
             Container(
               width: 34,
               height: 34,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF3F4F6),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHighest.withOpacity(0.5),
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
