@@ -44,7 +44,6 @@ class MyApp extends StatelessWidget {
             ).copyWith(
               primary: kPrimaryColor,
               onPrimary: Colors.white,
-              background: Colors.white,
               surface: const Color(0xFFF8FAFC),
               outlineVariant: const Color(0xFFE5E7EB),
               onSurface: const Color(0xFF111827),
@@ -165,7 +164,6 @@ class MyApp extends StatelessWidget {
             ).copyWith(
               primary: kPrimaryColor,
               onPrimary: Colors.white,
-              background: Colors.black,
               surface: Colors.black,
               outlineVariant: const Color(0xFF374151),
               onSurface: Colors.white,

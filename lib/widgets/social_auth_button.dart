@@ -63,7 +63,7 @@ class _BrandCircle extends StatelessWidget {
       width: 26,
       height: 26,
       decoration: BoxDecoration(
-        color: cs.surfaceVariant.withOpacity(.5),
+        color: cs.surfaceContainerHighest.withOpacity(.5),
         shape: BoxShape.circle,
         border: Border.all(color: cs.outlineVariant),
       ),

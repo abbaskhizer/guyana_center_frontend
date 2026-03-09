@@ -433,7 +433,7 @@ class _MobileCollageRow extends StatelessWidget {
           child: Image.network(
             imageUrl,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(
+            errorBuilder: (_, _, _) => Container(
               color: Theme.of(context).cardColor,
               alignment: Alignment.center,
               child: Icon(
@@ -559,7 +559,7 @@ class _WebCollageCard extends StatelessWidget {
           Image.network(
             imageUrl,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) =>
+            errorBuilder: (_, _, _) =>
                 Container(color: theme.colorScheme.surface),
           ),
           Container(
@@ -1062,7 +1062,7 @@ class _WebCategoryCard extends StatelessWidget {
                   child: Image.asset(
                     item.assetImage ?? "assets/vehicle.png",
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => Icon(
+                    errorBuilder: (_, _, _) => Icon(
                       Icons.broken_image_outlined,
                       color: cs.onSurface.withOpacity(.35),
                       size: 20,
@@ -1202,7 +1202,7 @@ class _CategoryTile extends StatelessWidget {
                       child: Image.asset(
                         item.assetImage ?? "assets/vehicle.png",
                         fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => Icon(
+                        errorBuilder: (_, _, _) => Icon(
                           Icons.broken_image_outlined,
                           color: cs.onSurface.withOpacity(.35),
                           size: 20,

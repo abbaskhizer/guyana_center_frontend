@@ -327,7 +327,7 @@ class _ConversationList extends GetView<MessagesController> {
       () => ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         itemCount: controller.chats.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 2),
+        separatorBuilder: (_, _) => const SizedBox(height: 2),
         itemBuilder: (context, index) {
           final chat = controller.chats[index];
           final selected = controller.selectedChatIndex.value == index;

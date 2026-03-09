@@ -564,7 +564,7 @@ class BrowseResults extends StatelessWidget {
                   itemCount: controller.filtered.length,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (_, i) {
                     final item = controller.filtered[i];
                     return _BrowseListingCardWrapper(
@@ -610,7 +610,7 @@ class _ListingCard extends StatelessWidget {
     if (listView) {
       return Container(
         decoration: BoxDecoration(
-          color: cs.background,
+          color: cs.surface,
           borderRadius: BorderRadius.circular(18),
 
           boxShadow: [

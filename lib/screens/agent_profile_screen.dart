@@ -897,7 +897,7 @@ class _AgentListingCard extends StatelessWidget {
                   height: 150,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (_, _, _) => Container(
                     height: 150,
                     color: cs.surfaceContainerHighest,
                     alignment: Alignment.center,

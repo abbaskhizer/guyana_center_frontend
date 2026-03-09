@@ -39,7 +39,7 @@ class BrowseSearchesListingScreen extends StatelessWidget {
                             width: 34,
                             height: 34,
                             decoration: BoxDecoration(
-                              color: cs.surfaceVariant,
+                              color: cs.surfaceContainerHighest,
                               shape: BoxShape.circle,
                             ),
                             alignment: Alignment.center,
@@ -58,7 +58,7 @@ class BrowseSearchesListingScreen extends StatelessWidget {
                               width: 34,
                               height: 34,
                               decoration: BoxDecoration(
-                                color: cs.surfaceVariant,
+                                color: cs.surfaceContainerHighest,
                                 shape: BoxShape.circle,
                               ),
                               alignment: Alignment.center,
@@ -120,7 +120,7 @@ class BrowseSearchesListingScreen extends StatelessWidget {
                   () => ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: controller.categories.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
                     itemBuilder: (_, index) {
                       final item = controller.categories[index];
                       final label = item["label"] as String;

@@ -9,28 +9,32 @@ class FeaturedVehiclesSection extends StatelessWidget {
       'title': 'Toyota Hilux 2023',
       'price': '\$185,000',
       'location': 'Port of Spain',
-      'imageUrl': 'https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'imageUrl':
+          'https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=800',
       'pictureCount': 7,
     },
     {
       'title': 'Nissan Juke 2018',
       'price': '\$120,000',
       'location': 'San Fernando',
-      'imageUrl': 'https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'imageUrl':
+          'https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg?auto=compress&cs=tinysrgb&w=800',
       'pictureCount': 12,
     },
     {
       'title': 'Toyota Aqua 2015',
       'price': '\$95,000',
       'location': 'Chaguanas',
-      'imageUrl': 'https://images.pexels.com/photos/120049/pexels-photo-120049.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'imageUrl':
+          'https://images.pexels.com/photos/120049/pexels-photo-120049.jpeg?auto=compress&cs=tinysrgb&w=800',
       'pictureCount': 7,
     },
     {
       'title': 'Nissan Frontier 2021',
       'price': '\$210,000',
       'location': 'Arima',
-      'imageUrl': 'https://images.pexels.com/photos/210019/pexels-photo-210019.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'imageUrl':
+          'https://images.pexels.com/photos/210019/pexels-photo-210019.jpeg?auto=compress&cs=tinysrgb&w=800',
       'pictureCount': 9,
     },
   ];
@@ -60,7 +64,7 @@ class FeaturedVehiclesSection extends StatelessWidget {
                   fit: BoxFit.contain,
                   width: 28,
                   height: 28,
-                  errorBuilder: (_, __, ___) => Icon(
+                  errorBuilder: (_, _, _) => Icon(
                     Icons.directions_car_outlined,
                     color: cs.primary,
                     size: 28,
@@ -93,7 +97,10 @@ class FeaturedVehiclesSection extends StatelessWidget {
               TextButton(
                 onPressed: () {},
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
@@ -117,7 +124,7 @@ class FeaturedVehiclesSection extends StatelessWidget {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: vehicles.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
               itemBuilder: (_, index) {
                 final vehicle = vehicles[index];
                 return SizedBox(
@@ -150,7 +157,8 @@ class RealEstateSection extends StatelessWidget {
       'title': '2BR House in Coromandel',
       'price': '\$1,250,000',
       'location': 'Coromandel',
-      'imageUrl': 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=900',
+      'imageUrl':
+          'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=900',
       'pictureCount': 9,
       'tag': 'For Sale',
     },
@@ -158,7 +166,8 @@ class RealEstateSection extends StatelessWidget {
       'title': '2BR Apt in Chaguanas',
       'price': '\$4,500/mo',
       'location': 'Chaguanas',
-      'imageUrl': 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=900',
+      'imageUrl':
+          'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=900',
       'pictureCount': 11,
       'tag': 'For Rent',
     },
@@ -166,7 +175,8 @@ class RealEstateSection extends StatelessWidget {
       'title': '3BR House in Maraval',
       'price': '\$2,800,000',
       'location': 'Maraval',
-      'imageUrl': 'https://images.pexels.com/photos/259588/pexels-photo-259588.jpeg?auto=compress&cs=tinysrgb&w=900',
+      'imageUrl':
+          'https://images.pexels.com/photos/259588/pexels-photo-259588.jpeg?auto=compress&cs=tinysrgb&w=900',
       'pictureCount': 16,
       'tag': 'For Sale',
     },
@@ -174,7 +184,8 @@ class RealEstateSection extends StatelessWidget {
       'title': '2BR Apt in Maraval',
       'price': '\$6,200/mo',
       'location': 'Maraval',
-      'imageUrl': 'https://images.pexels.com/photos/1642128/pexels-photo-1642128.jpeg?auto=compress&cs=tinysrgb&w=900',
+      'imageUrl':
+          'https://images.pexels.com/photos/1642128/pexels-photo-1642128.jpeg?auto=compress&cs=tinysrgb&w=900',
       'pictureCount': 14,
       'tag': 'For Rent',
     },
@@ -205,11 +216,8 @@ class RealEstateSection extends StatelessWidget {
                   fit: BoxFit.contain,
                   width: 28,
                   height: 28,
-                  errorBuilder: (_, __, ___) => Icon(
-                    Icons.home_outlined,
-                    color: cs.primary,
-                    size: 28,
-                  ),
+                  errorBuilder: (_, _, _) =>
+                      Icon(Icons.home_outlined, color: cs.primary, size: 28),
                 ),
               ),
               const SizedBox(width: 8),
@@ -238,7 +246,10 @@ class RealEstateSection extends StatelessWidget {
               TextButton(
                 onPressed: () {},
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
@@ -262,7 +273,7 @@ class RealEstateSection extends StatelessWidget {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: properties.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
               itemBuilder: (_, index) {
                 final property = properties[index];
                 return SizedBox(

@@ -14,7 +14,7 @@ class CustomBottomNavBar extends StatelessWidget {
 
     final barColor = theme.brightness == Brightness.dark
         ? cs.surface
-        : cs.background;
+        : cs.surface;
 
     final inactive = cs.onSurfaceVariant;
 

@@ -257,7 +257,7 @@ class _EmptyFavoriteSearches extends StatelessWidget {
 }
 
 class _FavoriteSearchIcon extends StatelessWidget {
-  const _FavoriteSearchIcon({super.key});
+  const _FavoriteSearchIcon();
 
   @override
   Widget build(BuildContext context) {

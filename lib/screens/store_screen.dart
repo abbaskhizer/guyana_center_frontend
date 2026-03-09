@@ -53,7 +53,7 @@ class StoresScreen extends StatelessWidget {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: c.visibleStores.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      separatorBuilder: (_, _) => const SizedBox(height: 10),
                       itemBuilder: (_, i) =>
                           StoreTile(store: c.visibleStores[i]),
                     ),
@@ -257,7 +257,7 @@ class ChipPill extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? cs.primary.withOpacity(0.10) : cs.background,
+          color: active ? cs.primary.withOpacity(0.10) : cs.surface,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
             color: active
@@ -309,7 +309,7 @@ class StoreTile extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: cs.background,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(

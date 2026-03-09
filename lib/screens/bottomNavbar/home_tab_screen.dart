@@ -64,7 +64,7 @@ class _MobileLayout extends StatelessWidget {
             return ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: list.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 14),
+              separatorBuilder: (_, _) => const SizedBox(width: 14),
               itemBuilder: (_, i) {
                 final item = list[i];
                 final active = i == selected;
@@ -121,7 +121,7 @@ class _MobileLayout extends StatelessWidget {
             return ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: props.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
               itemBuilder: (_, i) {
                 final p = props[i];
                 return _PropertyCard(
@@ -210,7 +210,7 @@ class _WebLayout extends StatelessWidget {
         ),
         SliverToBoxAdapter(
           child: Container(
-            color: theme.colorScheme.background,
+            color: theme.colorScheme.surface,
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
@@ -768,7 +768,7 @@ class _CategoryCard extends StatelessWidget {
                 child: Image.asset(
                   assetImage,
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => Icon(
+                  errorBuilder: (_, _, _) => Icon(
                     Icons.broken_image_outlined,
                     color: active ? Colors.white : cs.onSurfaceVariant,
                   ),
@@ -839,7 +839,7 @@ class _ListingCard extends StatelessWidget {
                   child: Image(
                     image: item.image,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    errorBuilder: (_, _, _) => Container(
                       color: cs.surfaceContainerHighest,
                       alignment: Alignment.center,
                       child: Icon(
@@ -970,8 +970,8 @@ class _PropertyCard extends StatelessWidget {
     required this.meta,
     required this.image,
     this.isFav = false,
-    this.onTap,
     this.onFavTap,
+    this.onTap,
   });
 
   @override
@@ -1010,7 +1010,7 @@ class _PropertyCard extends StatelessWidget {
                     Image(
                       image: image,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorBuilder: (_, _, _) => Container(
                         color: cs.surfaceContainerHighest,
                         alignment: Alignment.center,
                         child: Icon(

@@ -301,7 +301,7 @@ class _ImageGalleryMobile extends StatelessWidget {
               child: Image.network(
                 item.gallery[imageIndex],
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+                errorBuilder: (_, _, _) => Container(
                   color: cs.surfaceContainerHighest,
                   alignment: Alignment.center,
                   child: Icon(
@@ -389,7 +389,7 @@ class _ImageGalleryWeb extends StatelessWidget {
               child: Image.network(
                 item.gallery[imageIndex],
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+                errorBuilder: (_, _, _) => Container(
                   color: cs.surfaceContainerHighest,
                   alignment: Alignment.center,
                   child: Icon(
@@ -471,7 +471,7 @@ class _ThumbnailStrip extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: compact ? 0 : 12),
         scrollDirection: Axis.horizontal,
         itemCount: item.gallery.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (_, i) {
           final active = i == idx;
 
@@ -492,7 +492,7 @@ class _ThumbnailStrip extends StatelessWidget {
                 child: Image.network(
                   item.gallery[i],
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (_, _, _) => Container(
                     color: cs.surfaceContainerHighest,
                     alignment: Alignment.center,
                     child: Icon(
@@ -1456,7 +1456,7 @@ class _LocationSection extends StatelessWidget {
               child: Image.network(
                 'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=1200',
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+                errorBuilder: (_, _, _) => Container(
                   color: cs.surfaceContainerHighest,
                   alignment: Alignment.center,
                   child: Icon(
@@ -1549,7 +1549,7 @@ class _SimilarAdsSection extends StatelessWidget {
         padding: EdgeInsets.zero,
         scrollDirection: Axis.horizontal,
         itemCount: 4,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (_, i) => _SimilarCard(
           imageUrl: item.gallery[i % item.gallery.length],
           title: web ? 'Toyota Corolla 2019' : 'Toyota Van 2016',
@@ -1706,7 +1706,7 @@ class _SimilarCard extends StatelessWidget {
               height: web ? 92 : 100,
               width: web ? 160 : 150,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
+              errorBuilder: (_, _, _) => Container(
                 height: web ? 92 : 100,
                 color: cs.surfaceContainerHighest,
                 alignment: Alignment.center,

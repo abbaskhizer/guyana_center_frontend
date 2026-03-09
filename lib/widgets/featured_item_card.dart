@@ -77,7 +77,7 @@ class FeaturedItemCard extends StatelessWidget {
                         loadingBuilder: (context, child, progress) {
                           if (progress == null) return child;
                           return Container(
-                            color: cs.surfaceVariant,
+                            color: cs.surfaceContainerHighest,
                             alignment: Alignment.center,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
@@ -85,8 +85,8 @@ class FeaturedItemCard extends StatelessWidget {
                             ),
                           );
                         },
-                        errorBuilder: (_, __, ___) => Container(
-                          color: cs.surfaceVariant,
+                        errorBuilder: (_, _, _) => Container(
+                          color: cs.surfaceContainerHighest,
                           alignment: Alignment.center,
                           child: Icon(
                             Icons.broken_image_outlined,

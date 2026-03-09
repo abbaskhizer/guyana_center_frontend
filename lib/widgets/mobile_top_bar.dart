@@ -11,7 +11,7 @@ class MobileTopBar extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
+    return SizedBox(
       height: 60,
       // padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Row(

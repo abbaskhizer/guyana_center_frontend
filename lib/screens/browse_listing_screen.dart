@@ -639,7 +639,7 @@ class _ChipRow extends StatelessWidget {
         return ListView.separated(
           scrollDirection: Axis.horizontal,
           itemCount: tabs.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 20),
+          separatorBuilder: (_, _) => const SizedBox(width: 20),
           itemBuilder: (_, i) => Center(
             child: _TabPill(
               text: tabs[i],
@@ -793,7 +793,7 @@ class _SearchAndFilterRow extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     decoration: BoxDecoration(
                       color: grid
-                          ? cs.surfaceVariant.withOpacity(0.5)
+                          ? cs.surfaceContainerHighest.withOpacity(0.5)
                           : Colors.transparent,
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(14),
@@ -816,7 +816,7 @@ class _SearchAndFilterRow extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     decoration: BoxDecoration(
                       color: !grid
-                          ? cs.surfaceVariant.withOpacity(0.5)
+                          ? cs.surfaceContainerHighest.withOpacity(0.5)
                           : Colors.transparent,
                       borderRadius: const BorderRadius.only(
                         topRight: Radius.circular(14),
@@ -1392,8 +1392,8 @@ class ListingCardGrid extends StatelessWidget {
                     item.imageUrl,
                     fit: BoxFit.cover,
                     width: double.infinity,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: cs.surfaceVariant,
+                    errorBuilder: (_, _, _) => Container(
+                      color: cs.surfaceContainerHighest,
                       alignment: Alignment.center,
                       child: Icon(
                         Icons.broken_image_outlined,
@@ -1633,8 +1633,8 @@ class ListingCardList extends StatelessWidget {
               child: Image.network(
                 item.imageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  color: cs.surfaceVariant,
+                errorBuilder: (_, _, _) => Container(
+                  color: cs.surfaceContainerHighest,
                   alignment: Alignment.center,
                   child: Icon(
                     Icons.broken_image_outlined,

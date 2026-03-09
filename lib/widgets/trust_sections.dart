@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
-import 'package:get/state_manager.dart';
 import 'package:guyana_center_frontend/screens/store_screen.dart';
 
 class TopStoresSection extends StatelessWidget {

@@ -4,7 +4,7 @@ import 'package:guyana_center_frontend/modal/browse_categoryVM.dart';
 
 class WebCategoriesGrid extends StatelessWidget {
   final HomeTabController controller;
-  const WebCategoriesGrid({required this.controller});
+  const WebCategoriesGrid({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -18,8 +18,9 @@ class WebCategoriesGrid extends StatelessWidget {
         // First row (6 items)
         Row(
           children: List.generate(6, (index) {
-            if (index >= allCategories.length)
+            if (index >= allCategories.length) {
               return const Expanded(child: SizedBox());
+            }
             final item = allCategories[index];
             return Expanded(
               child: Padding(
@@ -34,8 +35,9 @@ class WebCategoriesGrid extends StatelessWidget {
         Row(
           children: List.generate(6, (index) {
             final secondIndex = index + 6;
-            if (secondIndex >= allCategories.length)
+            if (secondIndex >= allCategories.length) {
               return const Expanded(child: SizedBox());
+            }
             final item = allCategories[secondIndex];
             return Expanded(
               child: Padding(
@@ -90,7 +92,7 @@ class _WebCategoryCard extends StatelessWidget {
               fit: BoxFit.contain,
               width: 28,
               height: 28,
-              errorBuilder: (_, __, ___) => Icon(
+              errorBuilder: (_, _, _) => Icon(
                 Icons.broken_image_outlined,
                 color: cs.onSurfaceVariant,
                 size: 24,
