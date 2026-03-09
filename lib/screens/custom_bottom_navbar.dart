@@ -88,7 +88,7 @@ class CustomBottomNavBar extends StatelessWidget {
           ),
 
           Positioned(
-            top: -5,
+            top: -25,
             child: GestureDetector(
               onTap: () => c.goToTab(2),
               child: Column(
