@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">guyana_center_frontend</string>
+    <string name="facebook_app_id">1669914647547310</string>
+    <string name="fb_login_protocol_scheme">fb1669914647547310</string>
+    <!-- TODO: Replace with your actual Client Token from Facebook Developer Dashboard (Settings > Advanced) -->
+    <string name="facebook_client_token">07f66e06b3a9856a93910c268a78e886</string>
+</resources>

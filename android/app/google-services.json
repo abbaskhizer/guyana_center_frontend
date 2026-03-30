@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "938776904371",
+    "project_id": "gycentral-5713c",
+    "storage_bucket": "gycentral-5713c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:938776904371:android:962a16748220fb5680a6c6",
+        "android_client_info": {
+          "package_name": "com.guyanacentral.www"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "938776904371-uempa36brvbv0lepavl1t0n1p6f9b7r0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.guyanacentral.www",
+            "certificate_hash": "4b871bb5f3a8d07cd610644b8bf014f9030ff278"
+          }
+        },
+        {
+          "client_id": "938776904371-9mph6an5ov3dlkj3o6lgg31t4c11d8pk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-FtB8ya1Drs8TQ7ODnr0rYyrECz_Yo-Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "938776904371-9mph6an5ov3dlkj3o6lgg31t4c11d8pk.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "938776904371-7v3k40ivti68racdc7bcod7cnqkld946.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.guyanacentral.www"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
