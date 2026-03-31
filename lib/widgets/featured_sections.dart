@@ -6,8 +6,6 @@ import 'package:guyana_center_frontend/widgets/featured_item_card.dart';
 class FeaturedVehiclesSection extends StatelessWidget {
   const FeaturedVehiclesSection({super.key});
 
-
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -64,24 +62,6 @@ class FeaturedVehiclesSection extends StatelessWidget {
                 ],
               ),
               const Spacer(),
-              TextButton(
-                onPressed: () {},
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  'See all >',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: cs.primary,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -98,7 +78,7 @@ class FeaturedVehiclesSection extends StatelessWidget {
               final vehicles = controller.featuredListings
                   .where((l) => l.categoryId.toLowerCase() == 'vehicles')
                   .toList();
-                  
+
               if (vehicles.isEmpty) {
                 return const Center(child: Text("No vehicles found"));
               }
@@ -132,11 +112,8 @@ class FeaturedVehiclesSection extends StatelessWidget {
   }
 }
 
-
 class RealEstateSection extends StatelessWidget {
   const RealEstateSection({super.key});
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -191,24 +168,6 @@ class RealEstateSection extends StatelessWidget {
                 ],
               ),
               const Spacer(),
-              TextButton(
-                onPressed: () {},
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  'See all >',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: cs.primary,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -223,7 +182,7 @@ class RealEstateSection extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               }
               final props = controller.properties;
-                  
+
               if (props.isEmpty) {
                 return const Center(child: Text("No properties found"));
               }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:guyana_center_frontend/controller/notification_controller.dart';
 import 'package:guyana_center_frontend/screens/auth/login_signup_screen.dart';
+import 'package:guyana_center_frontend/screens/notification_screen.dart';
 import 'package:guyana_center_frontend/screens/side_menu_screen.dart';
 import 'package:guyana_center_frontend/services/auth_service.dart';
 import 'package:guyana_center_frontend/widgets/profile_dot.dart';
@@ -20,81 +22,102 @@ class MobileTopBar extends StatelessWidget {
       // padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Row(
         children: [
-        Transform.translate(
-          offset: const Offset(-4, 0),
-          child: Stack(
-            children: [
-              IconButton(
-                onPressed: () => Get.to(() => const SideMenuScreen()),
-                icon: Icon(
-                  Icons.menu_rounded,
-                  size: 28,
-                  color: isDark ? Colors.white : const Color(0xFF111827),
+          Transform.translate(
+            offset: const Offset(-4, 0),
+            child: Stack(
+              children: [
+                IconButton(
+                  onPressed: () => Get.to(() => const SideMenuScreen()),
+                  icon: Icon(
+                    Icons.menu_rounded,
+                    size: 28,
+                    color: isDark ? Colors.white : const Color(0xFF111827),
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
                 ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-              Obx(() {
-                final msgController = Get.isRegistered<MessagesController>() 
-                    ? Get.find<MessagesController>() 
-                    : Get.put(MessagesController(), permanent: true);
-                if (msgController.totalUnreadCount > 0) {
-                  return Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 10,
-                      height: 10,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
+                Obx(() {
+                  final msgController = Get.isRegistered<MessagesController>()
+                      ? Get.find<MessagesController>()
+                      : Get.put(MessagesController(), permanent: true);
+                  if (msgController.totalUnreadCount > 0) {
+                    return Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        width: 10,
+                        height: 10,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              }),
-            ],
+                    );
+                  }
+                  return const SizedBox.shrink();
+                }),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(width: 10),
+          const SizedBox(width: 10),
 
           const Expanded(child: GuyanaCentralLogo()),
           const SizedBox(width: 8),
           Obx(() {
             if (AuthService.to.isLoggedIn.value) {
+              final notifController = Get.isRegistered<NotificationController>()
+                  ? Get.find<NotificationController>()
+                  : Get.put(NotificationController());
               return Row(
                 children: [
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Container(
-                        width: 34,
-                        height: 34,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: const Icon(
-                          Icons.notifications_none_rounded,
-                          size: 18,
-                          color: Color(0xFF6B7280),
-                        ),
-                      ),
-                      Positioned(
-                        right: 2,
-                        top: 3,
-                        child: Container(
-                          width: 7,
-                          height: 7,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFF7A2F),
-                            shape: BoxShape.circle,
+                  GestureDetector(
+                    onTap: () {
+                      print('🔔 Notification bell tapped in MobileTopBar');
+                      Get.toNamed('/notifications');
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: Obx(() {
+                      final count = notifController.unreadCount.value;
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: 34,
+                            height: 34,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHighest
+                                  .withOpacity(0.5),
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Icon(
+                              Icons.notifications_rounded,
+                              size: 18,
+                              color: count > 0
+                                  ? theme.colorScheme.primary
+                                  : const Color(0xFF6B7280),
+                            ),
                           ),
-                        ),
-                      ),
-                    ],
+                          if (count > 0)
+                            Positioned(
+                              right: -2,
+                              top: -2,
+                              child: Container(
+                                width: 10,
+                                height: 10,
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 1.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    }),
                   ),
                   const SizedBox(width: 12),
                   ProfileDot(

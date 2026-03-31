@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'screens/splash_screen.dart';
 import 'screens/home_screen.dart';
@@ -16,6 +17,7 @@ import 'screens/agent_profile_screen.dart';
 import 'screens/listing_detail_screen.dart';
 import 'screens/message_screen.dart';
 import 'screens/chat_screen.dart';
+import 'screens/notification_screen.dart';
 import 'utils/size_config.dart';
 import 'services/auth_service.dart';
 import 'services/firebase_auth_service.dart';
@@ -29,15 +31,29 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   usePathUrlStrategy();
 
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: const FirebaseOptions(
-      apiKey: 'AIzaSyB-FtB8ya1Drs8TQ7ODnr0rYyrECz_Yo-Y',
-      appId: '1:938776904371:android:962a16748220fb5680a6c6',
-      messagingSenderId: '938776904371',
-      projectId: 'gycentral-5713c',
-    ),
-  );
+  // Initialize Firebase with platform-specific options
+  if (kIsWeb) {
+    await Firebase.initializeApp(
+      options: const FirebaseOptions(
+        apiKey: 'AIzaSyBQCmLO8u2MAZxz1YzKgScW_F8JsXrcIcI',
+        appId: '1:938776904371:web:7802f201ae81d11c80a6c6',
+        messagingSenderId: '938776904371',
+        projectId: 'gycentral-5713c',
+        authDomain: 'gycentral-5713c.firebaseapp.com',
+        storageBucket: 'gycentral-5713c.firebasestorage.app',
+        measurementId: 'G-V8R54ZQ8P2',
+      ),
+    );
+  } else {
+    await Firebase.initializeApp(
+      options: const FirebaseOptions(
+        apiKey: 'AIzaSyB-FtB8ya1Drs8TQ7ODnr0rYyrECz_Yo-Y',
+        appId: '1:938776904371:android:962a16748220fb5680a6c6',
+        messagingSenderId: '938776904371',
+        projectId: 'gycentral-5713c',
+      ),
+    );
+  }
 
   // Initialize services
   await Get.putAsync(() async => AuthService());
@@ -310,27 +326,56 @@ class MyApp extends StatelessWidget {
       getPages: [
         GetPage(name: '/', page: () => const SplashScreen()),
         GetPage(name: '/home', page: () => HomeScreen()),
-        GetPage(name: '/login', page: () => const LoginSignupScreen(isSignup: false)),
-        GetPage(name: '/signup', page: () => const LoginSignupScreen(isSignup: true)),
-        GetPage(name: '/forgot-password', page: () => const ForgotPasswordScreen()),
-        GetPage(name: '/verification', page: () => const VerificationCodeScreen()),
-        GetPage(name: '/reset-password', page: () => const ResetPasswordScreen()),
+        GetPage(
+          name: '/login',
+          page: () => const LoginSignupScreen(isSignup: false),
+        ),
+        GetPage(
+          name: '/signup',
+          page: () => const LoginSignupScreen(isSignup: true),
+        ),
+        GetPage(
+          name: '/forgot-password',
+          page: () => const ForgotPasswordScreen(),
+        ),
+        GetPage(
+          name: '/verification',
+          page: () => const VerificationCodeScreen(),
+        ),
+        GetPage(
+          name: '/reset-password',
+          page: () => const ResetPasswordScreen(),
+        ),
         GetPage(name: '/settings', page: () => const SettingScreen()),
         GetPage(name: '/favorites', page: () => const FavoritesScreen()),
         GetPage(name: '/sell', page: () => const SellScreen()),
         GetPage(name: '/agent-profile', page: () => AgentProfileScreen()),
         GetPage(name: '/listing-detail', page: () => ListingDetailScreen()),
-GetPage(name: '/messages', page: () => const MessagesScreen()),
-GetPage(name: '/chat', page: () => ChatScreen(
-conversationId: Get.arguments['conversationId'] ?? '',
-otherUserId: Get.arguments['otherUserId'] ?? '',
-otherUserName: Get.arguments['otherUserName'] ?? 'Seller',
-listingId: Get.arguments['listingId'] ?? 0,
-listingTitle: Get.arguments['listingTitle'] ?? 'Listing',
-listingPrice: Get.arguments['listingPrice'],
-)),
+        
+        // Deep link routes for sharing
+        GetPage(
+          name: '/listing/:id',
+          page: () => ListingDetailScreen(),
+        ),
+        GetPage(
+          name: '/agent/:id',
+          page: () => AgentProfileScreen(),
+        ),
+        
+        GetPage(name: '/messages', page: () => const MessagesScreen()),
+        GetPage(name: '/notifications', page: () => const NotificationScreen()),
+        GetPage(
+          name: '/chat',
+          page: () => ChatScreen(
+            conversationId: Get.arguments['conversationId'] ?? '',
+            otherUserId: Get.arguments['otherUserId'] ?? '',
+            otherUserName: Get.arguments['otherUserName'] ?? 'Seller',
+            listingId: Get.arguments['listingId'] ?? 0,
+            listingTitle: Get.arguments['listingTitle'] ?? 'Listing',
+            listingPrice: Get.arguments['listingPrice'],
+          ),
+        ),
       ],
     );
   }
 }
-

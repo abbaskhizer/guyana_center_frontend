@@ -90,9 +90,7 @@ class _MobileLayout extends StatelessWidget {
                 _TitleRow(category: category),
                 const SizedBox(height: 14),
                 Obx(
-                  () => _StatsStrip(
-                    listings: controller.listingsCount.value,
-                  ),
+                  () => _StatsStrip(listings: controller.listingsCount.value),
                 ),
                 const SizedBox(height: 16),
                 _SearchAndFilterRow(
@@ -210,22 +208,39 @@ class _WebLayout extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 24),
-                      _SearchAndFilterRow(
-                        controller: controller,
-                        hint: "Search in ${category.title}...",
-                        isWeb: true,
+                      SizedBox(
+                        width: double.infinity,
+                        child: _SearchAndFilterRow(
+                          controller: controller,
+                          hint: "Search in ${category.title}...",
+                          isWeb: true,
+                        ),
                       ),
                       const SizedBox(height: 24),
-                      Text(
-                        "Showing ${controller.totalFilteredCount} results",
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: cs.onSurface.withOpacity(.45),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
+                      Obx(
+                        () => Text(
+                          "Showing ${controller.totalFilteredCount} results",
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: cs.onSurface.withOpacity(.45),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
                         ),
                       ),
                       const SizedBox(height: 16),
-                      _ListingsSection(controller: controller, isWeb: true),
+                      Obx(() {
+                        if (controller.isLoading.value) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 40),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+                        return _ListingsSection(
+                          controller: controller,
+                          isWeb: true,
+                        );
+                      }),
                       const SizedBox(height: 48),
                       _PaginationBar(controller: controller),
                       const SizedBox(height: 64),
@@ -287,7 +302,8 @@ class _MobileTopBar extends StatelessWidget {
                       width: 34,
                       height: 34,
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                        color: theme.colorScheme.surfaceContainerHighest
+                            .withOpacity(0.5),
                         shape: BoxShape.circle,
                       ),
                       alignment: Alignment.center,
@@ -312,7 +328,9 @@ class _MobileTopBar extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(width: 12),
-                ProfileDot(onTap: () => Get.to(() => const AgentProfileScreen())),
+                ProfileDot(
+                  onTap: () => Get.to(() => const AgentProfileScreen()),
+                ),
               ],
             );
           }
@@ -581,10 +599,7 @@ class _StatsStrip extends StatelessWidget {
   final String listings;
   final bool dense;
 
-  const _StatsStrip({
-    required this.listings,
-    this.dense = false,
-  });
+  const _StatsStrip({required this.listings, this.dense = false});
 
   @override
   Widget build(BuildContext context) {
@@ -631,11 +646,14 @@ class _StatsStrip extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Text(listings, style: theme.textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w900,
-          fontSize: 20,
-          color: cs.primary,
-        )),
+        Text(
+          listings,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w900,
+            fontSize: 20,
+            color: cs.primary,
+          ),
+        ),
         const SizedBox(width: 6),
         Text(
           "listings",
@@ -649,7 +667,6 @@ class _StatsStrip extends StatelessWidget {
     );
   }
 }
-
 
 class _SearchAndFilterRow extends StatelessWidget {
   final BrowseListingController controller;
@@ -699,8 +716,14 @@ class _SearchAndFilterRow extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       itemBuilder: (context) => [
         const PopupMenuItem(value: "Newest", child: Text("Newest First")),
-        const PopupMenuItem(value: "Price: Low", child: Text("Price: Low to High")),
-        const PopupMenuItem(value: "Price: High", child: Text("Price: High to Low")),
+        const PopupMenuItem(
+          value: "Price: Low",
+          child: Text("Price: Low to High"),
+        ),
+        const PopupMenuItem(
+          value: "Price: High",
+          child: Text("Price: High to Low"),
+        ),
       ],
       child: Container(
         width: 48,
@@ -725,113 +748,226 @@ class _SearchAndFilterRow extends StatelessWidget {
       );
     }
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(flex: 4, child: SizedBox(height: 48, child: field)),
-        const SizedBox(width: 16),
-        SizedBox(
-          height: 48,
-          child: PopupMenuButton<String>(
-            onSelected: controller.setSort,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-            offset: const Offset(0, 52),
-            itemBuilder: (context) => [
-              const PopupMenuItem(value: "Newest", child: Text("Newest First")),
-              const PopupMenuItem(value: "Price: Low", child: Text("Price: Low to High")),
-              const PopupMenuItem(value: "Price: High", child: Text("Price: High to Low")),
-            ],
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: cs.outlineVariant),
-              ),
-              child: Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final narrow = constraints.maxWidth < 750;
+        if (narrow) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: 48, child: field),
+              const SizedBox(height: 12),
+              Row(
                 children: [
-                  Icon(Icons.tune_rounded, size: 18, color: cs.onSurfaceVariant),
-                  const SizedBox(width: 8),
-                  Text(
-                    "Filters",
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                      color: cs.onSurface,
-                    ),
-                  ),
+                  Expanded(child: filterBtn),
+                  const SizedBox(width: 12),
+                  Obx(() {
+                    final grid = controller.isGrid.value;
+                    return Container(
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: cs.outlineVariant),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          InkWell(
+                            onTap: () => controller.toggleView(),
+                            child: Container(
+                              height: 48,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                              ),
+                              decoration: BoxDecoration(
+                                color: grid
+                                    ? cs.surfaceContainerHighest.withOpacity(
+                                        0.5,
+                                      )
+                                    : Colors.transparent,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(14),
+                                  bottomLeft: Radius.circular(14),
+                                ),
+                              ),
+                              alignment: Alignment.center,
+                              child: Icon(
+                                Icons.grid_view_rounded,
+                                size: 18,
+                                color: grid
+                                    ? cs.onSurface
+                                    : cs.onSurface.withOpacity(.4),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 1,
+                            height: 48,
+                            color: cs.outlineVariant,
+                          ),
+                          InkWell(
+                            onTap: () => controller.toggleView(),
+                            child: Container(
+                              height: 48,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                              ),
+                              decoration: BoxDecoration(
+                                color: !grid
+                                    ? cs.surfaceContainerHighest.withOpacity(
+                                        0.5,
+                                      )
+                                    : Colors.transparent,
+                                borderRadius: const BorderRadius.only(
+                                  topRight: Radius.circular(14),
+                                  bottomRight: Radius.circular(14),
+                                ),
+                              ),
+                              alignment: Alignment.center,
+                              child: Icon(
+                                Icons.format_list_bulleted_rounded,
+                                size: 18,
+                                color: !grid
+                                    ? cs.onSurface
+                                    : cs.onSurface.withOpacity(.4),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
                 ],
               ),
-            ),
-          ),
-        ),
-        const Spacer(flex: 2),
-        const Spacer(flex: 3),
-        const SizedBox(width: 16),
-        Obx(() {
-          final grid = controller.isGrid.value;
-          return Container(
-            height: 48,
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: cs.outlineVariant),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                InkWell(
-                  onTap: () => controller.toggleView(),
-                  child: Container(
-                    height: 48,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: grid
-                          ? cs.surfaceContainerHighest.withOpacity(0.5)
-                          : Colors.transparent,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(14),
-                        bottomLeft: Radius.circular(14),
-                      ),
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.grid_view_rounded,
-                      size: 18,
-                      color: grid ? cs.onSurface : cs.onSurface.withOpacity(.4),
-                    ),
-                  ),
-                ),
-                Container(width: 1, height: 48, color: cs.outlineVariant),
-                InkWell(
-                  onTap: () => controller.toggleView(),
-                  child: Container(
-                    height: 48,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: !grid
-                          ? cs.surfaceContainerHighest.withOpacity(0.5)
-                          : Colors.transparent,
-                      borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(14),
-                        bottomRight: Radius.circular(14),
-                      ),
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.format_list_bulleted_rounded,
-                      size: 18,
-                      color: !grid
-                          ? cs.onSurface
-                          : cs.onSurface.withOpacity(.4),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            ],
           );
-        }),
-      ],
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(child: SizedBox(height: 48, child: field)),
+            const SizedBox(width: 16),
+            SizedBox(
+              height: 48,
+              child: PopupMenuButton<String>(
+                onSelected: controller.setSort,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                offset: const Offset(0, 52),
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: "Newest",
+                    child: Text("Newest First"),
+                  ),
+                  const PopupMenuItem(
+                    value: "Price: Low",
+                    child: Text("Price: Low to High"),
+                  ),
+                  const PopupMenuItem(
+                    value: "Price: High",
+                    child: Text("Price: High to Low"),
+                  ),
+                ],
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: cs.outlineVariant),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.tune_rounded,
+                        size: 18,
+                        color: cs.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Filters",
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                          color: cs.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Obx(() {
+              final grid = controller.isGrid.value;
+              return Container(
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: cs.outlineVariant),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    InkWell(
+                      onTap: () => controller.toggleView(),
+                      child: Container(
+                        height: 48,
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        decoration: BoxDecoration(
+                          color: grid
+                              ? cs.surfaceContainerHighest.withOpacity(0.5)
+                              : Colors.transparent,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(14),
+                            bottomLeft: Radius.circular(14),
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: Icon(
+                          Icons.grid_view_rounded,
+                          size: 18,
+                          color: grid
+                              ? cs.onSurface
+                              : cs.onSurface.withOpacity(.4),
+                        ),
+                      ),
+                    ),
+                    Container(width: 1, height: 48, color: cs.outlineVariant),
+                    InkWell(
+                      onTap: () => controller.toggleView(),
+                      child: Container(
+                        height: 48,
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        decoration: BoxDecoration(
+                          color: !grid
+                              ? cs.surfaceContainerHighest.withOpacity(0.5)
+                              : Colors.transparent,
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(14),
+                            bottomRight: Radius.circular(14),
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: Icon(
+                          Icons.format_list_bulleted_rounded,
+                          size: 18,
+                          color: !grid
+                              ? cs.onSurface
+                              : cs.onSurface.withOpacity(.4),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        );
+      },
     );
   }
 }
@@ -861,7 +997,7 @@ class _ResultsHeaderRow extends StatelessWidget {
           String sortLabel = controller.sort.value;
           if (sortLabel == "Price: Low") sortLabel = "Price: Low to High";
           if (sortLabel == "Price: High") sortLabel = "Price: High to Low";
-          
+
           return Text(
             sortLabel,
             style: theme.textTheme.bodySmall?.copyWith(
@@ -1006,7 +1142,6 @@ class _ListingsSection extends StatelessWidget {
     });
   }
 }
-
 
 class _PaginationBar extends StatelessWidget {
   final BrowseListingController controller;
@@ -1175,17 +1310,32 @@ class _OtherCategoriesRow extends StatelessWidget {
       final cat = homeController.categories.firstWhere(
         (c) => c.id.toLowerCase() == id.toLowerCase(),
       );
-      Get.to(() => CategoryListingsScreen(category: cat), preventDuplicates: false);
+      Get.to(
+        () => CategoryListingsScreen(category: cat),
+        preventDuplicates: false,
+      );
     } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
     final List<Map<String, String>> items = [
-      {'id': 'real_estate', 'image': 'assets/realestate.png', 'text': "Real Estate"},
+      {
+        'id': 'real_estate',
+        'image': 'assets/realestate.png',
+        'text': "Real Estate",
+      },
       {'id': 'jobs', 'image': 'assets/jobs.png', 'text': "Jobs"},
-      {'id': 'electronics', 'image': 'assets/electronics.png', 'text': "Electronics"},
-      {'id': 'home_garden', 'image': 'assets/home&gardan.png', 'text': "Furniture"},
+      {
+        'id': 'electronics',
+        'image': 'assets/electronics.png',
+        'text': "Electronics",
+      },
+      {
+        'id': 'home_garden',
+        'image': 'assets/home&gardan.png',
+        'text': "Furniture",
+      },
       {'id': 'vehicles', 'image': 'assets/vehicle.png', 'text': "Vehicles"},
     ];
 
@@ -1196,11 +1346,15 @@ class _OtherCategoriesRow extends StatelessWidget {
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: filteredItems.map((item) => OtherCategoryIcon(
-        image: item['image'],
-        text: item['text']!,
-        onTap: () => _onCategoryTap(item['id']!),
-      )).toList(),
+      children: filteredItems
+          .map(
+            (item) => OtherCategoryIcon(
+              image: item['image'],
+              text: item['text']!,
+              onTap: () => _onCategoryTap(item['id']!),
+            ),
+          )
+          .toList(),
     );
   }
 }
@@ -1215,19 +1369,38 @@ class _OtherCategoriesRowWeb extends StatelessWidget {
       final cat = homeController.categories.firstWhere(
         (c) => c.id.toLowerCase() == id.toLowerCase(),
       );
-      Get.to(() => CategoryListingsScreen(category: cat), preventDuplicates: false);
+      Get.to(
+        () => CategoryListingsScreen(category: cat),
+        preventDuplicates: false,
+      );
     } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
     final List<Map<String, String>> items = [
-      {'id': 'real_estate', 'image': "assets/realestate.png", 'text': "Real Estate"},
+      {
+        'id': 'real_estate',
+        'image': "assets/realestate.png",
+        'text': "Real Estate",
+      },
       {'id': 'jobs', 'image': "assets/jobs.png", 'text': "Jobs"},
-      {'id': 'electronics', 'image': "assets/electronics.png", 'text': "Electronics"},
+      {
+        'id': 'electronics',
+        'image': "assets/electronics.png",
+        'text': "Electronics",
+      },
       {'id': 'fashion', 'image': "assets/fashion.png", 'text': "Fashion"},
-      {'id': 'home_garden', 'image': "assets/home&gardan.png", 'text': "Home & Furniture"},
-      {'id': 'sports_hobbies', 'image': "assets/sports&hobbies.png", 'text': "Sports & Hobbies"},
+      {
+        'id': 'home_garden',
+        'image': "assets/home&gardan.png",
+        'text': "Home & Furniture",
+      },
+      {
+        'id': 'sports_hobbies',
+        'image': "assets/sports&hobbies.png",
+        'text': "Sports & Hobbies",
+      },
       {'id': 'vehicles', 'image': "assets/vehicle.png", 'text': "Vehicles"},
     ];
 
@@ -1235,16 +1408,44 @@ class _OtherCategoriesRowWeb extends StatelessWidget {
         .where((item) => item['id'] != excludeId)
         .toList();
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: filteredItems.expand((item) => [
-        _StandaloneCategoryCard(
-          image: item['image']!,
-          text: item['text']!,
-          onTap: () => _onCategoryTap(item['id']!),
-        ),
-        const SizedBox(width: 14),
-      ]).toList()..removeLast(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxW = constraints.maxWidth;
+        final cardWidth = 140.0;
+        final spacing = 14.0;
+        final cols = (maxW / (cardWidth + spacing)).floor().clamp(1, 6);
+        final rows = (filteredItems.length / cols).ceil();
+        return Column(
+          children: List.generate(rows, (row) {
+            final start = row * cols;
+            final end = (start + cols).clamp(0, filteredItems.length);
+            final rowItems = filteredItems.sublist(start, end);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                children: rowItems
+                    .map(
+                      (item) => Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            right: rowItems.indexOf(item) < rowItems.length - 1
+                                ? spacing
+                                : 0,
+                          ),
+                          child: _StandaloneCategoryCard(
+                            image: item['image']!,
+                            text: item['text']!,
+                            onTap: () => _onCategoryTap(item['id']!),
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            );
+          }),
+        );
+      },
     );
   }
 }
@@ -1345,32 +1546,32 @@ class OtherCategoryIcon extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: Column(
         children: [
-        isWebDesktop
-            ? Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: cs.outlineVariant),
-                ),
-                alignment: Alignment.center,
-                child: iconWidget,
-              )
-            : iconWidget,
-        const SizedBox(height: 6),
-        Text(
-          text,
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: cs.onSurface.withOpacity(.65),
+          isWebDesktop
+              ? Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: cs.outlineVariant),
+                  ),
+                  alignment: Alignment.center,
+                  child: iconWidget,
+                )
+              : iconWidget,
+          const SizedBox(height: 6),
+          Text(
+            text,
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: cs.onSurface.withOpacity(.65),
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 }
 
 class ListingCardGrid extends StatelessWidget {
@@ -1405,8 +1606,9 @@ class ListingCardGrid extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(18)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(18),
+              ),
               child: Stack(
                 children: [
                   AspectRatio(
@@ -1535,108 +1737,108 @@ class ListingCardGrid extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                             horizontal: 6,
                             vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFDCFCE7),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            "Used",
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: const Color(0xFF16A34A),
+                              fontWeight: FontWeight.w800,
+                              fontSize: 9,
+                            ),
+                          ),
                         ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFDCFCE7),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          "Used",
+                        const SizedBox(width: 8),
+                        Text(
+                          item.subType.isEmpty ? "Cars for Sale" : item.subType,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF16A34A),
-                            fontWeight: FontWeight.w800,
-                            fontSize: 9,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        item.subType.isEmpty ? "Cars for Sale" : item.subType,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: cs.onSurface.withOpacity(.4),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Spacer(flex: 2),
-                  Text(
-                    item.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: cs.onSurface,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    item.price,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: const Color(0xFF16A34A),
-                      fontSize: 16,
-                    ),
-                  ),
-                  const Spacer(flex: 3),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.location_on_outlined,
-                            size: 14,
                             color: cs.onSurface.withOpacity(.4),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 10,
                           ),
-                          const SizedBox(width: 4),
-                          Flexible(
-                            child: Text(
-                              item.location,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                    const Spacer(flex: 2),
+                    Text(
+                      item.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: cs.onSurface,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      item.price,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF16A34A),
+                        fontSize: 16,
+                      ),
+                    ),
+                    const Spacer(flex: 3),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.location_on_outlined,
+                              size: 14,
+                              color: cs.onSurface.withOpacity(.4),
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                item.location,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: cs.onSurface.withOpacity(.5),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.schedule_rounded,
+                              size: 14,
+                              color: cs.onSurface.withOpacity(.4),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              item.timeAgo,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: cs.onSurface.withOpacity(.5),
                                 fontWeight: FontWeight.w600,
                                 fontSize: 11,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.schedule_rounded,
-                            size: 14,
-                            color: cs.onSurface.withOpacity(.4),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            item.timeAgo,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: cs.onSurface.withOpacity(.5),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
 
 class ListingCardList extends StatelessWidget {

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(sed 's|<StatCard title=\"\"Total Listings\"\" value={stats.totalListings} subtitle=\"\"Active marketplace\"\" icon=\"\"listings\"\" color=\"\"text-green-600\"\" bg=\"\"bg-green-50\"\" />|<StatCard title=\"\"Total Listings\"\" value={stats.totalListings} subtitle=\"\"Active marketplace\"\" icon=\"\"listings\"\" color=\"\"text-green-600\"\" bg=\"\"bg-green-50\"\" />\\\\n      <StatCard title=\"\"Total Earned\"\" value={earningsData.totalEarnings} subtitle=\"\"From sold listings\"\" icon=\"\"active\"\" color=\"\"text-amber-600\"\" bg=\"\"bg-amber-50\"\" />|g' /Users/umairanwar/Desktop/Projects/guyana_center_frontend-main/gyana-admin/app/page.tsx)",
+      "Bash(mv /tmp/page_temp.tsx /Users/umairanwar/Desktop/Projects/guyana_center_frontend-main/gyana-admin/app/page.tsx)",
+      "Bash(xxd)",
+      "Bash(perl -i -pe 's|</div>\\\\s*<!-- Charts Section -->|</div>\\\\n      <StatCard title=\"\"Total Earned\"\" value={earningsData.totalEarnings} subtitle=\"\"From sold listings\"\" icon=\"\"active\"\" color=\"\"text-amber-600\"\" bg=\"\"bg-amber-50\"\" />\\\\n\\\\n      <!-- Charts Section -->|g' /Users/umairanwar/Desktop/Projects/guyana_center_frontend-main/gyana-admin/app/page.tsx)",
+      "Bash(awk '/<\\\\/div>\\\\s*<!-- Charts Section -->/ { print; print \"\"      <StatCard title=\\\\\"\"Total Earned\\\\\"\" value={earningsData.totalEarnings} subtitle=\\\\\"\"From sold listings\\\\\"\" icon=\\\\\"\"active\\\\\"\" color=\\\\\"\"text-amber-600\\\\\"\" bg=\\\\\"\"bg-amber-50\\\\\"\" />\"\"; print \"\"\"\"; next }1' /Users/umairanwar/Desktop/Projects/guyana_center_frontend-main/gyana-admin/app/page.tsx)",
+      "Bash(npx prisma:*)"
+    ]
+  }
+}

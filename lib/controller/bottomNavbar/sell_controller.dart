@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:get/get.dart';
@@ -31,6 +32,7 @@ class SellController extends GetxController {
   static const int maxDesc = 500;
 
   final images = <String>[].obs;
+  final imageBytes = <Uint8List>[].obs; // For web support
   final priceCtrl = TextEditingController();
   final negotiable = false.obs;
 
@@ -452,7 +454,8 @@ class SellController extends GetxController {
               location: selectedArea.value,
               contactPhone: phoneNumber,
               contactMethod: contactMethod.value == ContactMethod.chat ? 'chat' : 'call',
-              imagePaths: images.isEmpty ? null : images.toList(),
+              imagePaths: kIsWeb ? null : (images.isEmpty ? null : images.toList()),
+              imageBytes: kIsWeb ? (imageBytes.isEmpty ? null : imageBytes.toList()) : null,
               // Category specific
               brand: isVehicleCategory || isElectronicsCategory || isFashionCategory || isHomeGardenCategory || isKidsCategory || isPetsCategory || isHealthBeautyCategory || isServicesCategory || isBusinessCategory ? brandCtrl.text.trim() : null,
               model: isVehicleCategory || isElectronicsCategory || isFashionCategory || isHomeGardenCategory || isKidsCategory || isPetsCategory || isHealthBeautyCategory || isServicesCategory || isBusinessCategory ? modelCtrl.text.trim() : null,
@@ -492,7 +495,8 @@ class SellController extends GetxController {
               location: selectedArea.value,
               contactPhone: phoneNumber,
               contactMethod: contactMethod.value == ContactMethod.chat ? 'chat' : 'call',
-              imagePaths: images.isEmpty ? null : images.toList(),
+              imagePaths: kIsWeb ? null : (images.isEmpty ? null : images.toList()),
+              imageBytes: kIsWeb ? (imageBytes.isEmpty ? null : imageBytes.toList()) : null,
               // Location coordinates
               latitude: currentLocation.value?.latitude,
               longitude: currentLocation.value?.longitude,
@@ -579,6 +583,7 @@ class SellController extends GetxController {
     bathroomsCtrl.text = '2';
     areaCtrl.clear();
     images.clear();
+    imageBytes.clear();
     negotiable.value = false;
     furnished.value = false;
     selectedCategory.value = 0;
@@ -693,7 +698,15 @@ class SellController extends GetxController {
       );
 
       if (pickedFile != null) {
-        images.add(pickedFile.path);
+        if (kIsWeb) {
+          // On web, read bytes directly
+          final bytes = await pickedFile.readAsBytes();
+          imageBytes.add(bytes);
+          images.add(pickedFile.path); // Keep path for display
+        } else {
+          // On mobile, just store the path
+          images.add(pickedFile.path);
+        }
       }
     } catch (e) {
       Get.snackbar("Error", "Failed to pick image: $e");
@@ -715,7 +728,15 @@ class SellController extends GetxController {
       );
 
       if (pickedFile != null) {
-        images.add(pickedFile.path);
+        if (kIsWeb) {
+          // On web, read bytes directly
+          final bytes = await pickedFile.readAsBytes();
+          imageBytes.add(bytes);
+          images.add(pickedFile.path); // Keep path for display
+        } else {
+          // On mobile, just store the path
+          images.add(pickedFile.path);
+        }
       }
     } catch (e) {
       Get.snackbar("Error", "Failed to take photo: $e");
@@ -770,6 +791,9 @@ class SellController extends GetxController {
   void removePhoto(int i) {
     if (i < 0 || i >= images.length) return;
     images.removeAt(i);
+    if (kIsWeb && i < imageBytes.length) {
+      imageBytes.removeAt(i);
+    }
   }
 
   void setArea(String v) => selectedArea.value = v;

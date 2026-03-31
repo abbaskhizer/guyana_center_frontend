@@ -66,6 +66,13 @@ class BrowseListingController extends GetxController {
       final auth = AuthService.to;
       final token = auth.isLoggedIn.value ? auth.accessToken.value : null;
 
+      final url = ApiService.baseUrl;
+      print('🌐 API Base URL: $url');
+      print('📋 Loading listings for category: ${category.id}');
+      print(
+        '📋 Sort: $sortParam, Page: ${currentPage.value}, PageSize: $pageSize',
+      );
+
       final result = await ApiService.getListings(
         category: category.id == "all" ? null : category.id,
         search: search.value.isEmpty ? null : search.value,
@@ -74,6 +81,8 @@ class BrowseListingController extends GetxController {
         pageSize: pageSize,
         token: token,
       );
+
+      print('📋 API Response: $result');
 
       if (result != null && result['data'] != null) {
         final listingsData = result['data'] as List;
@@ -96,12 +105,13 @@ class BrowseListingController extends GetxController {
         // Calculate new listings in last 24h (simplified)
         updated.value = "${(total * 0.02).toInt()}";
       } else {
+        print('⚠️ No data returned from API. Result: $result');
         allListings.value = [];
         listingsCount.value = "0";
         totalPages.value = 1;
       }
     } catch (e) {
-      print('Error loading listings: $e');
+      print('❌ Error loading listings: $e');
       allListings.value = [];
     } finally {
       isLoading.value = false;
@@ -116,7 +126,10 @@ class BrowseListingController extends GetxController {
     }
 
     try {
-      final result = await ApiService.toggleFavorite(auth.accessToken.value, item.id);
+      final result = await ApiService.toggleFavorite(
+        auth.accessToken.value,
+        item.id,
+      );
       if (result != null && result['success'] == true) {
         // Update local item
         final index = allListings.indexWhere((l) => l.id == item.id);
@@ -125,7 +138,7 @@ class BrowseListingController extends GetxController {
             favorited: result['favorited'] as bool,
           );
           allListings.refresh();
-          
+
           // Refresh favorites screen if it's already in memory
           if (Get.isRegistered<FavoritesController>()) {
             Get.find<FavoritesController>().refreshFavorites();

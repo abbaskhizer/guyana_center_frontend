@@ -4,16 +4,29 @@ import 'package:get/get.dart';
 import 'package:guyana_center_frontend/services/auth_service.dart';
 import 'package:guyana_center_frontend/services/api_services.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class FirebaseAuthService extends GetxService {
   static FirebaseAuthService get to => Get.find();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: ['email', 'profile'],
-  );
+  late final GoogleSignIn _googleSignIn;
 
   final isLoading = false.obs;
+
+  FirebaseAuthService() {
+    // Initialize GoogleSignIn with web-specific settings for web platform
+    if (kIsWeb) {
+      _googleSignIn = GoogleSignIn(
+        scopes: ['openid', 'email', 'profile'],
+        clientId: '938776904371-9mph6an5ov3dlkj3o6lgg31t4c11d8pk.apps.googleusercontent.com',
+      );
+    } else {
+      _googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+      );
+    }
+  }
 
   @override
   void onInit() {
@@ -31,27 +44,29 @@ class FirebaseAuthService extends GetxService {
     try {
       isLoading.value = true;
 
-      // Trigger the Google Sign-In flow
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        // User cancelled the sign-in
-        isLoading.value = false;
-        return null;
+      UserCredential? userCredential;
+
+      if (kIsWeb) {
+        // On web, use Firebase's native signInWithPopup (avoids FedCM issues)
+        GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        googleProvider.addScope('email');
+        googleProvider.addScope('profile');
+        userCredential = await _auth.signInWithPopup(googleProvider);
+      } else {
+        // On mobile, use Google Sign-In plugin
+        final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+        if (googleUser == null) {
+          isLoading.value = false;
+          return null;
+        }
+
+        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        userCredential = await _auth.signInWithCredential(credential);
       }
-
-      // Obtain the auth details from the request
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      // Create a new credential
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      // Sign in to Firebase with the Google credentials
-      final UserCredential userCredential =
-          await _auth.signInWithCredential(credential);
 
       final User? user = userCredential.user;
       if (user == null) {
@@ -60,7 +75,7 @@ class FirebaseAuthService extends GetxService {
       }
 
       // Get the ID token from Firebase for backend verification
-      final String? idToken = await user.getIdToken(true); // force refresh to get fresh token
+      final String? idToken = await user.getIdToken(true);
 
       isLoading.value = false;
 

@@ -15,6 +15,18 @@ class AgentProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    
+    // Handle URL parameters from deep links (e.g., /agent/123)
+    final urlId = Get.parameters['id'];
+    if (urlId != null) {
+      final targetId = int.tryParse(urlId.toString());
+      if (targetId != null) {
+        isOwnProfile.value = (targetId == AuthService.to.userId.value);
+        loadUserListings(targetId);
+        return;
+      }
+    }
+    
     final args = Get.arguments;
     if (args != null && args is Map && args.containsKey('userId') && args['userId'] != null) {
       final targetId = args['userId'] as int;

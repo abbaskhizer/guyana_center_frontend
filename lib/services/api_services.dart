@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
@@ -8,39 +9,46 @@ import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 
 class ApiService {
-  // HTTP Client that bypasses SSL certificate verification (DEV ONLY)
+  // HTTP Client with SSL handling
   static http.Client get _client {
     if (kIsWeb) {
       return http.Client();
     }
+    // For production HTTPS, use normal client (SSL verification enabled)
+    // For local development, bypass SSL certificate verification
+    if (baseUrl.startsWith('https://')) {
+      return http.Client();
+    }
     final ioClient = HttpClient()
-      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
     return IOClient(ioClient);
   }
 
-  // Base URL configuration
+  // Base URL configuration - Production API
   static String get baseUrl {
-    if (kIsWeb) {
-      return 'http://185.197.194.139';
-    }
-    // Android emulator uses 10.0.2.2 to access localhost
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://185.197.194.139';
-    }
-    // iOS and others
-    return 'http://185.197.194.139';
+    // All platforms use production HTTPS API
+    return 'https://api.guyanacentral.com';
+
+    // Local development URLs (commented out):
+    // if (kIsWeb) return 'http://localhost:3001';
+    // if (defaultTargetPlatform == TargetPlatform.android) return 'http://10.0.2.2:3001';
   }
 
   // AUTH ENDPOINTS
   // --------------
 
   // 1. Signup
-  static Future<Map<String, dynamic>?> signup(String email, String password, {String? name}) async {
+  static Future<Map<String, dynamic>?> signup(
+    String email,
+    String password, {
+    String? name,
+  }) async {
     try {
       print('🚀 Attempting signup for $email');
       final bodyData = {'email': email, 'password': password};
       if (name != null) bodyData['name'] = name;
-      
+
       final response = await _client.post(
         Uri.parse('$baseUrl/auth/signup'),
         headers: {'Content-Type': 'application/json'},
@@ -54,7 +62,10 @@ class ApiService {
   }
 
   // 2. Verify OTP
-  static Future<Map<String, dynamic>?> verifyOtp(String email, String otp) async {
+  static Future<Map<String, dynamic>?> verifyOtp(
+    String email,
+    String otp,
+  ) async {
     try {
       print('🔐 Verifying OTP $otp for $email');
       final response = await _client.post(
@@ -84,7 +95,11 @@ class ApiService {
   }
 
   // 4. Reset Password
-  static Future<Map<String, dynamic>?> resetPassword(String email, String otp, String newPassword) async {
+  static Future<Map<String, dynamic>?> resetPassword(
+    String email,
+    String otp,
+    String newPassword,
+  ) async {
     try {
       final response = await _client.post(
         Uri.parse('$baseUrl/auth/reset-password'),
@@ -98,7 +113,10 @@ class ApiService {
   }
 
   // 5. Login
-  static Future<Map<String, dynamic>?> login(String email, String password) async {
+  static Future<Map<String, dynamic>?> login(
+    String email,
+    String password,
+  ) async {
     try {
       print('🔑 Logging in user $email');
       final response = await _client.post(
@@ -130,7 +148,10 @@ class ApiService {
   }
 
   // 7. Update Profile
-  static Future<Map<String, dynamic>?> updateProfile(String token, Map<String, dynamic> data) async {
+  static Future<Map<String, dynamic>?> updateProfile(
+    String token,
+    Map<String, dynamic> data,
+  ) async {
     try {
       final response = await _client.post(
         Uri.parse('$baseUrl/auth/update-profile'),
@@ -256,7 +277,11 @@ class ApiService {
       request.files.add(multipartFile);
 
       // Send request using custom client to bypass SSL verification
-      final streamedResponse = await IOClient(HttpClient()..badCertificateCallback = (X509Certificate cert, String host, int port) => true).send(request);
+      final streamedResponse = await IOClient(
+        HttpClient()
+          ..badCertificateCallback =
+              (X509Certificate cert, String host, int port) => true,
+      ).send(request);
       final response = await http.Response.fromStream(streamedResponse);
 
       return _handleResponse(response, 'Upload Profile Photo');
@@ -281,6 +306,7 @@ class ApiService {
     required String contactPhone,
     required String contactMethod,
     List<String>? imagePaths,
+    List<Uint8List>? imageBytes, // For web support
     // Vehicle specific fields
     String? brand,
     String? model,
@@ -362,7 +388,8 @@ class ApiService {
 
       // Add jobs specific fields
       if (jobType != null) request.fields['jobType'] = jobType;
-      if (experienceLevel != null) request.fields['experienceLevel'] = experienceLevel;
+      if (experienceLevel != null)
+        request.fields['experienceLevel'] = experienceLevel;
       if (salaryPeriod != null) request.fields['salaryPeriod'] = salaryPeriod;
       if (companyName != null) request.fields['companyName'] = companyName;
       if (industry != null) request.fields['industry'] = industry;
@@ -371,7 +398,19 @@ class ApiService {
       if (longitude != null) request.fields['longitude'] = longitude.toString();
 
       // Add image files if provided
-      if (imagePaths != null && imagePaths.isNotEmpty) {
+      if (kIsWeb && imageBytes != null && imageBytes.isNotEmpty) {
+        // On web, use provided bytes directly
+        for (int i = 0; i < imageBytes.length; i++) {
+          final multipartFile = http.MultipartFile.fromBytes(
+            'images',
+            imageBytes[i],
+            filename: 'image_${i}.jpg',
+            contentType: MediaType.parse('image/jpeg'),
+          );
+          request.files.add(multipartFile);
+        }
+      } else if (!kIsWeb && imagePaths != null && imagePaths.isNotEmpty) {
+        // On mobile, read from file paths
         for (int i = 0; i < imagePaths.length; i++) {
           final imagePath = imagePaths[i];
           final file = File(imagePath);
@@ -389,8 +428,17 @@ class ApiService {
         }
       }
 
-      // Send request using custom client to bypass SSL verification
-      final streamedResponse = await IOClient(HttpClient()..badCertificateCallback = (X509Certificate cert, String host, int port) => true).send(request);
+      // Send request using platform-appropriate client
+      http.StreamedResponse streamedResponse;
+      if (kIsWeb) {
+        streamedResponse = await request.send();
+      } else {
+        streamedResponse = await IOClient(
+          HttpClient()
+            ..badCertificateCallback =
+                (X509Certificate cert, String host, int port) => true,
+        ).send(request);
+      }
       final response = await http.Response.fromStream(streamedResponse);
 
       return _handleResponse(response, 'Create Listing');
@@ -416,12 +464,12 @@ class ApiService {
       if (page != null) queryParams['page'] = page.toString();
       if (pageSize != null) queryParams['pageSize'] = pageSize.toString();
 
-      final uri = Uri.parse('$baseUrl/listings').replace(queryParameters: queryParams);
+      final uri = Uri.parse(
+        '$baseUrl/listings',
+      ).replace(queryParameters: queryParams);
       print('📋 Fetching listings from $uri');
 
-      final headers = <String, String>{
-        'Content-Type': 'application/json',
-      };
+      final headers = <String, String>{'Content-Type': 'application/json'};
       if (token != null) headers['Authorization'] = 'Bearer $token';
 
       final response = await _client.get(uri, headers: headers);
@@ -432,15 +480,19 @@ class ApiService {
   }
 
   // 3. Get Listing by ID
-  static Future<Map<String, dynamic>?> getListingById(int id, {String? token}) async {
+  static Future<Map<String, dynamic>?> getListingById(
+    int id, {
+    String? token,
+  }) async {
     try {
       print('📋 Fetching listing $id');
-      final headers = <String, String>{
-        'Content-Type': 'application/json',
-      };
+      final headers = <String, String>{'Content-Type': 'application/json'};
       if (token != null) headers['Authorization'] = 'Bearer $token';
 
-      final response = await _client.get(Uri.parse('$baseUrl/listings/$id'), headers: headers);
+      final response = await _client.get(
+        Uri.parse('$baseUrl/listings/$id'),
+        headers: headers,
+      );
       return _handleResponse(response, 'Get Listing');
     } catch (e) {
       return _handleError(e, 'Get Listing');
@@ -451,7 +503,9 @@ class ApiService {
   static Future<Map<String, dynamic>?> getUserListings(int userId) async {
     try {
       print('📋 Fetching listings for user $userId');
-      final response = await _client.get(Uri.parse('$baseUrl/listings/user/$userId'));
+      final response = await _client.get(
+        Uri.parse('$baseUrl/listings/user/$userId'),
+      );
       return _handleResponse(response, 'Get User Listings');
     } catch (e) {
       return _handleError(e, 'Get User Listings');
@@ -506,6 +560,7 @@ class ApiService {
     String? contactPhone,
     String? contactMethod,
     List<String>? imagePaths,
+    List<Uint8List>? imageBytes, // For web support
     String? brand,
     String? model,
     int? year,
@@ -550,13 +605,15 @@ class ApiService {
       if (title != null) request.fields['title'] = title;
       if (description != null) request.fields['description'] = description;
       if (price != null) request.fields['price'] = price.toString();
-      if (negotiable != null) request.fields['negotiable'] = negotiable.toString();
+      if (negotiable != null)
+        request.fields['negotiable'] = negotiable.toString();
       if (categoryId != null) request.fields['categoryId'] = categoryId;
       if (condition != null) request.fields['condition'] = condition;
       if (location != null) request.fields['location'] = location;
       if (contactPhone != null) request.fields['contactPhone'] = contactPhone;
-      if (contactMethod != null) request.fields['contactMethod'] = contactMethod;
-      
+      if (contactMethod != null)
+        request.fields['contactMethod'] = contactMethod;
+
       // Category specific
       if (brand != null) request.fields['brand'] = brand;
       if (model != null) request.fields['model'] = model;
@@ -564,7 +621,7 @@ class ApiService {
       if (mileage != null) request.fields['mileage'] = mileage.toString();
       if (transmission != null) request.fields['transmission'] = transmission;
       if (fuelType != null) request.fields['fuelType'] = fuelType;
-      
+
       if (propertyType != null) request.fields['propertyType'] = propertyType;
       if (bedrooms != null) request.fields['bedrooms'] = bedrooms.toString();
       if (bathrooms != null) request.fields['bathrooms'] = bathrooms.toString();
@@ -581,7 +638,8 @@ class ApiService {
       if (village != null) request.fields['village'] = village;
 
       if (jobType != null) request.fields['jobType'] = jobType;
-      if (experienceLevel != null) request.fields['experienceLevel'] = experienceLevel;
+      if (experienceLevel != null)
+        request.fields['experienceLevel'] = experienceLevel;
       if (salaryPeriod != null) request.fields['salaryPeriod'] = salaryPeriod;
       if (companyName != null) request.fields['companyName'] = companyName;
       if (industry != null) request.fields['industry'] = industry;
@@ -591,7 +649,19 @@ class ApiService {
       if (longitude != null) request.fields['longitude'] = longitude.toString();
 
       // Add image files if provided
-      if (imagePaths != null && imagePaths.isNotEmpty) {
+      if (kIsWeb && imageBytes != null && imageBytes.isNotEmpty) {
+        // On web, use provided bytes directly
+        for (int i = 0; i < imageBytes.length; i++) {
+          final multipartFile = http.MultipartFile.fromBytes(
+            'images',
+            imageBytes[i],
+            filename: 'image_${i}.jpg',
+            contentType: MediaType.parse('image/jpeg'),
+          );
+          request.files.add(multipartFile);
+        }
+      } else if (!kIsWeb && imagePaths != null && imagePaths.isNotEmpty) {
+        // On mobile, read from file paths
         for (int i = 0; i < imagePaths.length; i++) {
           final imagePath = imagePaths[i];
           final file = File(imagePath);
@@ -609,7 +679,17 @@ class ApiService {
         }
       }
 
-      final streamedResponse = await request.send();
+      // Send request using platform-appropriate client
+      http.StreamedResponse streamedResponse;
+      if (kIsWeb) {
+        streamedResponse = await request.send();
+      } else {
+        streamedResponse = await IOClient(
+          HttpClient()
+            ..badCertificateCallback =
+                (X509Certificate cert, String host, int port) => true,
+        ).send(request);
+      }
       final response = await http.Response.fromStream(streamedResponse);
 
       return _handleResponse(response, 'Update Listing');
@@ -619,7 +699,10 @@ class ApiService {
   }
 
   // 6. Delete Listing
-  static Future<Map<String, dynamic>?> deleteListing(String token, int id) async {
+  static Future<Map<String, dynamic>?> deleteListing(
+    String token,
+    int id,
+  ) async {
     try {
       print('🗑️ Deleting listing $id');
       final response = await _client.delete(
@@ -632,6 +715,90 @@ class ApiService {
       return _handleResponse(response, 'Delete Listing');
     } catch (e) {
       return _handleError(e, 'Delete Listing');
+    }
+  }
+
+  // NOTIFICATION ENDPOINTS
+  // ----------------------
+
+  static Future<dynamic> getNotifications(String token) async {
+    try {
+      final response = await _client.get(
+        Uri.parse('$baseUrl/api/notifications'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      return _handleResponse(response, 'Get Notifications');
+    } catch (e) {
+      return _handleError(e, 'Get Notifications');
+    }
+  }
+
+  static Future<dynamic> getUnreadNotificationCount(String token) async {
+    try {
+      final response = await _client.get(
+        Uri.parse('$baseUrl/api/notifications/unread-count'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      return _handleResponse(response, 'Get Unread Count');
+    } catch (e) {
+      return _handleError(e, 'Get Unread Count');
+    }
+  }
+
+  static Future<dynamic> markNotificationAsRead(
+    String token,
+    int notificationId,
+  ) async {
+    try {
+      final response = await _client.post(
+        Uri.parse('$baseUrl/api/notifications/$notificationId/read'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      return _handleResponse(response, 'Mark Notification Read');
+    } catch (e) {
+      return _handleError(e, 'Mark Notification Read');
+    }
+  }
+
+  static Future<dynamic> markAllNotificationsAsRead(String token) async {
+    try {
+      final response = await _client.post(
+        Uri.parse('$baseUrl/api/notifications/read-all'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      return _handleResponse(response, 'Mark All Notifications Read');
+    } catch (e) {
+      return _handleError(e, 'Mark All Notifications Read');
+    }
+  }
+
+  static Future<dynamic> deleteNotification(
+    String token,
+    int notificationId,
+  ) async {
+    try {
+      final response = await _client.delete(
+        Uri.parse('$baseUrl/api/notifications/$notificationId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      return _handleResponse(response, 'Delete Notification');
+    } catch (e) {
+      return _handleError(e, 'Delete Notification');
     }
   }
 
@@ -653,9 +820,9 @@ class ApiService {
 
   static dynamic _handleError(dynamic e, String method) {
     print('⚠️ Exception during $method: $e');
-    
+
     String message = 'Could not connect to server. Check logs.';
-    
+
     if (e.toString().contains('SocketException')) {
       print('🌐 Network error: Check server connection');
       message = 'Network error. Is the server running?';
@@ -663,7 +830,7 @@ class ApiService {
       print('⏱️ Request timed out');
       message = 'Request timed out.';
     }
-    
+
     return {'message': message};
   }
 }

@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:guyana_center_frontend/controller/agent_profile_controller.dart';
 import 'package:guyana_center_frontend/main.dart';
 import 'package:guyana_center_frontend/modal/listingVM.dart';
 import 'package:guyana_center_frontend/screens/custom_bottom_navbar.dart';
+import 'package:guyana_center_frontend/screens/listing_detail_screen.dart';
 import 'package:guyana_center_frontend/services/auth_service.dart';
 import 'package:guyana_center_frontend/widgets/web_footer.dart';
 
@@ -247,7 +249,9 @@ class _TopBarMobile extends StatelessWidget {
         ),
         InkWell(
           onTap: () {
-            // TODO: Implement actual share logic
+            final userId = (controller.sellerUser.value?.id ?? AuthService.to.userId.value ?? '').toString();
+            final name = controller.sellerUser.value?.name ?? AuthService.to.userName.value ?? 'User';
+            ShareHelper.shareAgent(userId, name);
           },
           borderRadius: BorderRadius.circular(12),
           child: Padding(
@@ -297,7 +301,11 @@ class _TopBarWeb extends StatelessWidget {
         )),
         const Spacer(),
         OutlinedButton.icon(
-          onPressed: () {},
+          onPressed: () {
+            final userId = (controller.sellerUser.value?.id ?? AuthService.to.userId.value ?? '').toString();
+            final name = controller.sellerUser.value?.name ?? AuthService.to.userName.value ?? 'User';
+            ShareHelper.shareAgent(userId, name);
+          },
           icon: Icon(Icons.share_outlined, size: 18, color: cs.onSurface),
           label: Text(
             "Share Profile",

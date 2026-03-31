@@ -51,20 +51,20 @@ class _MobileLayout extends StatelessWidget {
           const SizedBox(height: 14),
           const _HeroSection(web: false),
           const SizedBox(height: 18),
-  
+
           _SectionHeader(
             title: "Browse Categories",
             actionText: "See All",
             onTap: controller.openAllCategoriesScreen,
           ),
           const SizedBox(height: 10),
-  
+
           SizedBox(
             height: 92,
             child: Obx(() {
               final list = controller.homeCategories;
               final selected = controller.selectedCategoryIndex.value;
-  
+
               return ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: list.length,
@@ -72,7 +72,7 @@ class _MobileLayout extends StatelessWidget {
                 itemBuilder: (_, i) {
                   final item = list[i];
                   final active = i == selected;
-  
+
                   return _CategoryCard(
                     assetImage: item.assetImage ?? "",
                     title: item.title,
@@ -86,14 +86,12 @@ class _MobileLayout extends StatelessWidget {
               );
             }),
           ),
-  
+
           const SizedBox(height: 18),
-  
-          const _SectionHeader(
-            title: "Featured Listings",
-          ),
+
+          const _SectionHeader(title: "Featured Listings"),
           const SizedBox(height: 10),
-  
+
           Obx(
             () => Column(
               children: controller.featuredListings
@@ -109,14 +107,12 @@ class _MobileLayout extends StatelessWidget {
                   .toList(),
             ),
           ),
-  
+
           const SizedBox(height: 18),
-  
-          const _SectionHeader(
-            title: "Popular Properties",
-          ),
+
+          const _SectionHeader(title: "Popular Properties"),
           const SizedBox(height: 10),
-  
+
           SizedBox(
             height: 252,
             child: Obx(() {
@@ -141,9 +137,9 @@ class _MobileLayout extends StatelessWidget {
               );
             }),
           ),
-  
+
           const SizedBox(height: 14),
-  
+
           Row(
             children: [
               Expanded(
@@ -179,11 +175,7 @@ class _MobileLayout extends StatelessWidget {
               ),
             ],
           ),
-  
-          const SizedBox(height: 24),
-  
-          const TopStoresSection(),
-  
+
           const SizedBox(height: 24),
         ],
       ),
@@ -224,10 +216,16 @@ class _WebLayout extends StatelessWidget {
                 const SizedBox(height: 16),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(0, 16, 0, 10),
-                  child: _SectionHeader(
-                    title: "Browse Categories",
-                    actionText: "See All",
-                    onTap: controller.openAllCategoriesScreen,
+                  child: Row(
+                    children: [
+                      Text(
+                        "Browse Categories",
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: cs.onSurface,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -307,13 +305,6 @@ class _WebLayout extends StatelessWidget {
                         ),
                       ),
                     ],
-                  ),
-                ),
-                const SizedBox(height: 64),
-                Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1200),
-                    child: const TopStoresSection(),
                   ),
                 ),
                 const SizedBox(height: 64),
@@ -521,7 +512,10 @@ class _WebSearchBar extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+                borderSide: BorderSide(
+                  color: theme.colorScheme.primary,
+                  width: 1.5,
+                ),
               ),
               suffixIcon: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
@@ -684,11 +678,7 @@ class _SectionHeader extends StatelessWidget {
   final String? actionText;
   final VoidCallback? onTap;
 
-  const _SectionHeader({
-    required this.title,
-    this.actionText,
-    this.onTap,
-  });
+  const _SectionHeader({required this.title, this.actionText, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -816,7 +806,9 @@ class _ListingCard extends StatelessWidget {
 
   ImageProvider _getImageProvider() {
     if (item.imageUrl.isEmpty) {
-      return const NetworkImage('https://via.placeholder.com/400x300?text=No+Image');
+      return const NetworkImage(
+        'https://via.placeholder.com/400x300?text=No+Image',
+      );
     }
 
     // If it's a full URL, use it directly
@@ -853,8 +845,9 @@ class _ListingCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(18)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(18),
+              ),
               child: Stack(
                 children: [
                   AspectRatio(

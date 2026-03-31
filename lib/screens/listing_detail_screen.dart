@@ -1,7 +1,8 @@
-import 'dart:ui';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:convert';
+import 'dart:ui';
 import 'package:get/get.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -11,10 +12,53 @@ import 'package:guyana_center_frontend/screens/custom_bottom_navbar.dart';
 import 'package:guyana_center_frontend/screens/chat_screen.dart';
 import 'package:guyana_center_frontend/widgets/mobile_header.dart';
 import 'package:guyana_center_frontend/widgets/web_footer.dart';
+import 'package:guyana_center_frontend/widgets/web_header.dart';
 import 'package:guyana_center_frontend/services/api_services.dart';
 import 'package:guyana_center_frontend/modal/listingVM.dart';
 import 'package:guyana_center_frontend/services/auth_service.dart';
+import 'package:guyana_center_frontend/controller/notification_controller.dart';
+import 'package:http/http.dart' as http;
 
+class ShareHelper {
+  static const String baseUrl = 'https://guyanacentral.com';
+
+  static void shareListing(String listingId, String title) {
+    final url = '$baseUrl/listing/$listingId';
+    final text = 'Check out this listing on GUYANA CENTRAL: $title\n$url';
+    _share(text);
+  }
+
+  static void shareAgent(String userId, String name) {
+    final url = '$baseUrl/agent/$userId';
+    final text = 'Check out $name\'s profile on GUYANA CENTRAL\n$url';
+    _share(text);
+  }
+
+  static void _share(String text) {
+    if (kIsWeb) {
+      Clipboard.setData(ClipboardData(text: text));
+      Get.snackbar(
+        'Copied!',
+        'Link copied to clipboard',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFF16A34A),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 2),
+      );
+    } else {
+      // For mobile, use share dialog through a method channel or plugin
+      Clipboard.setData(ClipboardData(text: text));
+      Get.snackbar(
+        'Copied!',
+        'Link copied to clipboard. You can now paste and share it.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFF16A34A),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+    }
+  }
+}
 
 class ListingDetailScreen extends StatelessWidget {
   const ListingDetailScreen({super.key});
@@ -28,7 +72,7 @@ class ListingDetailScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      bottomNavigationBar: CustomBottomNavBar(),
+      bottomNavigationBar: _isWebDesktop(context) ? null : CustomBottomNavBar(),
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: _isWebDesktop(context)
@@ -118,6 +162,10 @@ class _MobileLayout extends StatelessWidget {
                   const SizedBox(height: 14),
                   _PropertyFeatures(item: item, web: false),
                   _JobFeatures(item: item, web: false),
+                  if (item.user?.id == AuthService.to.userId.value) ...[
+                    const SizedBox(height: 14),
+                    _FeatureAdCard(),
+                  ],
                   const SizedBox(height: 14),
                   _DescriptionSection(controller: controller, web: false),
                   const SizedBox(height: 14),
@@ -128,9 +176,22 @@ class _MobileLayout extends StatelessWidget {
                   const SizedBox(height: 14),
                   _MobileActionSection(item: item),
                   const SizedBox(height: 14),
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.symmetric(horizontal: 10),
-                    child: _ReportAd(),
+                    child: Row(
+                      children: [
+                        if (item.user?.id != AuthService.to.userId.value)
+                          Expanded(child: _ReportAd(item: item)),
+                        if (item.user?.id != AuthService.to.userId.value)
+                          Container(
+                            height: 15,
+                            width: 1.5,
+                            color: cs.outlineVariant,
+                            margin: const EdgeInsets.symmetric(horizontal: 10),
+                          ),
+                        Expanded(child: _ShareAd(listingId: item.id.toString(), title: item.title)),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 14),
                   Padding(
@@ -192,15 +253,16 @@ class _WebLayout extends StatelessWidget {
               : Text(
                   'Listing not found',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: cs.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: cs.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
         );
       }
 
       return CustomScrollView(
         slivers: [
+          const SliverToBoxAdapter(child: WebHeader()),
           SliverToBoxAdapter(
             child: Center(
               child: ConstrainedBox(
@@ -241,7 +303,10 @@ class _WebLayout extends StatelessWidget {
                                   web: true,
                                 ),
                                 const SizedBox(height: 14),
-                                _LocationSection(controller: controller, web: true),
+                                _LocationSection(
+                                  controller: controller,
+                                  web: true,
+                                ),
                                 const SizedBox(height: 14),
                                 const Divider(),
                                 const SizedBox(height: 14),
@@ -282,8 +347,6 @@ class _WebLayout extends StatelessWidget {
     });
   }
 }
-
-
 
 class _ImageGalleryMobile extends StatelessWidget {
   final ListingDetailController controller;
@@ -565,8 +628,10 @@ class _Breadcrumb2 extends StatelessWidget {
         children: [
           Text('Home', style: crumbStyle),
           sep(),
-          Text(item.categoryId[0].toUpperCase() + item.categoryId.substring(1),
-              style: crumbStyle),
+          Text(
+            item.categoryId[0].toUpperCase() + item.categoryId.substring(1),
+            style: crumbStyle,
+          ),
           sep(),
           Text(item.title, style: activeStyle),
         ],
@@ -736,19 +801,19 @@ class _SpecsRow extends StatelessWidget {
         children: [
           Expanded(
             child: _SpecIconTile(
-              icon: isHealthBeauty 
-                  ? Icons.spa_outlined 
-                  : isServices 
-                      ? Icons.design_services_outlined 
-                      : isBusiness
-                          ? Icons.business_center_outlined
-                          : Icons.checkroom_outlined,
+              icon: isHealthBeauty
+                  ? Icons.spa_outlined
+                  : isServices
+                  ? Icons.design_services_outlined
+                  : isBusiness
+                  ? Icons.business_center_outlined
+                  : Icons.checkroom_outlined,
               value: item.brand ?? 'N/A',
-              label: isServices 
-                  ? 'Service Type' 
-                  : isBusiness 
-                      ? 'Business Type' 
-                      : 'Brand',
+              label: isServices
+                  ? 'Service Type'
+                  : isBusiness
+                  ? 'Business Type'
+                  : 'Brand',
             ),
           ),
           const Expanded(child: SizedBox.shrink()),
@@ -762,26 +827,26 @@ class _SpecsRow extends StatelessWidget {
         children: [
           Expanded(
             child: _SpecIconTile(
-              icon: isHomeGarden 
-                  ? Icons.chair_outlined 
+              icon: isHomeGarden
+                  ? Icons.chair_outlined
                   : isKids
-                      ? Icons.toys_outlined
-                      : isPets
-                          ? Icons.pets_outlined
-                          : Icons.branding_watermark_outlined,
+                  ? Icons.toys_outlined
+                  : isPets
+                  ? Icons.pets_outlined
+                  : Icons.branding_watermark_outlined,
               value: item.brand ?? 'N/A',
               label: isPets ? 'Species / Type' : 'Brand',
             ),
           ),
           Expanded(
             child: _SpecIconTile(
-              icon: isHomeGarden 
-                  ? Icons.widgets_outlined 
+              icon: isHomeGarden
+                  ? Icons.widgets_outlined
                   : isKids
-                      ? Icons.child_friendly_outlined
-                      : isPets
-                          ? Icons.category_outlined
-                          : Icons.devices_outlined,
+                  ? Icons.child_friendly_outlined
+                  : isPets
+                  ? Icons.category_outlined
+                  : Icons.devices_outlined,
               value: item.model ?? 'N/A',
               label: isPets ? 'Breed' : 'Model',
             ),
@@ -811,8 +876,11 @@ class _SpecsRow extends StatelessWidget {
           Expanded(
             child: _SpecIconTile(
               icon: Icons.schedule_rounded,
-              value: item.salaryPeriod != null && (item.salaryPeriod as String).isNotEmpty
-                  ? (item.salaryPeriod as String)[0].toUpperCase() + (item.salaryPeriod as String).substring(1)
+              value:
+                  item.salaryPeriod != null &&
+                      (item.salaryPeriod as String).isNotEmpty
+                  ? (item.salaryPeriod as String)[0].toUpperCase() +
+                        (item.salaryPeriod as String).substring(1)
                   : 'N/A',
               label: 'Pay Period',
             ),
@@ -825,22 +893,36 @@ class _SpecsRow extends StatelessWidget {
       children: [
         Expanded(
           child: _SpecIconTile(
-            icon: isRealEstate ? Icons.king_bed_outlined : Icons.directions_car_filled_outlined,
-            value: isRealEstate ? '${item.bedrooms ?? 'N/A'}' : (item.brand ?? 'N/A'),
+            icon: isRealEstate
+                ? Icons.king_bed_outlined
+                : Icons.directions_car_filled_outlined,
+            value: isRealEstate
+                ? '${item.bedrooms ?? 'N/A'}'
+                : (item.brand ?? 'N/A'),
             label: isRealEstate ? 'Beds' : 'Brand',
           ),
         ),
         Expanded(
           child: _SpecIconTile(
-            icon: isRealEstate ? Icons.bathtub_outlined : Icons.local_gas_station_outlined,
-            value: isRealEstate ? '${item.bathrooms ?? 'N/A'}' : (item.fuelType ?? 'N/A'),
+            icon: isRealEstate
+                ? Icons.bathtub_outlined
+                : Icons.local_gas_station_outlined,
+            value: isRealEstate
+                ? '${item.bathrooms ?? 'N/A'}'
+                : (item.fuelType ?? 'N/A'),
             label: isRealEstate ? 'Baths' : 'Fuel',
           ),
         ),
         Expanded(
           child: _SpecIconTile(
-            icon: isRealEstate ? Icons.square_foot_outlined : Icons.settings_outlined,
-            value: isRealEstate ? (item.area != null ? '${item.area!.toStringAsFixed(0)}' : 'N/A') : (item.transmission ?? 'N/A'),
+            icon: isRealEstate
+                ? Icons.square_foot_outlined
+                : Icons.settings_outlined,
+            value: isRealEstate
+                ? (item.area != null
+                      ? '${item.area!.toStringAsFixed(0)}'
+                      : 'N/A')
+                : (item.transmission ?? 'N/A'),
             label: isRealEstate ? 'Sqft' : 'Trans',
           ),
         ),
@@ -850,8 +932,11 @@ class _SpecsRow extends StatelessWidget {
 
   static String _jobTypeLabel(dynamic jt) {
     const labels = {
-      'full-time': 'Full-Time', 'part-time': 'Part-Time',
-      'contract': 'Contract', 'internship': 'Internship', 'remote': 'Remote',
+      'full-time': 'Full-Time',
+      'part-time': 'Part-Time',
+      'contract': 'Contract',
+      'internship': 'Internship',
+      'remote': 'Remote',
     };
     if (jt == null || (jt as String).isEmpty) return 'N/A';
     return labels[jt] ?? jt;
@@ -859,8 +944,10 @@ class _SpecsRow extends StatelessWidget {
 
   static String _expLabel(dynamic el) {
     const labels = {
-      'entry': 'Entry', 'mid': 'Mid Level',
-      'senior': 'Senior', 'executive': 'Executive',
+      'entry': 'Entry',
+      'mid': 'Mid Level',
+      'senior': 'Senior',
+      'executive': 'Executive',
     };
     if (el == null || (el as String).isEmpty) return 'N/A';
     return labels[el] ?? el;
@@ -875,7 +962,8 @@ class _PropertyFeatures extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (item.categoryId.toLowerCase() != 'real_estate') return const SizedBox.shrink();
+    if (item.categoryId.toLowerCase() != 'real_estate')
+      return const SizedBox.shrink();
 
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
@@ -901,16 +989,33 @@ class _PropertyFeatures extends StatelessWidget {
     } catch (_) {}
 
     final features = <Map<String, String>>[];
-    
-    if (item.village != null && item.village.isNotEmpty) features.add({"label": "Village", "value": item.village});
-    if (item.propertyType != null) features.add({"label": "Property Type", "value": item.propertyType});
-    if (item.parking != null && item.parking != 'None') features.add({"label": "Parking", "value": item.parking});
-    features.add({"label": "Gated", "value": item.gated == true ? "Yes" : "No"});
-    features.add({"label": "Tiled", "value": item.tiled == true ? "Yes" : "No"});
-    if (item.ac != null && item.ac != 'None') features.add({"label": "AC", "value": item.ac});
-    features.add({"label": "Master Ensuite", "value": item.ensuite == true ? "Yes" : "No"});
-    if (item.cupboards != null && item.cupboards != 'None') features.add({"label": "Cupboards", "value": item.cupboards});
-    features.add({"label": "Furnished", "value": item.furnished == true ? "Yes" : "No"});
+
+    if (item.village != null && item.village.isNotEmpty)
+      features.add({"label": "Village", "value": item.village});
+    if (item.propertyType != null)
+      features.add({"label": "Property Type", "value": item.propertyType});
+    if (item.parking != null && item.parking != 'None')
+      features.add({"label": "Parking", "value": item.parking});
+    features.add({
+      "label": "Gated",
+      "value": item.gated == true ? "Yes" : "No",
+    });
+    features.add({
+      "label": "Tiled",
+      "value": item.tiled == true ? "Yes" : "No",
+    });
+    if (item.ac != null && item.ac != 'None')
+      features.add({"label": "AC", "value": item.ac});
+    features.add({
+      "label": "Master Ensuite",
+      "value": item.ensuite == true ? "Yes" : "No",
+    });
+    if (item.cupboards != null && item.cupboards != 'None')
+      features.add({"label": "Cupboards", "value": item.cupboards});
+    features.add({
+      "label": "Furnished",
+      "value": item.furnished == true ? "Yes" : "No",
+    });
 
     String waterStr = "";
     if (waterData != null) {
@@ -919,7 +1024,8 @@ class _PropertyFeatures extends StatelessWidget {
       if (waterData['cold'] == true) w.add("Cold");
       waterStr = w.join(", ");
     }
-    if (waterStr.isNotEmpty) features.add({"label": "Water", "value": waterStr});
+    if (waterStr.isNotEmpty)
+      features.add({"label": "Water", "value": waterStr});
 
     String amenitiesStr = "";
     if (amenitiesData != null) {
@@ -929,7 +1035,8 @@ class _PropertyFeatures extends StatelessWidget {
       if (amenitiesData['patio'] == true) a.add("Patio");
       amenitiesStr = a.join(", ");
     }
-    if (amenitiesStr.isNotEmpty) features.add({"label": "Includes", "value": amenitiesStr});
+    if (amenitiesStr.isNotEmpty)
+      features.add({"label": "Includes", "value": amenitiesStr});
 
     if (features.isEmpty) return const SizedBox.shrink();
 
@@ -1005,19 +1112,35 @@ class _JobFeatures extends StatelessWidget {
     final features = <Map<String, String>>[];
 
     const jobTypeLabels = {
-      'full-time': 'Full-Time', 'part-time': 'Part-Time',
-      'contract': 'Contract', 'internship': 'Internship', 'remote': 'Remote',
+      'full-time': 'Full-Time',
+      'part-time': 'Part-Time',
+      'contract': 'Contract',
+      'internship': 'Internship',
+      'remote': 'Remote',
     };
     const expLabels = {
-      'entry': 'Entry Level', 'mid': 'Mid Level',
-      'senior': 'Senior', 'executive': 'Executive',
+      'entry': 'Entry Level',
+      'mid': 'Mid Level',
+      'senior': 'Senior',
+      'executive': 'Executive',
     };
     if (item.jobType != null && item.jobType.isNotEmpty)
-      features.add({"label": "Job Type", "value": jobTypeLabels[item.jobType] ?? item.jobType});
+      features.add({
+        "label": "Job Type",
+        "value": jobTypeLabels[item.jobType] ?? item.jobType,
+      });
     if (item.experienceLevel != null && item.experienceLevel.isNotEmpty)
-      features.add({"label": "Experience Level", "value": expLabels[item.experienceLevel] ?? item.experienceLevel});
+      features.add({
+        "label": "Experience Level",
+        "value": expLabels[item.experienceLevel] ?? item.experienceLevel,
+      });
     if (item.salaryPeriod != null && item.salaryPeriod.isNotEmpty)
-      features.add({"label": "Salary Period", "value": (item.salaryPeriod as String)[0].toUpperCase() + (item.salaryPeriod as String).substring(1)});
+      features.add({
+        "label": "Salary Period",
+        "value":
+            (item.salaryPeriod as String)[0].toUpperCase() +
+            (item.salaryPeriod as String).substring(1),
+      });
     if (item.companyName != null && item.companyName.isNotEmpty)
       features.add({"label": "Company", "value": item.companyName});
     if (item.industry != null && item.industry.isNotEmpty)
@@ -1110,38 +1233,40 @@ class _MobileActionSection extends StatelessWidget {
                 Expanded(
                   child: SizedBox(
                     height: 55,
-                    child: Obx(() => ElevatedButton.icon(
-                      onPressed: () {
-                        if (!c.isLoggedIn) {
-                          Get.snackbar(
-                            "Login Required",
-                            "Please login to contact the seller",
-                            backgroundColor: Colors.red.withOpacity(.1),
-                          );
-                          return;
-                        }
-                        c.togglePhone();
-                        c.makeCall();
-                      },
-                      icon: Icon(Icons.call, size: 16, color: cs.onPrimary),
-                      label: Text(
-                        c.showPhoneNumber.value
-                            ? (item.contactPhone.isNotEmpty
-                                ? item.contactPhone
-                                : "Call")
-                            : 'Show Phone Number',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          color: cs.onPrimary,
+                    child: Obx(
+                      () => ElevatedButton.icon(
+                        onPressed: () {
+                          if (!c.isLoggedIn) {
+                            Get.snackbar(
+                              "Login Required",
+                              "Please login to contact the seller",
+                              backgroundColor: Colors.red.withOpacity(.1),
+                            );
+                            return;
+                          }
+                          c.togglePhone();
+                          c.makeCall();
+                        },
+                        icon: Icon(Icons.call, size: 16, color: cs.onPrimary),
+                        label: Text(
+                          c.showPhoneNumber.value
+                              ? (item.contactPhone.isNotEmpty
+                                    ? item.contactPhone
+                                    : "Call")
+                              : 'Show Phone Number',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            color: cs.onPrimary,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    )),
+                    ),
                   ),
                 ),
               if (canCall && canChat) const SizedBox(width: 10),
@@ -1160,50 +1285,61 @@ class _MobileActionSection extends StatelessWidget {
                           return;
                         }
                         // Get seller ID from item
-final sellerId = item.user?.id?.toString();
+                        final sellerId = item.user?.id?.toString();
 
-if (sellerId == null || sellerId.isEmpty) {
-Get.snackbar("Error", "Unable to get seller information");
-return;
-}
-
-// Check if seller is the current user
-if (sellerId == AuthService.to.userId.value.toString()) {
-Get.snackbar("Error", "You cannot message yourself");
-return;
-}
-
-                      // Refresh conversations from backend so we can reuse existing conversationId
-                      final msgController = Get.isRegistered<MessagesController>()
-                          ? Get.find<MessagesController>()
-                          : Get.put(MessagesController(), permanent: true);
-                      await msgController.refreshConversations();
-
-                      final currentUserId = AuthService.to.userId.value.toString();
-                      String existingConversationId = '';
-                      for (final conv in msgController.conversations) {
-                        final sameListing = conv.listingId == item.id;
-                        final samePair = (conv.sellerId == sellerId && conv.buyerId == currentUserId) ||
-                            (conv.buyerId == sellerId && conv.sellerId == currentUserId);
-                        if (sameListing && samePair) {
-                          existingConversationId = conv.conversationId;
-                          break;
+                        if (sellerId == null || sellerId.isEmpty) {
+                          Get.snackbar(
+                            "Error",
+                            "Unable to get seller information",
+                          );
+                          return;
                         }
-                      }
 
-                      // Navigate to chat screen with listing context
-                      Get.to(
-                        ChatScreen(
-                          conversationId: existingConversationId,
-                          otherUserId: sellerId,
-                          otherUserName: item.user?.name ?? 'Seller',
-                          otherUserPhotoUrl: item.user?.photoUrl,
-                          listingId: item.id,
-                          listingTitle: item.title,
-                          listingPrice: item.price != null ? double.tryParse(item.price.toString()) : null,
-                          listingImages: item.images,
-                        ),
-                      );
+                        // Check if seller is the current user
+                        if (sellerId ==
+                            AuthService.to.userId.value.toString()) {
+                          Get.snackbar("Error", "You cannot message yourself");
+                          return;
+                        }
+
+                        // Refresh conversations from backend so we can reuse existing conversationId
+                        final msgController =
+                            Get.isRegistered<MessagesController>()
+                            ? Get.find<MessagesController>()
+                            : Get.put(MessagesController(), permanent: true);
+                        await msgController.refreshConversations();
+
+                        final currentUserId = AuthService.to.userId.value
+                            .toString();
+                        String existingConversationId = '';
+                        for (final conv in msgController.conversations) {
+                          final sameListing = conv.listingId == item.id;
+                          final samePair =
+                              (conv.sellerId == sellerId &&
+                                  conv.buyerId == currentUserId) ||
+                              (conv.buyerId == sellerId &&
+                                  conv.sellerId == currentUserId);
+                          if (sameListing && samePair) {
+                            existingConversationId = conv.conversationId;
+                            break;
+                          }
+                        }
+
+                        // Navigate to chat screen with listing context
+                        Get.to(
+                          ChatScreen(
+                            conversationId: existingConversationId,
+                            otherUserId: sellerId,
+                            otherUserName: item.user?.name ?? 'Seller',
+                            otherUserPhotoUrl: item.user?.photoUrl,
+                            listingId: item.id,
+                            listingTitle: item.title,
+                            listingPrice: item.price != null
+                                ? double.tryParse(item.price.toString())
+                                : null,
+                            listingImages: item.images,
+                          ),
+                        );
                       },
                       icon: Icon(
                         Icons.mail_outline,
@@ -1346,7 +1482,10 @@ class _WebMainDetailsCard extends StatelessWidget {
               ],
             ],
           ),
-          if (item.categoryId.toLowerCase() != 'jobs' && item.categoryId.toLowerCase() != 'pets' && item.categoryId.toLowerCase() != 'services' && item.categoryId.toLowerCase() != 'business') ...[
+          if (item.categoryId.toLowerCase() != 'jobs' &&
+              item.categoryId.toLowerCase() != 'pets' &&
+              item.categoryId.toLowerCase() != 'services' &&
+              item.categoryId.toLowerCase() != 'business') ...[
             const SizedBox(height: 4),
             Text(
               item.condition,
@@ -1378,8 +1517,10 @@ class _WebSidebarCard extends StatelessWidget {
     final cs = theme.colorScheme;
     final c = Get.find<ListingDetailController>();
 
-    final canCall = item.contactMethod == 'call' || item.contactMethod == 'both';
-    final canChat = item.contactMethod == 'chat' || item.contactMethod == 'both';
+    final canCall =
+        item.contactMethod == 'call' || item.contactMethod == 'both';
+    final canChat =
+        item.contactMethod == 'chat' || item.contactMethod == 'both';
     final isOwner = item.user?.id == AuthService.to.userId.value;
 
     return Container(
@@ -1406,28 +1547,36 @@ class _WebSidebarCard extends StatelessWidget {
               if (canCall)
                 SizedBox(
                   width: double.infinity,
-                  child: Obx(() => ElevatedButton.icon(
-                    onPressed: () {
-                      if (!c.isLoggedIn) {
-                        Get.snackbar(
-                          "Login Required",
-                          "Please login to contact the seller",
-                          backgroundColor: Colors.red.withOpacity(.1),
-                        );
-                        return;
-                      }
-                      c.togglePhone();
-                      c.makeCall();
-                    },
-                    icon: const Icon(Icons.call, size: 16),
-                    label: Text(c.showPhoneNumber.value ? (item.contactPhone.isNotEmpty ? item.contactPhone : "Call Seller") : 'Show Phone Number'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                  child: Obx(
+                    () => ElevatedButton.icon(
+                      onPressed: () {
+                        if (!c.isLoggedIn) {
+                          Get.snackbar(
+                            "Login Required",
+                            "Please login to contact the seller",
+                            backgroundColor: Colors.red.withOpacity(.1),
+                          );
+                          return;
+                        }
+                        c.togglePhone();
+                        c.makeCall();
+                      },
+                      icon: const Icon(Icons.call, size: 16),
+                      label: Text(
+                        c.showPhoneNumber.value
+                            ? (item.contactPhone.isNotEmpty
+                                  ? item.contactPhone
+                                  : "Call Seller")
+                            : 'Show Phone Number',
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
-                  )),
+                  ),
                 ),
               if (canCall && canChat) const SizedBox(height: 10),
               if (canChat && !isOwner)
@@ -1444,31 +1593,39 @@ class _WebSidebarCard extends StatelessWidget {
                         return;
                       }
                       // Get seller ID from item
-final sellerId = item.user?.id?.toString();
+                      final sellerId = item.user?.id?.toString();
 
-if (sellerId == null || sellerId.isEmpty) {
-Get.snackbar("Error", "Unable to get seller information");
-return;
-}
+                      if (sellerId == null || sellerId.isEmpty) {
+                        Get.snackbar(
+                          "Error",
+                          "Unable to get seller information",
+                        );
+                        return;
+                      }
 
-// Check if seller is the current user
-if (sellerId == AuthService.to.userId.value.toString()) {
-Get.snackbar("Error", "You cannot message yourself");
-return;
-}
+                      // Check if seller is the current user
+                      if (sellerId == AuthService.to.userId.value.toString()) {
+                        Get.snackbar("Error", "You cannot message yourself");
+                        return;
+                      }
 
                       // Refresh conversations from backend so we can reuse existing conversationId
-                      final msgController = Get.isRegistered<MessagesController>()
+                      final msgController =
+                          Get.isRegistered<MessagesController>()
                           ? Get.find<MessagesController>()
                           : Get.put(MessagesController(), permanent: true);
                       await msgController.refreshConversations();
 
-                      final currentUserId = AuthService.to.userId.value.toString();
+                      final currentUserId = AuthService.to.userId.value
+                          .toString();
                       String existingConversationId = '';
                       for (final conv in msgController.conversations) {
                         final sameListing = conv.listingId == item.id;
-                        final samePair = (conv.sellerId == sellerId && conv.buyerId == currentUserId) ||
-                            (conv.buyerId == sellerId && conv.sellerId == currentUserId);
+                        final samePair =
+                            (conv.sellerId == sellerId &&
+                                conv.buyerId == currentUserId) ||
+                            (conv.buyerId == sellerId &&
+                                conv.sellerId == currentUserId);
                         if (sameListing && samePair) {
                           existingConversationId = conv.conversationId;
                           break;
@@ -1484,7 +1641,9 @@ return;
                           otherUserPhotoUrl: item.user?.photoUrl,
                           listingId: item.id,
                           listingTitle: item.title,
-                          listingPrice: item.price != null ? double.tryParse(item.price.toString()) : null,
+                          listingPrice: item.price != null
+                              ? double.tryParse(item.price.toString())
+                              : null,
                           listingImages: item.images,
                         ),
                       );
@@ -1523,16 +1682,16 @@ class _SellerCard extends StatelessWidget {
     final userInitial = userName.isNotEmpty ? userName[0].toUpperCase() : 'S';
     // Fallback to current user's photo if this is the user's own listing
     final bool isMe = item.user?.id == AuthService.to.userId.value;
-    final userPhoto = (item.user?.photoUrl != null &&
-            item.user!.photoUrl!.isNotEmpty)
+    final userPhoto =
+        (item.user?.photoUrl != null && item.user!.photoUrl!.isNotEmpty)
         ? item.user!.photoUrl
         : (isMe ? AuthService.to.userPhotoUrl.value : null);
 
     final hasPhoto = userPhoto != null && userPhoto.isNotEmpty;
     final photoUrl = hasPhoto
         ? (userPhoto.startsWith('http')
-            ? userPhoto
-            : '${ApiService.baseUrl}${userPhoto.startsWith('/') ? '' : '/'}$userPhoto')
+              ? userPhoto
+              : '${ApiService.baseUrl}${userPhoto.startsWith('/') ? '' : '/'}$userPhoto')
         : null;
 
     if (web) {
@@ -1592,10 +1751,10 @@ class _SellerCard extends StatelessWidget {
                   const SizedBox(height: 10),
                   InkWell(
                     onTap: () {
-                      Get.toNamed('/agent-profile', arguments: {
-                        'userId': item.user?.id,
-                        'user': item.user,
-                      });
+                      Get.toNamed(
+                        '/agent-profile',
+                        arguments: {'userId': item.user?.id, 'user': item.user},
+                      );
                     },
                     child: Text(
                       'View All Ads by Seller',
@@ -1696,10 +1855,10 @@ class _SellerCard extends StatelessWidget {
           const SizedBox(height: 10),
           InkWell(
             onTap: () {
-              Get.toNamed('/agent-profile', arguments: {
-                'userId': item.user?.id,
-                'user': item.user,
-              });
+              Get.toNamed(
+                '/agent-profile',
+                arguments: {'userId': item.user?.id, 'user': item.user},
+              );
             },
             child: Text(
               'View All Ads by Seller',
@@ -1793,8 +1952,175 @@ class _SafetyTipsCard extends StatelessWidget {
   }
 }
 
-class _ReportAd extends StatelessWidget {
-  const _ReportAd();
+class _ReportAd extends StatefulWidget {
+  final dynamic item;
+  const _ReportAd({required this.item});
+
+  @override
+  State<_ReportAd> createState() => _ReportAdState();
+}
+
+class _ReportAdState extends State<_ReportAd> {
+  final _descriptionController = TextEditingController();
+
+  void _showReportDialog(BuildContext context) {
+    final controller = Get.find<ListingDetailController>();
+    final item = controller.itemNullable;
+    if (item == null) return;
+
+    String selectedReason = 'spam';
+    final reasons = [
+      {
+        'value': 'spam',
+        'label': 'Spam or misleading',
+        'icon': Icons.markunread_mailbox,
+      },
+      {'value': 'fraud', 'label': 'Scam or fraud', 'icon': Icons.money_off},
+      {
+        'value': 'inappropriate',
+        'label': 'Inappropriate content',
+        'icon': Icons.no_adult_content,
+      },
+      {
+        'value': 'prohibited',
+        'label': 'Prohibited item/service',
+        'icon': Icons.block,
+      },
+      {'value': 'other', 'label': 'Other', 'icon': Icons.report_outlined},
+    ];
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.flag, color: Theme.of(context).colorScheme.error),
+              const SizedBox(width: 8),
+              Text(
+                'Report this ad',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Select a reason:',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 12),
+                ...reasons.map(
+                  (r) => RadioListTile<String>(
+                    value: r['value'] as String,
+                    groupValue: selectedReason,
+                    onChanged: (v) => setDialogState(() => selectedReason = v!),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                    secondary: Icon(r['icon'] as IconData, size: 20),
+                    title: Text(r['label'] as String),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _descriptionController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    labelText: 'Additional details (optional)',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                await _submitReport(
+                  context,
+                  item.id,
+                  selectedReason,
+                  _descriptionController.text,
+                );
+              },
+              child: Text('Submit Report'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _submitReport(
+    BuildContext context,
+    int listingId,
+    String reason,
+    String description,
+  ) async {
+    final token = AuthService.to.accessToken.value;
+
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiService.baseUrl}/listings/$listingId/report'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'reason': reason, 'description': description}),
+      );
+
+      final data = jsonDecode(response.body);
+      if (data['success'] == true) {
+        if (Get.isRegistered<NotificationController>()) {
+          Get.find<NotificationController>().refreshNotifications();
+        }
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Report submitted successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(data['message'] ?? 'Failed to submit report'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1805,13 +2131,16 @@ class _ReportAd extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         children: [
-          // Report Button
           Expanded(
             child: InkWell(
-              onTap: () {},
+              onTap: () => _showReportDialog(context),
               child: Row(
                 children: [
-                  Icon(Icons.outlined_flag, size: 22, color: cs.onSurfaceVariant),
+                  Icon(
+                    Icons.outlined_flag,
+                    size: 22,
+                    color: cs.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Report this ad',
@@ -1825,22 +2154,39 @@ class _ReportAd extends StatelessWidget {
               ),
             ),
           ),
-          
-          Container(
-            height: 15,
-            width: 1.5,
-            color: cs.outlineVariant,
-            margin: const EdgeInsets.symmetric(horizontal: 10),
-          ),
+        ],
+      ),
+    );
+  }
+}
 
-          // Share Button
+class _ShareAd extends StatelessWidget {
+  final String listingId;
+  final String title;
+  
+  const _ShareAd({required this.listingId, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Row(
+        children: [
           Expanded(
             child: InkWell(
-              onTap: () {}, // TODO: Implement sharing
+              onTap: () => ShareHelper.shareListing(listingId, title),
+              borderRadius: BorderRadius.circular(12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Icon(Icons.share_outlined, size: 20, color: cs.onSurfaceVariant),
+                  Icon(
+                    Icons.share_outlined,
+                    size: 20,
+                    color: cs.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Share this ad',
@@ -1851,6 +2197,92 @@ class _ReportAd extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FeatureAdCard extends StatelessWidget {
+  const _FeatureAdCard();
+
+  void _onFeaturePressed(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Work in progress'),
+        backgroundColor: Colors.orange,
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [cs.primary.withOpacity(0.1), cs.primary.withOpacity(0.05)],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.primary.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: cs.primary.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(Icons.star_rounded, color: cs.primary, size: 24),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Feature Your Ad',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Make your ad appear at the top of search results',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton(
+            onPressed: () => _onFeaturePressed(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: cs.primary,
+              foregroundColor: cs.onPrimary,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              'Feature Now',
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
               ),
             ),
           ),
@@ -1935,8 +2367,6 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-
-
 class _LocationSection extends StatelessWidget {
   final ListingDetailController controller;
   final bool web;
@@ -1980,7 +2410,8 @@ class _LocationSection extends StatelessWidget {
                 ),
                 children: [
                   TileLayer(
-                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'com.guyanacentral.www',
                   ),
                   // Always show marker at listing location
@@ -2026,7 +2457,11 @@ class _LocationSection extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.lock_outline_rounded, color: cs.onSurface, size: 24),
+                            Icon(
+                              Icons.lock_outline_rounded,
+                              color: cs.onSurface,
+                              size: 24,
+                            ),
                             const SizedBox(height: 8),
                             Text(
                               "Log in to view exact location",
@@ -2079,16 +2514,14 @@ class _SimilarAdsSection extends StatelessWidget {
 
     final header = Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _SectionTitle(title: 'Similar Ads', web: web),
-      ],
+      children: [_SectionTitle(title: 'Similar Ads', web: web)],
     );
 
     final list = Obx(() {
       if (controller.isSimilarLoading.value) {
         return const Center(child: CircularProgressIndicator());
       }
-      
+
       if (controller.similarAds.isEmpty) {
         return Container(
           height: 80,
@@ -2096,7 +2529,9 @@ class _SimilarAdsSection extends StatelessWidget {
           decoration: BoxDecoration(
             color: theme.cardColor.withOpacity(0.5),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: theme.colorScheme.outlineVariant.withOpacity(0.5)),
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+            ),
           ),
           child: Text(
             'No similar ads found',
@@ -2107,7 +2542,7 @@ class _SimilarAdsSection extends StatelessWidget {
           ),
         );
       }
-      
+
       return SizedBox(
         height: web ? 190 : 176,
         child: ListView.separated(
@@ -2115,10 +2550,8 @@ class _SimilarAdsSection extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           itemCount: controller.similarAds.length,
           separatorBuilder: (_, _) => const SizedBox(width: 10),
-          itemBuilder: (_, i) => _SimilarCard(
-            ad: controller.similarAds[i],
-            web: web,
-          ),
+          itemBuilder: (_, i) =>
+              _SimilarCard(ad: controller.similarAds[i], web: web),
         ),
       );
     });
@@ -2236,10 +2669,7 @@ class _SimilarCard extends StatelessWidget {
   final ListingVM ad;
   final bool web;
 
-  const _SimilarCard({
-    required this.ad,
-    required this.web,
-  });
+  const _SimilarCard({required this.ad, required this.web});
 
   @override
   Widget build(BuildContext context) {
@@ -2249,14 +2679,18 @@ class _SimilarCard extends StatelessWidget {
     final imageUrl = ad.images.isEmpty
         ? 'https://via.placeholder.com/150'
         : ad.images[0].startsWith('http')
-            ? ad.images[0]
-            : '${ApiService.baseUrl}${ad.images[0]}';
+        ? ad.images[0]
+        : '${ApiService.baseUrl}${ad.images[0]}';
 
     return GestureDetector(
       onTap: () async {
         // Delete old controller to force fresh state
         await Get.delete<ListingDetailController>();
-        Get.offNamed('/listing-detail', arguments: ad, preventDuplicates: false);
+        Get.offNamed(
+          '/listing-detail',
+          arguments: ad,
+          preventDuplicates: false,
+        );
       },
       child: Container(
         width: web ? 160 : 150,
@@ -2269,7 +2703,9 @@ class _SimilarCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(14),
+              ),
               child: Image.network(
                 imageUrl,
                 height: web ? 92 : 100,

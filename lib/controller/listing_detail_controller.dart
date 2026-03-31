@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:guyana_center_frontend/modal/browse_categoryVM.dart';
 import 'package:guyana_center_frontend/modal/listingVM.dart';
 import 'package:guyana_center_frontend/services/auth_service.dart';
 import 'package:guyana_center_frontend/services/api_services.dart';
@@ -22,9 +23,25 @@ class ListingDetailController extends GetxController {
   void onInit() {
     super.onInit();
 
+    // Handle URL parameters from deep links (e.g., /listing/123)
+    final urlId = Get.parameters['id'];
+    if (urlId != null) {
+      final listingId = int.tryParse(urlId.toString());
+      if (listingId != null) {
+        _loadListingById(listingId);
+        return;
+      }
+    }
+
     final args = Get.arguments;
     if (args is ListingVM) {
       _setItem(args);
+      return;
+    }
+
+    // Handle BrowseListingVM from search/browse screens
+    if (args is BrowseListingVM) {
+      _loadListingById(int.parse(args.id));
       return;
     }
 

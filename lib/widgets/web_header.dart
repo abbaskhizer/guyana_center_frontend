@@ -2,6 +2,12 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'package:guyana_center_frontend/controller/custom_bottom_nav_controller.dart';
+import 'package:guyana_center_frontend/controller/message_controller.dart';
+import 'package:guyana_center_frontend/controller/notification_controller.dart';
+import 'package:guyana_center_frontend/screens/agent_profile_screen.dart';
+import 'package:guyana_center_frontend/screens/message_screen.dart';
+import 'package:guyana_center_frontend/screens/notification_screen.dart';
 import 'package:guyana_center_frontend/services/auth_service.dart';
 
 class WebHeader extends StatelessWidget {
@@ -9,7 +15,6 @@ class WebHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Only render on web
     if (!kIsWeb) return const SizedBox.shrink();
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -30,44 +35,50 @@ class WebHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Row(
         children: [
-          // ── Logo ──
-          RichText(
-            text: TextSpan(
-              children: [
-                const TextSpan(
-                  text: 'GUYANA',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    letterSpacing: 1.2,
-                  ),
+          GestureDetector(
+            onTap: () {
+              if (Get.currentRoute != '/home') {
+                Get.until((route) => route.settings.name == '/home');
+              }
+              if (Get.isRegistered<CustomBottomNavController>()) {
+                Get.find<CustomBottomNavController>().changeTab(0);
+              }
+            },
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: RichText(
+                text: const TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'GUYANA',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    TextSpan(
+                      text: 'CENTRAL',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFFF5A623),
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ],
                 ),
-                TextSpan(
-                  text: 'CENTRAL',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFFF5A623),
-                    letterSpacing: 1.2,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
 
           const Spacer(),
 
-          // ── Nav Links ──
-          _NavLink(label: 'Explore', isDark: isDark, onTap: () {}),
-          const SizedBox(width: 28),
-          _NavLink(label: 'Stores', isDark: isDark, onTap: () {}),
-          const SizedBox(width: 28),
           _NavLink(label: 'Get the App', isDark: isDark, onTap: () {}),
 
           const Spacer(),
 
-          // ── Dark/Light Mode Toggle ──
           IconButton(
             onPressed: () {
               Get.changeThemeMode(isDark ? ThemeMode.light : ThemeMode.dark);
@@ -83,7 +94,6 @@ class WebHeader extends StatelessWidget {
             if (AuthService.to.isLoggedIn.value) {
               return Row(
                 children: [
-                  // Favorite Icon
                   IconButton(
                     onPressed: () => Get.toNamed('/favorites'),
                     icon: const Icon(
@@ -92,39 +102,82 @@ class WebHeader extends StatelessWidget {
                       size: 26,
                     ),
                   ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    onPressed: () {
+                      final msgController =
+                          Get.isRegistered<MessagesController>()
+                          ? Get.find<MessagesController>()
+                          : Get.put(MessagesController(), permanent: true);
+                      Get.to(() => const MessagesScreen());
+                    },
+                    icon: const Icon(
+                      Icons.mail_outline_rounded,
+                      color: Colors.white,
+                      size: 26,
+                    ),
+                  ),
                   const SizedBox(width: 8),
 
-                  // Notification Icon
-                  Stack(
-                    children: [
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(
-                          Icons.notifications_none_rounded,
-                          color: Colors.white,
-                          size: 26,
-                        ),
-                      ),
-                      Positioned(
-                        right: 8,
-                        top: 8,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFF5A3A),
-                            shape: BoxShape.circle,
+                  Obx(() {
+                    final notifController =
+                        Get.isRegistered<NotificationController>()
+                        ? Get.find<NotificationController>()
+                        : Get.put(NotificationController());
+                    final count = notifController.unreadCount.value;
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        IconButton(
+                          onPressed: () =>
+                              Get.to(() => const NotificationScreen()),
+                          icon: const Icon(
+                            Icons.notifications_rounded,
+                            color: Colors.white,
+                            size: 26,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                        if (count > 0)
+                          Positioned(
+                            right: 6,
+                            top: 6,
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFF5A3A),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 1.5,
+                                ),
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 16,
+                                minHeight: 16,
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                count > 9 ? '9+' : '$count',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w700,
+                                  height: 1,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  }),
                   const SizedBox(width: 12),
 
-                  // User Dropdown
                   PopupMenuButton<String>(
                     onSelected: (value) {
-                      if (value == 'settings') {
+                      if (value == 'my_ads') {
+                        Get.to(() => const AgentProfileScreen());
+                      } else if (value == 'settings') {
                         Get.toNamed('/settings');
                       } else if (value == 'logout') {
                         AuthService.to.logout();
@@ -136,12 +189,43 @@ class WebHeader extends StatelessWidget {
                     ),
                     itemBuilder: (context) => [
                       PopupMenuItem(
+                        value: 'my_ads',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.storefront_outlined,
+                              size: 18,
+                              color: Colors.grey[700],
+                            ),
+                            const SizedBox(width: 10),
+                            const Text(
+                              'My Ads',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuDivider(),
+                      PopupMenuItem(
                         value: 'settings',
                         child: Row(
                           children: [
-                            Icon(Icons.settings_outlined, size: 18, color: Colors.grey[700]),
+                            Icon(
+                              Icons.settings_outlined,
+                              size: 18,
+                              color: Colors.grey[700],
+                            ),
                             const SizedBox(width: 10),
-                            const Text('Settings', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                            const Text(
+                              'Settings',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -149,55 +233,75 @@ class WebHeader extends StatelessWidget {
                         value: 'logout',
                         child: Row(
                           children: [
-                            const Icon(Icons.logout_rounded, size: 18, color: Colors.redAccent),
+                            const Icon(
+                              Icons.logout_rounded,
+                              size: 18,
+                              color: Colors.redAccent,
+                            ),
                             const SizedBox(width: 10),
-                            const Text('Logout', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.redAccent)),
+                            const Text(
+                              'Logout',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.redAccent,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     ],
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.white.withOpacity(0.2)),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.2),
+                        ),
                       ),
                       child: Row(
                         children: [
-                    Obx(() {
-                      final photoUrl = AuthService.to.userPhotoUrl.value;
-                      String? fullPhotoUrl;
-                      if (photoUrl != null && photoUrl.isNotEmpty) {
-                        if (photoUrl.startsWith('http')) {
-                          fullPhotoUrl = photoUrl;
-                        } else {
-                          fullPhotoUrl = 'http://localhost:3000$photoUrl';
-                        }
-                      }
-                      if (fullPhotoUrl != null && fullPhotoUrl.isNotEmpty) {
-                        return CircleAvatar(
-                          radius: 14,
-                          backgroundColor: Colors.white,
-                          backgroundImage: NetworkImage(fullPhotoUrl),
-                          onBackgroundImageError: (_, __) {},
-                        );
-                      }
-                      return CircleAvatar(
-                        radius: 14,
-                        backgroundColor: Colors.white,
-                        child: Text(
-                          (AuthService.to.userName.value ?? "U").isNotEmpty
-                              ? AuthService.to.userName.value!.substring(0, 1).toUpperCase()
-                              : "U",
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF16A34A),
-                          ),
-                        ),
-                      );
-                    }),
+                          Obx(() {
+                            final photoUrl = AuthService.to.userPhotoUrl.value;
+                            String? fullPhotoUrl;
+                            if (photoUrl != null && photoUrl.isNotEmpty) {
+                              if (photoUrl.startsWith('http')) {
+                                fullPhotoUrl = photoUrl;
+                              } else {
+                                fullPhotoUrl = 'http://localhost:3001$photoUrl';
+                              }
+                            }
+                            if (fullPhotoUrl != null &&
+                                fullPhotoUrl.isNotEmpty) {
+                              return CircleAvatar(
+                                radius: 14,
+                                backgroundColor: Colors.white,
+                                backgroundImage: NetworkImage(fullPhotoUrl),
+                                onBackgroundImageError: (_, __) {},
+                              );
+                            }
+                            return CircleAvatar(
+                              radius: 14,
+                              backgroundColor: Colors.white,
+                              child: Text(
+                                (AuthService.to.userName.value ?? "U")
+                                        .isNotEmpty
+                                    ? AuthService.to.userName.value!
+                                          .substring(0, 1)
+                                          .toUpperCase()
+                                    : "U",
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF16A34A),
+                                ),
+                              ),
+                            );
+                          }),
                           const SizedBox(width: 8),
                           Text(
                             AuthService.to.userName.value ?? "User",
@@ -208,7 +312,11 @@ class WebHeader extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 4),
-                          const Icon(Icons.arrow_drop_down, color: Colors.white, size: 20),
+                          const Icon(
+                            Icons.arrow_drop_down,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ],
                       ),
                     ),
@@ -218,12 +326,13 @@ class WebHeader extends StatelessWidget {
             }
 
             return TextButton(
-              onPressed: () {
-                Get.toNamed('/login');
-              },
+              onPressed: () => Get.toNamed('/login'),
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
               ),
               child: const Text(
                 'Log In',
@@ -238,7 +347,6 @@ class WebHeader extends StatelessWidget {
 
           const SizedBox(width: 16),
 
-          // ── Post Free Ad Button ──
           SizedBox(
             height: 36,
             child: ElevatedButton(

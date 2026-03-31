@@ -18,19 +18,41 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="GUYANA CENTRAL - Buy and sell in Guyana">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="guyana_center_frontend">
+  <meta name="apple-mobile-web-app-title" content="GUYANA CENTRAL">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>guyana_center_frontend</title>
+  <title>GUYANA CENTRAL</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Firebase SDK for Google Sign-In -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+
+  <script>
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBQCmLO8u2MAZxz1YzKgScW_F8JsXrcIcI",
+      authDomain: "gycentral-5713c.firebaseapp.com",
+      projectId: "gycentral-5713c",
+      storageBucket: "gycentral-5713c.firebasestorage.app",
+      messagingSenderId: "938776904371",
+      appId: "1:938776904371:web:7802f201ae81d11c80a6c6",
+      measurementId: "G-V8R54ZQ8P2"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+  </script>
 </head>
 <body>
   <!--

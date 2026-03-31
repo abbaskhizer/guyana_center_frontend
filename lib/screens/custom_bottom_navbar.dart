@@ -12,9 +12,7 @@ class CustomBottomNavBar extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    final barColor = theme.brightness == Brightness.dark
-        ? cs.surface
-        : cs.surface;
+    final barColor = cs.surface;
 
     final inactive = cs.onSurfaceVariant;
 
@@ -29,61 +27,67 @@ class CustomBottomNavBar extends StatelessWidget {
         clipBehavior: Clip.none,
         alignment: Alignment.bottomCenter,
         children: [
-          Container(
-            height: 80,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: barColor,
-              boxShadow: [
-                BoxShadow(
-                  color: shadow,
-                  blurRadius: 18,
-                  offset: const Offset(0, -6),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Container(
+                height: 80,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: barColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: shadow,
+                      blurRadius: 18,
+                      offset: const Offset(0, -6),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _NavItem(
-                    icon: Icons.home_outlined,
-                    label: "Home",
-                    active: currentIndex == 0,
-                    onPressed: () => c.goToTab(0), // ✅
-                    inactiveColor: inactive,
-                  ),
-                ),
-                Expanded(
-                  child: _NavItem(
-                    icon: Icons.search_rounded,
-                    label: "Browse",
-                    active: currentIndex == 1,
-                    onPressed: () => c.goToTab(1), // ✅
-                    inactiveColor: inactive,
-                  ),
-                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _NavItem(
+                        icon: Icons.home_outlined,
+                        label: "Home",
+                        active: currentIndex == 0,
+                        onPressed: () => c.goToTab(0),
+                        inactiveColor: inactive,
+                      ),
+                    ),
+                    Expanded(
+                      child: _NavItem(
+                        icon: Icons.search_rounded,
+                        label: "Browse",
+                        active: currentIndex == 1,
+                        onPressed: () => c.goToTab(1),
+                        inactiveColor: inactive,
+                      ),
+                    ),
 
-                const Expanded(child: SizedBox()),
+                    const Expanded(child: SizedBox()),
 
-                Expanded(
-                  child: _NavItem(
-                    icon: Icons.favorite_border,
-                    label: "Favorites",
-                    active: currentIndex == 3,
-                    onPressed: () => c.goToTab(3), // ✅
-                    inactiveColor: inactive,
-                  ),
+                    Expanded(
+                      child: _NavItem(
+                        icon: Icons.favorite_border,
+                        label: "Favorites",
+                        active: currentIndex == 3,
+                        onPressed: () => c.goToTab(3),
+                        inactiveColor: inactive,
+                      ),
+                    ),
+                    Expanded(
+                      child: _NavItem(
+                        icon: Icons.settings_outlined,
+                        label: "Settings",
+                        active: currentIndex == 4,
+                        onPressed: () => c.goToTab(4),
+                        inactiveColor: inactive,
+                      ),
+                    ),
+                  ],
                 ),
-                Expanded(
-                  child: _NavItem(
-                    icon: Icons.settings_outlined,
-                    label: "Settings",
-                    active: currentIndex == 4,
-                    onPressed: () => c.goToTab(4), // ✅
-                    inactiveColor: inactive,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
 
@@ -159,7 +163,7 @@ class _NavItem extends StatelessWidget {
     return InkWell(
       onTap: onPressed,
       child: Padding(
-        padding: const EdgeInsets.only(top: 12, bottom: 10),
+        padding: const EdgeInsets.only(top: 12, bottom: 22),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
